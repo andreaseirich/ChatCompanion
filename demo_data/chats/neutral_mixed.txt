@@ -1,0 +1,7 @@
+Person1: Hey, how are you doing?
+Person2: I'm okay, thanks for asking. How about you?
+Person1: Good! Want to hang out this weekend?
+Person2: Maybe, I'll have to check my schedule.
+Person1: No problem, just let me know.
+Person2: Will do!
+

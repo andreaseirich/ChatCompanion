@@ -43,13 +43,11 @@ class ExplanationGenerator:
         ),
     }
 
-    # Advice messages
+    # Advice messages - concise, non-repetitive, supportive
     ADVICE_MESSAGES = [
-        "Remember: you have the right to feel safe and respected.",
-        "It's okay to say no, even to friends or people you know.",
-        "Trust your feelings. If something feels wrong, it probably is.",
-        "Talk to a trusted adult: a parent, teacher, counselor, or family member.",
-        "You are not alone. There are people who want to help you.",
+        "You have the right to feel safe and respected.",
+        "It's okay to say no and set boundaries.",
+        "Talk to a trusted adult if something doesn't feel right.",
     ]
 
     def generate_explanation(

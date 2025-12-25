@@ -22,6 +22,7 @@ from app.ui.components import (
     render_help_section,
     render_traffic_light,
     render_uneasy_button,
+    render_uneasy_help_panel,
 )
 from app.ui.input_handler import load_demo_chats
 
@@ -126,10 +127,7 @@ def main():
                 st.divider()
                 uneasy_clicked = render_uneasy_button()
                 if uneasy_clicked:
-                    st.success(
-                        "It's important to trust your feelings. Please talk to a trusted adult "
-                        "about what's making you uncomfortable. You're not alone, and help is available."
-                    )
+                    render_uneasy_help_panel()
 
                 # Help section
                 render_help_section()

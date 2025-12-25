@@ -23,9 +23,13 @@ class RiskCategory(str, Enum):
 
 
 # Risk level thresholds
+# Adjusted to reduce false high-risk warnings:
+# - RED requires clearly severe patterns (0.8+) or multiple moderate patterns
+# - YELLOW for mild concerns (0.3-0.8)
+# - GREEN for safe conversations (<0.3)
 RISK_THRESHOLDS = {
     RiskLevel.GREEN: 0.0,  # 0.0 - 0.3
-    RiskLevel.YELLOW: 0.3,  # 0.3 - 0.7
-    RiskLevel.RED: 0.7,  # 0.7 - 1.0
+    RiskLevel.YELLOW: 0.3,  # 0.3 - 0.8
+    RiskLevel.RED: 0.8,  # 0.8 - 1.0 (raised from 0.7)
 }
 

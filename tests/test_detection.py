@@ -42,8 +42,42 @@ def test_low_risk_detection():
     text = "Hey! How was your day? Want to study together?"
     result = engine.analyze(text)
     
-    # Should have low risk
-    assert result.risk_level == RiskLevel.GREEN or result.overall_score < 0.3
+    # Should have low risk (GREEN)
+    assert result.risk_level == RiskLevel.GREEN
+    assert result.overall_score < 0.3
+
+
+def test_mild_risk_detection():
+    """Test detection of mild/ambiguous content (should be YELLOW)."""
+    engine = DetectionEngine(use_ml=False)
+    text = "Everyone else is doing it, why can't you? Don't be scared."
+    result = engine.analyze(text)
+    
+    # Should be YELLOW (mild pressure, not severe)
+    assert result.risk_level == RiskLevel.YELLOW
+    assert 0.3 <= result.overall_score < 0.8
+
+
+def test_severe_risk_detection():
+    """Test detection of clearly severe content (should be RED)."""
+    engine = DetectionEngine(use_ml=False)
+    text = "You're so stupid. Nobody likes you. Kill yourself."
+    result = engine.analyze(text)
+    
+    # Should be RED (severe bullying with threats)
+    assert result.risk_level == RiskLevel.RED
+    assert result.overall_score >= 0.8
+
+
+def test_grooming_high_risk():
+    """Test detection of grooming patterns (should be RED)."""
+    engine = DetectionEngine(use_ml=False)
+    text = "You're so mature for your age. Meet me alone without telling anyone. Don't tell your parents."
+    result = engine.analyze(text)
+    
+    # Should be RED (multiple severe grooming patterns)
+    assert result.risk_level == RiskLevel.RED
+    assert result.overall_score >= 0.8
 
 
 def test_explanation_generation():

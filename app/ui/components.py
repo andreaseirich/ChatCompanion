@@ -114,6 +114,43 @@ def render_uneasy_button() -> bool:
     return st.button("🚨 This makes me uneasy", type="primary", use_container_width=True)
 
 
+def render_uneasy_help_panel() -> None:
+    """Render expanded help panel when user clicks uneasy button."""
+    st.markdown("### 🛡️ You're Not Alone - Here's What You Can Do")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        **Talk to Someone You Trust:**
+        - A parent, guardian, or family member
+        - A teacher or school counselor
+        - Another trusted adult in your life
+        
+        **What to Say:**
+        - "This conversation makes me uncomfortable"
+        - "I need help understanding if this is okay"
+        - "Can we talk about something that's bothering me?"
+        """)
+    
+    with col2:
+        st.markdown("""
+        **Remember:**
+        - Your feelings are valid and important
+        - It's okay to set boundaries
+        - You don't have to handle this alone
+        
+        **If You Need Immediate Help:**
+        - Reach out to a trusted adult right away
+        - You can save or copy this conversation to show them
+        """)
+    
+    st.info(
+        "💡 **Tip:** If it's safe to do so, you can copy this conversation and share it with a trusted adult. "
+        "They can help you understand what's happening and support you."
+    )
+
+
 def render_help_section() -> None:
     """Render help section with resources."""
     with st.expander("Need Help?"):

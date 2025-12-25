@@ -161,7 +161,8 @@ class DetectionEngine:
         Returns:
             RiskLevel (GREEN, YELLOW, or RED)
         """
-        if score >= 0.7:
+        # Adjusted thresholds: RED requires 0.8+ (clearly severe patterns)
+        if score >= 0.8:
             return RiskLevel.RED
         elif score >= 0.3:
             return RiskLevel.YELLOW

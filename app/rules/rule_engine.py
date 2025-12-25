@@ -88,9 +88,11 @@ class RuleEngine:
         if not matches:
             return 0.0
 
-        # Use maximum confidence as base, with boost for multiple matches
+        # Use maximum confidence as base, with reduced boost for multiple matches
+        # Reduced boost to prevent over-sensitivity: max 0.1 instead of 0.2
         max_confidence = max(m.confidence for m in matches)
-        match_count_boost = min(len(matches) * 0.1, 0.2)  # Cap at 0.2 boost
+        # Only add boost if there are 3+ matches (multiple patterns indicate stronger signal)
+        match_count_boost = min((len(matches) - 1) * 0.05, 0.1) if len(matches) >= 3 else 0.0
 
         return min(max_confidence + match_count_boost, 1.0)
 

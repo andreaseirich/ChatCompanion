@@ -64,7 +64,24 @@ class ScoreAggregator:
         if not category_scores:
             return 0.0
 
-        # Use maximum category score as overall risk
-        # This ensures that any high-risk category raises the overall score
-        return max(category_scores.values())
+        scores = list(category_scores.values())
+        max_score = max(scores)
+        
+        # If there's a clearly severe pattern (>=0.8), use it directly
+        if max_score >= 0.8:
+            return max_score
+        
+        # For moderate scores, require multiple categories to reach high risk
+        # This reduces false positives from single weak signals
+        if len(scores) >= 2:
+            # If multiple categories are flagged, use weighted average
+            # This prevents single moderate signal from triggering high risk
+            avg_score = sum(scores) / len(scores)
+            # Combine max and average: max gives weight to strongest signal,
+            # but average prevents single moderate signal from dominating
+            combined = (max_score * 0.7) + (avg_score * 0.3)
+            return min(combined, 1.0)
+        
+        # Single category: use the score directly (but threshold is now 0.8 for RED)
+        return max_score
 
