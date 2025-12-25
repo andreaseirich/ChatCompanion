@@ -8,7 +8,7 @@ from app.detection.explainer import ExplanationGenerator
 from app.models_local.classifier import RiskClassifier
 from app.models_local.embeddings import EmbeddingModel
 from app.rules.rule_engine import RuleEngine
-from app.utils.constants import RiskCategory, RiskLevel
+from app.utils.constants import RiskCategory, RiskLevel, RISK_THRESHOLDS
 from app.utils.text_processing import normalize_text, segment_sentences
 
 logger = logging.getLogger(__name__)
@@ -183,10 +183,10 @@ class DetectionEngine:
         Returns:
             RiskLevel (GREEN, YELLOW, or RED)
         """
-        # Adjusted thresholds: RED requires 0.8+ (clearly severe patterns)
-        if score >= 0.8:
+        # Updated thresholds: RED requires 0.75+ (severe patterns or high-risk combinations)
+        if score >= RISK_THRESHOLDS[RiskLevel.RED]:
             return RiskLevel.RED
-        elif score >= 0.3:
+        elif score >= RISK_THRESHOLDS[RiskLevel.YELLOW]:
             return RiskLevel.YELLOW
         else:
             return RiskLevel.GREEN

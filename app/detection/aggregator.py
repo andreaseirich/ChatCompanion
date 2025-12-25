@@ -81,6 +81,23 @@ class ScoreAggregator:
         # Check for high-confidence patterns (>=0.75) - these should boost the score more
         high_confidence_count = sum(1 for s in scores if s >= 0.75)
         
+        # Special handling for high-risk combinations: secrecy + isolation + pressure
+        # This combination indicates coercive control and should trigger RED
+        has_secrecy = "secrecy" in category_scores and category_scores["secrecy"] >= 0.7
+        has_isolation = any(
+            cat in category_scores and category_scores[cat] >= 0.7
+            for cat in ["manipulation", "secrecy"]  # Isolation can be in manipulation or secrecy
+        )
+        has_pressure = "pressure" in category_scores and category_scores["pressure"] >= 0.6
+        has_coercive = "manipulation" in category_scores and category_scores["manipulation"] >= 0.7
+        
+        # Coercive control combo: secrecy + isolation + pressure/manipulation
+        if has_secrecy and has_isolation and (has_pressure or has_coercive):
+            # This is a high-risk coercive control pattern - boost significantly
+            combo_boost = 0.15
+            combined = (max_score * 0.45) + (avg_score * 0.4) + combo_boost
+            return min(combined, 1.0)
+        
         # Multiple moderate patterns (3+) should raise the risk level significantly
         # Example: 3 categories at 0.6 each should result in ~0.7-0.75 overall score
         if num_categories >= 3:

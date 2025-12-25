@@ -79,6 +79,18 @@ rules:
       - pattern: "(?i)\\b(setting boundaries is (rejection|selfish|not caring)|boundaries don't matter)\\b"
         confidence: 0.8
         description: "Framing boundaries as rejection"
+      - pattern: "(?i)\\b(you don't get to (decide|choose|say)|you (don't|do not) (decide|choose|get to say))\\b"
+        confidence: 0.9
+        description: "Coercive control - removing autonomy"
+      - pattern: "(?i)\\b(you (answer|respond|reply) when i (write|tell|say)|answer when i (write|tell|say) you)\\b"
+        confidence: 0.85
+        description: "Coercive control - demanding obedience"
+      - pattern: "(?i)\\b(do (exactly|precisely) what i (say|tell)|obey me|do as i (say|tell))\\b"
+        confidence: 0.9
+        description: "Coercive control - explicit obedience demands"
+      - pattern: "(?i)\\b((good|maybe) (fear|being afraid) (will|might) (finally|make|get) you (listen|obey|comply))\\b"
+        confidence: 0.95
+        description: "Deliberate use of fear for compliance"
 
   pressure:
     patterns:
@@ -127,15 +139,24 @@ rules:
       - pattern: "(?i)\\b(this is (just|only) (between|for) us|our little secret|keep (this|things) (between|just) us)\\b"
         confidence: 0.85
         description: "Exclusive secrecy"
+      - pattern: "(?i)\\b(delete (those|these|that) (chats|messages|texts) (and )?prove it|delete (those|these|that) (chats|messages|texts))\\b"
+        confidence: 0.9
+        description: "Secrecy with evidence destruction and proof demands"
+      - pattern: "(?i)\\b(if you tell (anyone|someone), (we're|we are) (finished|done|over))\\b"
+        confidence: 0.9
+        description: "Secrecy with relationship threat"
       - pattern: "(?i)\\b(they (won't|wouldn't) understand|adults (don't|won't) get it)\\b"
         confidence: 0.7
         description: "Authority undermining"
       - pattern: "(?i)\\b(delete (this|these) (messages|texts|chats)|don't save this)\\b"
         confidence: 0.9
         description: "Evidence destruction requests"
-      - pattern: "(?i)\\b(don't talk to (other people|anyone else|others) (about this|about it))\\b"
+      - pattern: "(?i)\\b(don't talk to (other people|anyone else|others|them) (about this|about it|about us))\\b"
         confidence: 0.85
         description: "Isolation through secrecy demands"
+      - pattern: "(?i)\\b(stop talking to (them|others|other people) (about|regarding))\\b"
+        confidence: 0.85
+        description: "Isolation - stopping contact with others"
       - pattern: "(?i)\\b(they (will|would) take your side|they'll (side|be) against me)\\b"
         confidence: 0.75
         description: "Discouraging outside support"

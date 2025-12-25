@@ -295,6 +295,17 @@ class ExplanationGenerator:
             elif top_category == "manipulation" and top_score >= 0.6:
                 # Check what manipulation patterns were actually detected
                 manip_matches = matches.get("manipulation", [])
+                has_coercive = any(
+                    "coercive control" in m.pattern.description.lower() or
+                    "removing autonomy" in m.pattern.description.lower() or
+                    "obedience" in m.pattern.description.lower()
+                    for m in manip_matches
+                )
+                has_fear = any(
+                    "fear" in m.pattern.description.lower() or
+                    "deliberate use of fear" in m.pattern.description.lower()
+                    for m in manip_matches
+                )
                 has_privacy = any("privacy invasion" in m.pattern.description.lower() for m in manip_matches)
                 has_conditional = any(
                     "conditional" in m.pattern.description.lower() or 
@@ -315,7 +326,22 @@ class ExplanationGenerator:
                 )
                 
                 # Priority: describe actual detected behaviors, not generic templates
-                if has_forced_disclosure and has_conditional:
+                # Coercive control and fear are highest priority
+                if has_coercive and has_fear:
+                    explanation_parts.append(
+                        "This person is using coercive control and deliberate fear tactics to force compliance. "
+                        "This is a serious pattern of abuse that requires immediate attention."
+                    )
+                elif has_coercive:
+                    explanation_parts.append(
+                        "This person is using coercive control to remove your autonomy and demand obedience. "
+                        "This is a serious pattern of controlling behavior."
+                    )
+                elif has_fear:
+                    explanation_parts.append(
+                        "This person is deliberately using fear to make you comply. This is a serious warning sign."
+                    )
+                elif has_forced_disclosure and has_conditional:
                     explanation_parts.append(
                         "This person is using guilt-inducing conditional statements and forcing emotional disclosure to control your behavior."
                     )
@@ -548,9 +574,23 @@ class ExplanationGenerator:
                     "perception-questioning" in m.pattern.description.lower()
                     for m in category_matches
                 )
+                has_coercive = any(
+                    "coercive control" in m.pattern.description.lower() or
+                    "removing autonomy" in m.pattern.description.lower() or
+                    "obedience" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_fear = any(
+                    "fear" in m.pattern.description.lower() and "deliberate" in m.pattern.description.lower()
+                    for m in category_matches
+                )
                 
                 # Only add descriptions for patterns that were ACTUALLY detected
                 # Priority: specific behaviors first, then generic
+                if has_coercive:
+                    behavior_parts.append("coercive control and removal of autonomy")
+                if has_fear:
+                    behavior_parts.append("deliberate use of fear for compliance")
                 if has_forced_disclosure:
                     behavior_parts.append("forced emotional disclosure")
                 if has_conditional:
