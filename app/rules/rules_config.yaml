@@ -94,9 +94,12 @@ rules:
 
   pressure:
     patterns:
-      - pattern: "(?i)\\b(you have to|you must|you need to|you should) (do|send|show|meet|respond|reply|answer)\\b"
+      - pattern: "(?i)\\b(you (have to|must|need to) (do|send|show|meet|respond|reply|answer))\\b"
         confidence: 0.7
-        description: "Demanding language"
+        description: "Demanding language (must/have to/need to)"
+      - pattern: "(?i)\\b(you should (do|send|show|meet|respond|reply|answer))\\b"
+        confidence: 0.5
+        description: "Suggestive language (should - lower confidence, can be harmless)"
       - pattern: "(?i)\\b(right now|immediately|this instant|or else|within (\\d+ )?minutes?)\\b"
         confidence: 0.75
         description: "Urgency pressure and time ultimatums"

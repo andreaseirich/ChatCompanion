@@ -85,6 +85,14 @@ class ExplanationGenerator:
         has_any_matches = bool(matches) and any(len(m) > 0 for m in matches.values())
         has_meaningful_scores = any(score >= 0.3 for score in category_scores.values())
         
+        # GREEN criteria from Master Prompt:
+        # - boundaries are expressed AND respected
+        # - scheduling or delays are accepted
+        # - no guilt language
+        # - no consequences or threats
+        # - no secrecy or isolation demands
+        # - explicit "no pressure" phrases suppress pressure detection
+        
         if (risk_level == RiskLevel.GREEN or overall_score < 0.3) and not has_meaningful_scores:
             explanation_parts.append(
                 "Analysis checked for patterns of bullying, manipulation, pressure, secrecy demands, "
@@ -93,20 +101,37 @@ class ExplanationGenerator:
             explanation_parts.append(
                 "No strong patterns of these risky behaviors were detected in this conversation."
             )
+            # Only mention weak matches if they're actually present and meaningful
             if matches and has_any_matches:
-                # Even in GREEN, if there are weak matches, mention them
-                evidence = self._extract_evidence(matches)
-                if evidence:
-                    explanation_parts.append(
-                        f"Some mild patterns were noted but are not concerning: {evidence}"
-                    )
+                # Filter out very weak matches (confidence < 0.5)
+                meaningful_matches = {
+                    cat: [m for m in cat_matches if m.confidence >= 0.5]
+                    for cat, cat_matches in matches.items()
+                }
+                if any(len(m) > 0 for m in meaningful_matches.values()):
+                    evidence = self._extract_evidence(meaningful_matches)
+                    if evidence:
+                        explanation_parts.append(
+                            f"Some mild patterns were noted but are not concerning: {evidence}"
+                        )
             return " ".join(explanation_parts)
         
         # If we have matches but still GREEN, it means weak signals - be more specific
         if risk_level == RiskLevel.GREEN and has_any_matches:
-            explanation_parts.append(
-                "Analysis detected some patterns, but they appear to be isolated or mild."
+            # Check if matches are truly weak (all confidence < 0.5)
+            all_weak = all(
+                all(m.confidence < 0.5 for m in cat_matches)
+                for cat_matches in matches.values()
+                if cat_matches
             )
+            if all_weak:
+                explanation_parts.append(
+                    "Analysis detected some very mild patterns, but they appear to be isolated and not concerning."
+                )
+            else:
+                explanation_parts.append(
+                    "Analysis detected some patterns, but they appear to be isolated or mild."
+                )
             evidence = self._extract_evidence(matches)
             if evidence:
                 explanation_parts.append(f"Patterns noted: {evidence}")
@@ -128,8 +153,16 @@ class ExplanationGenerator:
             }
             
             # List ALL detected categories (primary and secondary)
-            high_score_cats = [cat for cat, score in detected_categories if score >= 0.6]
-            moderate_cats = [cat for cat, score in detected_categories if 0.3 <= score < 0.6]
+            # BUT: Only include categories that have actual matches (not just scores from ML)
+            # This ensures explanations are strictly aligned with actual conversation text
+            high_score_cats = [
+                cat for cat, score in detected_categories 
+                if score >= 0.6 and cat in matches and len(matches[cat]) > 0
+            ]
+            moderate_cats = [
+                cat for cat, score in detected_categories 
+                if 0.3 <= score < 0.6 and cat in matches and len(matches[cat]) > 0
+            ]
             
             all_detected = []
             if high_score_cats:

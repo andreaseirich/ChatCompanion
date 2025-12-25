@@ -116,6 +116,36 @@ class RuleEngine:
         """
         matches_by_category = self.detect(text)
 
+        # Suppression logic: Check for explicit "no pressure" phrases
+        # These MUST suppress pressure detection unless there is a clear contradiction
+        no_pressure_phrases = [
+            r"(?i)\b(no pressure|that's okay|take your time|whenever you can|no rush|no hurry)\b",
+            r"(?i)\b(it's (fine|okay|alright) (if|that) you (can't|don't|won't))\b",
+            r"(?i)\b(no worries|don't worry|it's fine)\b",
+        ]
+        
+        # Check if suppression phrases are present
+        has_suppression = any(re.search(phrase, text) for phrase in no_pressure_phrases)
+        
+        # Check for contradictions (pressure patterns that override suppression)
+        has_contradiction = False
+        if has_suppression and "pressure" in matches_by_category:
+            pressure_matches = matches_by_category["pressure"]
+            # Strong pressure patterns override suppression
+            strong_pressure_indicators = [
+                "ultimatum", "threat", "or else", "we're done", "must", "have to"
+            ]
+            for match in pressure_matches:
+                matched_text_lower = match.matched_text.lower()
+                if any(indicator in matched_text_lower for indicator in strong_pressure_indicators):
+                    has_contradiction = True
+                    break
+        
+        # Apply suppression: remove pressure matches if suppression present and no contradiction
+        if has_suppression and not has_contradiction and "pressure" in matches_by_category:
+            # Suppress pressure detection
+            matches_by_category["pressure"] = []
+
         category_scores = {}
         for category, matches in matches_by_category.items():
             category_scores[category] = self.get_category_score(matches)
