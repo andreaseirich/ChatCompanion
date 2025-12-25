@@ -22,30 +22,42 @@ rules:
       - pattern: "(?i)\\b(if you (really|actually) (love|care about) me|if you were my (friend|true friend))\\b"
         confidence: 0.75
         description: "Conditional love/friendship"
-      - pattern: "(?i)\\b(you owe me|after all i did|i did so much for you)\\b"
-        confidence: 0.7
+      - pattern: "(?i)\\b(you owe me|after all i did|i did so much for you|you owe me this)\\b"
+        confidence: 0.75
         description: "Obligation manipulation"
       - pattern: "(?i)\\b(no one else (will|would)|i'm the only one who)\\b"
         confidence: 0.8
         description: "Isolation attempts"
       - pattern: "(?i)\\b(you're (being|acting) (selfish|crazy|paranoid)|you're overreacting)\\b"
-        confidence: 0.7
+        confidence: 0.75
         description: "Gaslighting attempts"
+      - pattern: "(?i)\\b(everyone else (does|responds|is doing)|all the (other|cool) (kids|people))\\b"
+        confidence: 0.7
+        description: "Comparison and belittling"
+      - pattern: "(?i)\\b(this is how you treat me|this is what you do)\\b"
+        confidence: 0.7
+        description: "Guilt induction through framing"
 
   pressure:
     patterns:
-      - pattern: "(?i)\\b(you have to|you must|you need to|you should) (do|send|show|meet)\\b"
+      - pattern: "(?i)\\b(you have to|you must|you need to|you should) (do|send|show|meet|respond)\\b"
         confidence: 0.7
         description: "Demanding language"
-      - pattern: "(?i)\\b(right now|immediately|this instant|or else)\\b"
+      - pattern: "(?i)\\b(right now|immediately|this instant|or else|within (\\d+ )?minutes?)\\b"
         confidence: 0.75
-        description: "Urgency pressure"
+        description: "Urgency pressure and time ultimatums"
       - pattern: "(?i)\\b(don't be (a|such a) (baby|coward|chicken)|stop being (so|such a) (scared|afraid))\\b"
         confidence: 0.7
         description: "Peer pressure tactics"
-      - pattern: "(?i)\\b(everyone else (does|is doing)|all the (other|cool) (kids|people))\\b"
-        confidence: 0.65
-        description: "Social pressure"
+      - pattern: "(?i)\\b(respond (faster|quicker|sooner)|reply (faster|quicker|sooner)|answer (faster|quicker))\\b"
+        confidence: 0.7
+        description: "Communication frequency control"
+      - pattern: "(?i)\\b(if you don't|if you won't|unless you) (do|respond|reply|answer) (then|we're done|i'm done|it's over)\\b"
+        confidence: 0.85
+        description: "Ultimatums and relationship threats"
+      - pattern: "(?i)\\b(we're done|i'm done|it's over|this is it) (if|unless|i mean it)\\b"
+        confidence: 0.8
+        description: "Relationship ultimatums"
 
   secrecy:
     patterns:
@@ -76,6 +88,12 @@ rules:
       - pattern: "(?i)\\b(see what you (made|forced) me to do|this is because of you)\\b"
         confidence: 0.8
         description: "Consequence blaming"
+      - pattern: "(?i)\\b(you're being (selfish|unfair|unreasonable)|that's not fair)\\b"
+        confidence: 0.7
+        description: "Guilt induction through character attack"
+      - pattern: "(?i)\\b(after everything i (did|do) for you|i (always|always) (do|did) (this|that) for you)\\b"
+        confidence: 0.75
+        description: "Obligation-based guilt"
 
   grooming:
     patterns:

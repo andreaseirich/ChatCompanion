@@ -98,8 +98,9 @@ class ExplanationGenerator:
                     )
             return " ".join(explanation_parts)
 
-        # For YELLOW/RED: Explain what WAS detected
-        detected_categories = [cat for cat, score in category_scores.items() if score > 0]
+        # For YELLOW/RED: Explain what WAS detected with specific details
+        detected_categories = [(cat, score) for cat, score in category_scores.items() if score > 0]
+        detected_categories.sort(key=lambda x: x[1], reverse=True)  # Sort by score
         
         if detected_categories:
             category_names = {
@@ -110,13 +111,21 @@ class ExplanationGenerator:
                 "guilt_shifting": "guilt-shifting",
                 "grooming": "grooming indicators",
             }
-            detected_list = [category_names.get(cat, cat) for cat in detected_categories[:3]]
-            if len(detected_categories) > 3:
-                detected_list.append("and others")
             
-            explanation_parts.append(
-                f"Analysis detected patterns of: {', '.join(detected_list)}."
-            )
+            # List detected categories with emphasis on high-scoring ones
+            high_score_cats = [cat for cat, score in detected_categories if score >= 0.6]
+            moderate_cats = [cat for cat, score in detected_categories if 0.3 <= score < 0.6]
+            
+            if high_score_cats:
+                high_names = [category_names.get(cat, cat) for cat in high_score_cats[:3]]
+                explanation_parts.append(
+                    f"Analysis detected strong patterns of: {', '.join(high_names)}."
+                )
+            if moderate_cats and not high_score_cats:
+                mod_names = [category_names.get(cat, cat) for cat in moderate_cats[:3]]
+                explanation_parts.append(
+                    f"Analysis detected patterns of: {', '.join(mod_names)}."
+                )
 
         # Find the highest-risk category for specific explanation
         sorted_categories = sorted(

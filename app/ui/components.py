@@ -104,51 +104,6 @@ def render_advice(advice: list) -> None:
         st.markdown(f"• {item}")
 
 
-def render_uneasy_button_and_help() -> None:
-    """
-    Render "I need more help" button with toggleable support panel.
-    
-    Uses Streamlit session state to persist the toggle state.
-    Provides clear, actionable support resources.
-    """
-    # Initialize session state for toggle
-    if "show_uneasy_help" not in st.session_state:
-        st.session_state.show_uneasy_help = False
-    
-    # Button to toggle help panel - clearer label
-    button_label = "💬 I Need More Help" if not st.session_state.show_uneasy_help else "💬 Hide Help Resources"
-    
-    if st.button(button_label, use_container_width=True, type="secondary"):
-        st.session_state.show_uneasy_help = not st.session_state.show_uneasy_help
-    
-    # Show help panel if toggled - clear, actionable content
-    if st.session_state.show_uneasy_help:
-        st.markdown("### Support & Next Steps")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("""
-            **Immediate Actions:**
-            - Take a break from the conversation if needed
-            - Document what happened (write it down or save the conversation)
-            - Reach out to someone you trust for support
-            """)
-        
-        with col2:
-            st.markdown("""
-            **Setting Boundaries:**
-            - You can say no or ask for time to think
-            - You can end conversations that make you uncomfortable
-            - Your feelings and safety matter
-            """)
-        
-        st.info(
-            "💡 **Remember:** If you feel unsafe or need immediate support, contact someone you trust "
-            "or reach out to appropriate support services in your area."
-        )
-
-
 def render_help_section() -> None:
     """Render help section with resources (only for high-risk scenarios)."""
     # Only show this section for high-risk situations

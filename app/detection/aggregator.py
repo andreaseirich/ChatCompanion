@@ -54,6 +54,8 @@ class ScoreAggregator:
     def get_overall_risk_score(self, category_scores: Dict[str, float]) -> float:
         """
         Calculate overall risk score from category scores.
+        
+        Improved severity scaling: multiple moderate patterns indicate higher risk.
 
         Args:
             category_scores: Dictionary of category -> score
@@ -71,17 +73,23 @@ class ScoreAggregator:
         if max_score >= 0.8:
             return max_score
         
-        # For moderate scores, require multiple categories to reach high risk
-        # This reduces false positives from single weak signals
-        if len(scores) >= 2:
-            # If multiple categories are flagged, use weighted average
-            # This prevents single moderate signal from triggering high risk
-            avg_score = sum(scores) / len(scores)
-            # Combine max and average: max gives weight to strongest signal,
-            # but average prevents single moderate signal from dominating
+        # For moderate scores, multiple patterns indicate higher risk
+        # This ensures conversations with multiple manipulative patterns are properly flagged
+        num_categories = len(scores)
+        avg_score = sum(scores) / num_categories
+        
+        # Multiple moderate patterns (3+) should raise the risk level
+        if num_categories >= 3:
+            # Multiple patterns: boost the score to reflect cumulative risk
+            # Example: 3 categories at 0.6 each = significant manipulation
+            pattern_boost = min((num_categories - 2) * 0.1, 0.2)  # Max +0.2 boost
+            combined = (max_score * 0.6) + (avg_score * 0.4) + pattern_boost
+            return min(combined, 1.0)
+        elif num_categories >= 2:
+            # Two patterns: moderate boost
             combined = (max_score * 0.7) + (avg_score * 0.3)
             return min(combined, 1.0)
         
-        # Single category: use the score directly (but threshold is now 0.8 for RED)
+        # Single category: use the score directly (but threshold is 0.8 for RED)
         return max_score
 

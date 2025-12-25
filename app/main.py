@@ -21,7 +21,6 @@ from app.ui.components import (
     render_explanation,
     render_help_section,
     render_traffic_light,
-    render_uneasy_button_and_help,
 )
 from app.ui.input_handler import load_demo_chats
 
@@ -121,10 +120,6 @@ def main():
 
                 # Advice
                 render_advice(result.advice)
-
-                # Additional help button (toggleable)
-                st.divider()
-                render_uneasy_button_and_help()
 
                 # Help section
                 render_help_section()
