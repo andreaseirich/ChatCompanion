@@ -167,7 +167,8 @@ class ExplanationGenerator:
                         else:
                             primary = None
                 
-                # Filter secondary to exclude low-score grooming
+                # Filter secondary to exclude low-score grooming, but include ALL other detected categories
+                # Even if scores are moderate (0.3-0.6), they should be mentioned if clearly present
                 filtered_secondary = []
                 for sec_cat in secondary:
                     if sec_cat == "grooming indicators":
@@ -175,6 +176,8 @@ class ExplanationGenerator:
                         if sec_score >= 0.6:
                             filtered_secondary.append(sec_cat)
                     else:
+                        # Include all non-grooming categories, even with moderate scores
+                        # This ensures all clearly present risky behaviors are mentioned
                         filtered_secondary.append(sec_cat)
                 
                 if primary:
@@ -247,11 +250,21 @@ class ExplanationGenerator:
                     for m in manip_matches
                 )
                 has_boundary = any("boundaries" in m.pattern.description.lower() for m in manip_matches)
+                has_gaslighting = any(
+                    "gaslighting" in m.pattern.description.lower() or
+                    "reality-questioning" in m.pattern.description.lower() or
+                    "perception-questioning" in m.pattern.description.lower()
+                    for m in manip_matches
+                )
                 
                 # Priority: describe actual detected behaviors, not generic templates
                 if has_forced_disclosure and has_conditional:
                     explanation_parts.append(
                         "This person is using guilt-inducing conditional statements and forcing emotional disclosure to control your behavior."
+                    )
+                elif has_conditional and has_gaslighting:
+                    explanation_parts.append(
+                        "This person is using guilt-inducing conditional statements and reality-questioning language to control your behavior."
                     )
                 elif has_conditional:
                     explanation_parts.append(
@@ -260,6 +273,10 @@ class ExplanationGenerator:
                 elif has_forced_disclosure:
                     explanation_parts.append(
                         "This person is forcing emotional disclosure and demanding proof of feelings."
+                    )
+                elif has_gaslighting:
+                    explanation_parts.append(
+                        "This person is using reality-questioning or perception-questioning language to undermine your perspective."
                     )
                 elif has_privacy:
                     explanation_parts.append(
@@ -459,6 +476,12 @@ class ExplanationGenerator:
                     "isolation" in m.pattern.description.lower()
                     for m in category_matches
                 )
+                has_gaslighting = any(
+                    "gaslighting" in m.pattern.description.lower() or
+                    "reality-questioning" in m.pattern.description.lower() or
+                    "perception-questioning" in m.pattern.description.lower()
+                    for m in category_matches
+                )
                 
                 # Only add descriptions for patterns that were ACTUALLY detected
                 # Priority: specific behaviors first, then generic
@@ -466,6 +489,8 @@ class ExplanationGenerator:
                     behavior_parts.append("forced emotional disclosure")
                 if has_conditional:
                     behavior_parts.append("guilt-inducing conditional statements")
+                if has_gaslighting:
+                    behavior_parts.append("reality-questioning or perception-questioning language")
                 if has_privacy_invasion:
                     behavior_parts.append("requests that invade privacy")
                 if has_trust_manipulation:
@@ -483,7 +508,23 @@ class ExplanationGenerator:
                         behavior_parts.append("attempts to manipulate through emotional pressure")
             
             elif category == "guilt_shifting":
-                if match_count >= 2:
+                # Check for specific guilt-shifting patterns
+                has_importance_questioning = any(
+                    "importance questioning" in m.pattern.description.lower() or
+                    "mattered" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_effort_questioning = any(
+                    "effort questioning" in m.pattern.description.lower() or
+                    "don't care" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                
+                if has_importance_questioning:
+                    behavior_parts.append("guilt-shifting through questioning your importance or care")
+                elif has_effort_questioning:
+                    behavior_parts.append("guilt-shifting through questioning your effort or commitment")
+                elif match_count >= 2:
                     behavior_parts.append("repeated guilt induction and blame-shifting")
                 else:
                     behavior_parts.append("attempts to shift blame or induce guilt")

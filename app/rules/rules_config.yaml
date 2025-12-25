@@ -34,6 +34,12 @@ rules:
       - pattern: "(?i)\\b(you're (being|acting) (selfish|crazy|paranoid)|you're overreacting)\\b"
         confidence: 0.75
         description: "Gaslighting attempts"
+      - pattern: "(?i)\\b(that's (just|simply) the truth (you|that) (don't|do not) (want to|want) (admit|accept|hear))\\b"
+        confidence: 0.8
+        description: "Reality-questioning gaslighting"
+      - pattern: "(?i)\\b(you're (not|just) (seeing|understanding|remembering) (it|things) (wrong|incorrectly)|that's not (what|how) (it|that) (happened|was))\\b"
+        confidence: 0.75
+        description: "Perception-questioning gaslighting"
       - pattern: "(?i)\\b(everyone else (does|responds|is doing)|all the (other|cool) (kids|people))\\b"
         confidence: 0.7
         description: "Comparison and belittling"
@@ -142,6 +148,12 @@ rules:
       - pattern: "(?i)\\b(after everything i (did|do) for you|i (always|always) (do|did) (this|that) for you)\\b"
         confidence: 0.75
         description: "Obligation-based guilt"
+      - pattern: "(?i)\\b(if (i|you) (mattered|matter), you (would|'d) (try|have tried) (harder|more))\\b"
+        confidence: 0.8
+        description: "Guilt-shifting through importance questioning"
+      - pattern: "(?i)\\b(you (don't|do not) (care|try|make an effort)|you're not (trying|making an effort))\\b"
+        confidence: 0.75
+        description: "Guilt-shifting through effort questioning"
 
   grooming:
     patterns:
