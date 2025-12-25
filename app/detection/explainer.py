@@ -14,7 +14,7 @@ class ExplanationGenerator:
         RiskCategory.BULLYING: (
             "Someone is saying mean things to you. This is not okay. "
             "You don't deserve to be treated this way. It's important to talk to "
-            "a trusted adult about this."
+            "a trusted person or support service about this."
         ),
         RiskCategory.MANIPULATION: (
             "This person is trying to make you feel like you have to do something "
@@ -27,9 +27,9 @@ class ExplanationGenerator:
             "that makes you uncomfortable."
         ),
         RiskCategory.SECRECY: (
-            "Someone is asking you to keep secrets from adults you trust. "
-            "This is a warning sign. Safe adults don't ask kids to keep secrets. "
-            "It's important to tell a trusted adult about this."
+            "Someone is asking you to keep secrets from people you trust. "
+            "This is a warning sign. Safe people don't ask you to keep secrets. "
+            "It's important to tell a trusted person or support service about this."
         ),
         RiskCategory.GUILT_SHIFTING: (
             "This person is trying to make you feel bad or blame you for something. "
@@ -39,7 +39,7 @@ class ExplanationGenerator:
         RiskCategory.GROOMING: (
             "This conversation has some concerning patterns. Someone might be trying "
             "to build trust in an inappropriate way. This is very serious. "
-            "Please talk to a trusted adult immediately."
+            "Please talk to a trusted person or support service immediately."
         ),
     }
 
@@ -55,7 +55,7 @@ class ExplanationGenerator:
     
     ADVICE_MESSAGES_RED = [
         "Serious warning signs detected: bullying, manipulation, or grooming patterns.",
-        "If you feel unsafe, talk to a trusted adult (parent, teacher, counselor) immediately.",
+        "If you feel unsafe, talk to a trusted person or support service immediately.",
     ]
 
     def generate_explanation(
@@ -313,8 +313,14 @@ class ExplanationGenerator:
                     for m in manip_matches
                 )
                 has_forced_disclosure = any(
-                    "forced emotional disclosure" in m.pattern.description.lower() or
-                    "demands for proof" in m.pattern.description.lower()
+                    "forced emotional disclosure" in m.pattern.description.lower()
+                    for m in manip_matches
+                )
+                has_proof_requests = any(
+                    "demands for proof" in m.pattern.description.lower() or
+                    "proof" in m.pattern.description.lower() or
+                    "screenshot" in m.pattern.description.lower() or
+                    "delete" in m.pattern.description.lower() and "prove" in m.pattern.description.lower()
                     for m in manip_matches
                 )
                 has_boundary = any("boundaries" in m.pattern.description.lower() for m in manip_matches)
@@ -341,6 +347,12 @@ class ExplanationGenerator:
                     explanation_parts.append(
                         "This person is deliberately using fear to make you comply. This is a serious warning sign."
                     )
+                elif has_proof_requests:
+                    # Proof-of-compliance requests (delete messages, send screenshots, etc.)
+                    explanation_parts.append(
+                        "This person is making proof-of-compliance requests (such as deleting messages or sending screenshots) "
+                        "to control your behavior and isolate you from support."
+                    )
                 elif has_forced_disclosure and has_conditional:
                     explanation_parts.append(
                         "This person is using guilt-inducing conditional statements and forcing emotional disclosure to control your behavior."
@@ -355,7 +367,7 @@ class ExplanationGenerator:
                     )
                 elif has_forced_disclosure:
                     explanation_parts.append(
-                        "This person is forcing emotional disclosure and demanding proof of feelings."
+                        "This person is forcing emotional disclosure to control your behavior."
                     )
                 elif has_gaslighting:
                     explanation_parts.append(
@@ -383,12 +395,27 @@ class ExplanationGenerator:
                 secrecy_matches = matches.get("secrecy", [])
                 has_isolation = any("isolation" in m.pattern.description.lower() or "discouraging" in m.pattern.description.lower() 
                                   for m in secrecy_matches)
+                has_proof_destruction = any(
+                    "delete" in m.pattern.description.lower() and "prove" in m.pattern.description.lower()
+                    for m in secrecy_matches
+                )
+                has_relationship_threat = any("relationship threat" in m.pattern.description.lower() or "finished" in m.pattern.description.lower()
+                                             for m in secrecy_matches)
                 has_privacy_redef = any("privacy" in m.pattern.description.lower() and "secrecy" in m.pattern.description.lower()
                                        for m in secrecy_matches)
                 
-                if has_isolation:
+                if has_proof_destruction:
                     explanation_parts.append(
-                        "This conversation discourages seeking outside support or advice, attempting to isolate you."
+                        "This conversation includes secrecy demands with proof-of-compliance requests (such as deleting messages) "
+                        "and attempts to isolate you from support."
+                    )
+                elif has_isolation:
+                    explanation_parts.append(
+                        "This conversation includes secrecy demands and attempts to isolate you from support."
+                    )
+                elif has_relationship_threat:
+                    explanation_parts.append(
+                        "This conversation includes secrecy demands with threats to end the relationship if you tell anyone."
                     )
                 elif has_privacy_redef:
                     explanation_parts.append(
@@ -396,7 +423,7 @@ class ExplanationGenerator:
                     )
                 else:
                     explanation_parts.append(
-                        "This conversation includes demands to keep secrets from trusted people."
+                        "This conversation includes secrecy demands designed to isolate you from support."
                     )
             elif risk_level == RiskLevel.YELLOW:
                 # For YELLOW, use milder language
@@ -421,7 +448,7 @@ class ExplanationGenerator:
         if risk_level == RiskLevel.RED:
             explanation_parts.append(
                 "\n\n⚠️ This is a high-risk situation requiring immediate attention. "
-                "Consider getting help from a trusted adult or support service."
+                "Consider getting help from a trusted person or support service."
             )
         elif risk_level == RiskLevel.YELLOW:
             # Check if multiple strong patterns are present (even if overall score is YELLOW)
@@ -555,8 +582,14 @@ class ExplanationGenerator:
                     for m in category_matches
                 )
                 has_forced_disclosure = any(
-                    "forced emotional disclosure" in m.pattern.description.lower() or
-                    "demands for proof" in m.pattern.description.lower()
+                    "forced emotional disclosure" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_proof_requests = any(
+                    "demands for proof" in m.pattern.description.lower() or
+                    "proof" in m.pattern.description.lower() or
+                    "screenshot" in m.pattern.description.lower() or
+                    ("delete" in m.pattern.description.lower() and "prove" in m.pattern.description.lower())
                     for m in category_matches
                 )
                 has_boundary_framing = any(
@@ -587,11 +620,15 @@ class ExplanationGenerator:
                 
                 # Only add descriptions for patterns that were ACTUALLY detected
                 # Priority: specific behaviors first, then generic
+                # Use preferred terms: coercive control, isolation from support, secrecy demands, proof-of-compliance requests
                 if has_coercive:
                     behavior_parts.append("coercive control and removal of autonomy")
                 if has_fear:
                     behavior_parts.append("deliberate use of fear for compliance")
-                if has_forced_disclosure:
+                if has_proof_requests:
+                    behavior_parts.append("proof-of-compliance requests (e.g., delete messages, send screenshots)")
+                # Only mention forced emotional disclosure if emotions were actually demanded (not just proof requests)
+                if has_forced_disclosure and not has_proof_requests:
                     behavior_parts.append("forced emotional disclosure")
                 if has_conditional:
                     behavior_parts.append("guilt-inducing conditional statements")
@@ -604,10 +641,10 @@ class ExplanationGenerator:
                 if has_boundary_framing:
                     behavior_parts.append("framing boundaries as rejection")
                 if has_isolation:
-                    behavior_parts.append("attempts to isolate from others")
+                    behavior_parts.append("isolation from support")
                 
                 # If no specific patterns matched, use generic description
-                if not (has_privacy_invasion or has_trust_manipulation or has_conditional or has_forced_disclosure or has_boundary_framing or has_isolation):
+                if not (has_privacy_invasion or has_trust_manipulation or has_conditional or has_forced_disclosure or has_proof_requests or has_boundary_framing or has_isolation or has_coercive or has_fear):
                     if match_count >= 2:
                         behavior_parts.append("repeated attempts to control behavior through emotional pressure")
                     else:
@@ -669,17 +706,30 @@ class ExplanationGenerator:
                     "discouraging" in m.pattern.description.lower()
                     for m in category_matches
                 )
+                has_proof_destruction = any(
+                    "delete" in m.pattern.description.lower() and "prove" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_relationship_threat = any(
+                    "relationship threat" in m.pattern.description.lower() or
+                    "finished" in m.pattern.description.lower()
+                    for m in category_matches
+                )
                 has_privacy_redefinition = any(
                     "privacy" in m.pattern.description.lower() and "secrecy" in m.pattern.description.lower()
                     for m in category_matches
                 )
                 
-                if has_isolation_secrecy:
-                    behavior_parts.append("discouraging outside support or advice")
+                if has_proof_destruction:
+                    behavior_parts.append("secrecy demands with proof-of-compliance requests (delete messages)")
+                elif has_isolation_secrecy:
+                    behavior_parts.append("secrecy demands and isolation from support")
+                elif has_relationship_threat:
+                    behavior_parts.append("secrecy demands with relationship threats")
                 elif has_privacy_redefinition:
                     behavior_parts.append("redefining privacy as keeping secrets")
                 else:
-                    behavior_parts.append("demands to keep secrets from trusted people")
+                    behavior_parts.append("secrecy demands")
             
             elif category == "grooming":
                 behavior_parts.append("inappropriate trust-building attempts")
