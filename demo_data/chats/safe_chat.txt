@@ -1,0 +1,10 @@
+Alex: Hey! How was your day at school?
+Sam: It was good! We had a science test today.
+Alex: Oh cool! How do you think you did?
+Sam: I think I did okay. The questions were a bit tricky though.
+Alex: I'm sure you did great! Want to study together for the next one?
+Sam: Yeah, that would be helpful. Thanks!
+Alex: No problem! That's what friends are for.
+Sam: You're the best!
+Alex: Aw, thanks! See you tomorrow!
+

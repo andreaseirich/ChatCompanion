@@ -1,0 +1,66 @@
+# Changelog
+
+All notable changes to ChatCompanion will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
+
+## [0.1.0] - 2024-01-XX
+
+### Added
+
+- Initial MVP release for Code Spring hackathon
+- Core detection engine with rules-based pattern matching
+- ML model integration with sentence-transformers (optional)
+- Hybrid detection system (rules + ML)
+- Rules-only fallback mode when ML models unavailable
+- Streamlit-based user interface
+- Traffic light risk indicator (green/yellow/red)
+- Child-friendly explanation generation
+- Help advice and resources section
+- "This makes me uneasy" button
+- Demo chat examples for testing
+- YAML-based rule configuration system
+- Support for 6 risk categories:
+  - Bullying
+  - Manipulation
+  - Pressure
+  - Secrecy demands
+  - Guilt shifting
+  - Grooming indicators
+- Fully offline processing (no network calls at runtime)
+- Privacy-first design (no data persistence by default)
+- Comprehensive documentation:
+  - README.md with setup and usage instructions
+  - ARCHITECTURE.md with technical details
+  - ETHICS.md with privacy and ethics statement
+  - CHANGELOG.md (this file)
+- Repository structure with modular components
+- Text preprocessing utilities
+- Score aggregation logic
+- Explainability module with evidence extraction
+
+### Technical Details
+
+- Python 3.10+ support
+- Streamlit 1.28.0+ for UI
+- sentence-transformers 2.2.2+ for NLP embeddings
+- scikit-learn 1.3.0+ for ML utilities
+- YAML configuration for rules
+- Modular architecture with separation of concerns
+
+### Privacy & Ethics
+
+- Fully offline operation after setup
+- No telemetry or tracking
+- No automatic data persistence
+- Transparent about limitations
+- Child-friendly, non-shaming language
+- Clear ethics statement and privacy guarantees
+
+---
+
+[0.1.0]: https://github.com/yourusername/ChatCompanion/releases/tag/v0.1.0
+

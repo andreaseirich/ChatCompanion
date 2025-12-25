@@ -1,0 +1,97 @@
+# Rules configuration for risk detection
+# Each rule has a pattern, category, and confidence score
+
+rules:
+  bullying:
+    patterns:
+      - pattern: "(?i)\\b(ugly|stupid|loser|hate you|worthless|nobody likes you)\\b"
+        confidence: 0.8
+        description: "Direct insults and negative labels"
+      - pattern: "(?i)\\b(you're|you are) (so|really|such a) (dumb|idiot|pathetic|annoying)\\b"
+        confidence: 0.75
+        description: "Personal attacks"
+      - pattern: "(?i)\\b(everyone|everybody) (hates|thinks you're|says you're)\\b"
+        confidence: 0.7
+        description: "Social exclusion attempts"
+      - pattern: "(?i)\\b(kill yourself|kys|go die)\\b"
+        confidence: 0.95
+        description: "Severe threats"
+
+  manipulation:
+    patterns:
+      - pattern: "(?i)\\b(if you (really|actually) (love|care about) me|if you were my (friend|true friend))\\b"
+        confidence: 0.75
+        description: "Conditional love/friendship"
+      - pattern: "(?i)\\b(you owe me|after all i did|i did so much for you)\\b"
+        confidence: 0.7
+        description: "Obligation manipulation"
+      - pattern: "(?i)\\b(no one else (will|would)|i'm the only one who)\\b"
+        confidence: 0.8
+        description: "Isolation attempts"
+      - pattern: "(?i)\\b(you're (being|acting) (selfish|crazy|paranoid)|you're overreacting)\\b"
+        confidence: 0.7
+        description: "Gaslighting attempts"
+
+  pressure:
+    patterns:
+      - pattern: "(?i)\\b(you have to|you must|you need to|you should) (do|send|show|meet)\\b"
+        confidence: 0.7
+        description: "Demanding language"
+      - pattern: "(?i)\\b(right now|immediately|this instant|or else)\\b"
+        confidence: 0.75
+        description: "Urgency pressure"
+      - pattern: "(?i)\\b(don't be (a|such a) (baby|coward|chicken)|stop being (so|such a) (scared|afraid))\\b"
+        confidence: 0.7
+        description: "Peer pressure tactics"
+      - pattern: "(?i)\\b(everyone else (does|is doing)|all the (other|cool) (kids|people))\\b"
+        confidence: 0.65
+        description: "Social pressure"
+
+  secrecy:
+    patterns:
+      - pattern: "(?i)\\b(don't tell (anyone|your (parents|mom|dad|teacher))|keep this (secret|between us))\\b"
+        confidence: 0.85
+        description: "Direct secrecy demands"
+      - pattern: "(?i)\\b(this is (just|only) (between|for) us|our little secret)\\b"
+        confidence: 0.8
+        description: "Exclusive secrecy"
+      - pattern: "(?i)\\b(they (won't|wouldn't) understand|adults (don't|won't) get it)\\b"
+        confidence: 0.7
+        description: "Authority undermining"
+      - pattern: "(?i)\\b(delete (this|these) (messages|texts|chats)|don't save this)\\b"
+        confidence: 0.9
+        description: "Evidence destruction requests"
+
+  guilt_shifting:
+    patterns:
+      - pattern: "(?i)\\b(this is (all|entirely) your fault|you made me (do|say) this)\\b"
+        confidence: 0.8
+        description: "Direct blame shifting"
+      - pattern: "(?i)\\b(you're (making|going to make) me (feel|look) (bad|terrible|awful))\\b"
+        confidence: 0.75
+        description: "Emotional manipulation"
+      - pattern: "(?i)\\b(i (wouldn't|would never) (have|do) (this|that) if (you|it weren't for you))\\b"
+        confidence: 0.7
+        description: "Conditional blame"
+      - pattern: "(?i)\\b(see what you (made|forced) me to do|this is because of you)\\b"
+        confidence: 0.8
+        description: "Consequence blaming"
+
+  grooming:
+    patterns:
+      - pattern: "(?i)\\b(you're (so|really) (mature|special|different) (for your age|than others))\\b"
+        confidence: 0.85
+        description: "Age-inappropriate flattery"
+      - pattern: "(?i)\\b(adults (don't|won't) understand (us|you)|we're (the same|alike))\\b"
+        confidence: 0.75
+        description: "Age boundary blurring"
+      - pattern: "(?i)\\b(send me a (picture|photo|pic)|show me|let me see)\\b"
+        confidence: 0.7
+        description: "Request for images"
+      - pattern: "(?i)\\b(meet me (alone|without (telling|telling anyone))|come over (when|while))\\b"
+        confidence: 0.9
+        description: "Private meeting requests"
+      - pattern: "(?i)\\b(i (love|really like) you (more than|like) (a friend|friends))\\b"
+        confidence: 0.8
+        description: "Inappropriate romantic language"
+
