@@ -124,14 +124,19 @@ def main():
                 # Help section
                 render_help_section()
 
-                # Debug info (collapsible)
-                with st.expander("Technical Details (for debugging)"):
+                # Debug info (collapsible, hidden by default - only for developers)
+                with st.expander("🔧 Developer Debug Info (click to expand)", expanded=False):
                     st.write(f"**Risk Level:** {result.risk_level.value}")
                     st.write(f"**Overall Score:** {result.overall_score:.2f}")
                     st.write(f"**ML Available:** {result.ml_available}")
                     st.write("**Category Scores:**")
                     for category, score in result.category_scores.items():
                         st.write(f"  - {category}: {score:.2f}")
+                    if result.matches:
+                        st.write("**Pattern Matches:**")
+                        for category, category_matches in result.matches.items():
+                            if category_matches:
+                                st.write(f"  - {category}: {len(category_matches)} matches")
 
             except Exception as e:
                 logger.error(f"Error during analysis: {e}", exc_info=True)
