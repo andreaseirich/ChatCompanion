@@ -46,6 +46,12 @@ rules:
       - pattern: "(?i)\\b(this makes me (not )?trust you|i (don't|cannot) trust you|i (can't|cannot) trust)\\b"
         confidence: 0.7
         description: "Threat of withdrawal of trust"
+      - pattern: "(?i)\\b((care|trust|love) means (doing|complying|listening)|if you (care|trust|love) me you (would|will))\\b"
+        confidence: 0.75
+        description: "Linking care/trust to compliance"
+      - pattern: "(?i)\\b(setting boundaries is (rejection|selfish|not caring)|boundaries don't matter)\\b"
+        confidence: 0.8
+        description: "Framing boundaries as rejection"
 
   pressure:
     patterns:
@@ -85,6 +91,18 @@ rules:
       - pattern: "(?i)\\b(delete (this|these) (messages|texts|chats)|don't save this)\\b"
         confidence: 0.9
         description: "Evidence destruction requests"
+      - pattern: "(?i)\\b(don't talk to (other people|anyone else|others) (about this|about it))\\b"
+        confidence: 0.85
+        description: "Isolation through secrecy demands"
+      - pattern: "(?i)\\b(they (will|would) take your side|they'll (side|be) against me)\\b"
+        confidence: 0.75
+        description: "Discouraging outside support"
+      - pattern: "(?i)\\b(don't (ask|get) (advice|help) from (others|anyone else|other people))\\b"
+        confidence: 0.8
+        description: "Discouraging outside advice"
+      - pattern: "(?i)\\b(privacy means (keeping secrets|not telling)|keeping secrets is (privacy|private))\\b"
+        confidence: 0.75
+        description: "Redefining privacy as secrecy"
 
   guilt_shifting:
     patterns:

@@ -93,9 +93,10 @@ class RuleEngine:
         max_confidence = max(m.confidence for m in matches)
         
         # Boost calculation: more matches = stronger signal
-        # 2 matches: +0.05, 3+ matches: +0.1-0.15 (capped)
+        # 2 matches: +0.05, 3+ matches: +0.1-0.2 (capped)
+        # Increased boost for secrecy/isolation patterns to better surface them
         if len(matches) >= 3:
-            match_count_boost = min((len(matches) - 2) * 0.05, 0.15)
+            match_count_boost = min((len(matches) - 2) * 0.05, 0.2)
         elif len(matches) >= 2:
             match_count_boost = 0.05
         else:
