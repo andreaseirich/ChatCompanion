@@ -149,14 +149,39 @@ class ExplanationGenerator:
             
             if unique_detected:
                 # Primary category (highest score) and secondary categories
+                # Filter out grooming if it's not the primary category and score is low
+                # (grooming should only be mentioned if it's actually present)
                 primary = unique_detected[0] if unique_detected else None
                 secondary = unique_detected[1:] if len(unique_detected) > 1 else []
                 
+                # Only include grooming in explanation if it's actually high-scoring
+                # (grooming should not appear as secondary if score is low)
+                if primary == "grooming indicators":
+                    # Check if grooming score is actually high
+                    grooming_score = next((score for cat, score in detected_categories if cat == "grooming"), 0.0)
+                    if grooming_score < 0.6:
+                        # Grooming is false positive, remove it and use next category
+                        if secondary:
+                            primary = secondary[0]
+                            secondary = secondary[1:]
+                        else:
+                            primary = None
+                
+                # Filter secondary to exclude low-score grooming
+                filtered_secondary = []
+                for sec_cat in secondary:
+                    if sec_cat == "grooming indicators":
+                        sec_score = next((score for cat, score in detected_categories if cat == "grooming"), 0.0)
+                        if sec_score >= 0.6:
+                            filtered_secondary.append(sec_cat)
+                    else:
+                        filtered_secondary.append(sec_cat)
+                
                 if primary:
-                    if secondary:
+                    if filtered_secondary:
                         explanation_parts.append(
                             f"Analysis detected patterns of {primary}, "
-                            f"with secondary patterns of {', '.join(secondary)}."
+                            f"with secondary patterns of {', '.join(filtered_secondary)}."
                         )
                     else:
                         explanation_parts.append(

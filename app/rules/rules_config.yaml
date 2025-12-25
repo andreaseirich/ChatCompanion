@@ -22,8 +22,8 @@ rules:
       - pattern: "(?i)\\b(if you (really|actually) (love|care about|care) me|if you were my (friend|true friend))\\b"
         confidence: 0.75
         description: "Conditional love/friendship"
-      - pattern: "(?i)\\b(you owe me|after all i did|i did so much for you|you owe me this)\\b"
-        confidence: 0.75
+      - pattern: "(?i)\\b(you owe me|after all i did|i did so much for you|you owe me this|after everything i (did|do) for you)\\b"
+        confidence: 0.8
         description: "Obligation manipulation"
       - pattern: "(?i)\\b(no one else (will|would)|i'm the only one who)\\b"
         confidence: 0.8
@@ -76,14 +76,20 @@ rules:
       - pattern: "(?i)\\b(i need to know|i need you to|i really need)\\b"
         confidence: 0.65
         description: "Pressure through need framing"
+      - pattern: "(?i)\\b(promise me|you have to promise|promise you (will|won't))\\b"
+        confidence: 0.75
+        description: "Pressure to promise compliance"
+      - pattern: "(?i)\\b(questioning (your|my) (loyalty|commitment)|are you (really|actually) (with|for) me)\\b"
+        confidence: 0.7
+        description: "Questioning loyalty to pressure agreement"
 
   secrecy:
     patterns:
       - pattern: "(?i)\\b(don't tell (anyone|your (parents|mom|dad|teacher))|keep this (secret|between us))\\b"
         confidence: 0.85
         description: "Direct secrecy demands"
-      - pattern: "(?i)\\b(this is (just|only) (between|for) us|our little secret)\\b"
-        confidence: 0.8
+      - pattern: "(?i)\\b(this is (just|only) (between|for) us|our little secret|keep (this|things) (between|just) us)\\b"
+        confidence: 0.85
         description: "Exclusive secrecy"
       - pattern: "(?i)\\b(they (won't|wouldn't) understand|adults (don't|won't) get it)\\b"
         confidence: 0.7
@@ -130,16 +136,19 @@ rules:
       - pattern: "(?i)\\b(you're (so|really) (mature|special|different) (for your age|than others))\\b"
         confidence: 0.85
         description: "Age-inappropriate flattery"
-      - pattern: "(?i)\\b(adults (don't|won't) understand (us|you)|we're (the same|alike))\\b"
+      - pattern: "(?i)\\b(adults (don't|won't) understand (us|you) (because|since)|we're (the same|alike) (age|in age))\\b"
         confidence: 0.75
-        description: "Age boundary blurring"
-      - pattern: "(?i)\\b(send me a (picture|photo|pic)|show me|let me see)\\b"
-        confidence: 0.7
-        description: "Request for images"
-      - pattern: "(?i)\\b(meet me (alone|without (telling|telling anyone))|come over (when|while))\\b"
+        description: "Age boundary blurring with explicit age reference"
+      - pattern: "(?i)\\b(send me a (nude|naked|sexy|inappropriate) (picture|photo|pic)|show me (your|yourself))\\b"
         confidence: 0.9
-        description: "Private meeting requests"
-      - pattern: "(?i)\\b(i (love|really like) you (more than|like) (a friend|friends))\\b"
+        description: "Inappropriate image requests"
+      - pattern: "(?i)\\b(meet me (alone|without (telling|telling anyone))|come over (when|while) (no one|nobody) (is|will be) (home|there))\\b"
+        confidence: 0.9
+        description: "Private meeting requests with isolation"
+      - pattern: "(?i)\\b(i (love|really like) you (more than|like) (a friend|friends)|i have (feelings|feelings) for you)\\b"
         confidence: 0.8
         description: "Inappropriate romantic language"
+      - pattern: "(?i)\\b(you're (so|really) (beautiful|sexy|attractive|hot) (for your age|))\\b"
+        confidence: 0.85
+        description: "Sexualized age-inappropriate comments"
 
