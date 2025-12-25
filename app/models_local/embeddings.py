@@ -38,28 +38,26 @@ class EmbeddingModel:
             self._load_model()
 
     def _load_model(self) -> None:
-        """Load the sentence transformer model."""
+        """Load the sentence transformer model from local storage only."""
         try:
             # Try to load from local directory first
             model_path = self.loader.get_model_path(self.model_name)
             if model_path:
                 logger.info(f"Loading model from local path: {model_path}")
                 self.model = SentenceTransformer(str(model_path))
+                self.available = True
+                logger.info(f"Embedding model {self.model_name} loaded successfully")
             else:
-                # Fallback: model will be downloaded on first use
-                # This should only happen during setup, not runtime
+                # Model not found locally - do NOT download at runtime
                 logger.warning(
-                    f"Model {self.model_name} not found locally. "
-                    "It will be downloaded on first use (setup phase only)."
+                    f"Model '{self.model_name}' not found locally. "
+                    "Running in RULES-ONLY mode. "
+                    "To enable hybrid detection, run: python scripts/download_models.py"
                 )
-                # For runtime, we'll set available=False to use rules-only mode
-                # During setup, the model can be downloaded
-                return
-
-            self.available = True
-            logger.info(f"Embedding model {self.model_name} loaded successfully")
+                self.available = False
         except Exception as e:
             logger.error(f"Failed to load embedding model: {e}")
+            logger.warning("Falling back to RULES-ONLY mode.")
             self.available = False
 
     def encode(self, texts: List[str]) -> Optional[List[List[float]]]:

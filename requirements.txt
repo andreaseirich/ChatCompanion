@@ -3,7 +3,9 @@ fastapi>=0.104.0
 streamlit>=1.28.0
 pydantic>=2.5.0
 
-# NLP and ML
+# NLP and ML (for hybrid detection mode)
+# Note: Hybrid mode recommended on Python 3.10-3.12
+# On Python 3.14+ or if models unavailable, rules-only mode is used automatically
 sentence-transformers>=2.2.2
 onnxruntime>=1.16.0
 scikit-learn>=1.3.0

@@ -72,11 +72,21 @@ class DetectionEngine:
                 if embedding_model.available:
                     self.classifier = RiskClassifier(embedding_model)
                     self.ml_available = True
-                    logger.info("ML models available - using hybrid detection")
+                    logger.info("=" * 60)
+                    logger.info("Running in HYBRID mode (Rules + ML)")
+                    logger.info("=" * 60)
                 else:
-                    logger.warning("ML models not available - using rules-only mode")
+                    self.ml_available = False
+                    logger.info("=" * 60)
+                    logger.info("Running in RULES-ONLY mode")
+                    logger.info("(ML models not available - install via: python scripts/download_models.py)")
+                    logger.info("=" * 60)
             except Exception as e:
-                logger.warning(f"Failed to initialize ML models: {e}. Using rules-only mode.")
+                self.ml_available = False
+                logger.warning(f"Failed to initialize ML models: {e}")
+                logger.info("Running in RULES-ONLY mode (fallback)")
+        else:
+            logger.info("Running in RULES-ONLY mode (ML disabled by configuration)")
 
     def analyze(self, text: str) -> DetectionResult:
         """
@@ -97,7 +107,7 @@ class DetectionEngine:
         rules_scores = rules_result["category_scores"]
         matches = rules_result["matches"]
 
-        # Run ML classifier if available
+        # Run ML classifier if available (hybrid mode)
         ml_scores = {}
         if self.ml_available and self.classifier:
             try:
@@ -112,20 +122,24 @@ class DetectionEngine:
                         )
                         if max_score > 0:
                             ml_scores[category_str] = max_score
+                    
+                    if ml_scores:
+                        logger.debug(f"ML scores generated: {len(ml_scores)} categories")
             except Exception as e:
                 logger.error(f"Error in ML classification: {e}")
+                logger.warning("Continuing with rules-only scores")
 
-        # Aggregate scores
-        if ml_scores:
+        # Aggregate scores (hybrid mode if ML available, rules-only otherwise)
+        if ml_scores and self.ml_available:
+            # Hybrid mode: combine rules (60%) and ML (40%) scores
             category_scores = self.aggregator.aggregate_category_scores(
                 rules_scores, ml_scores
             )
+            logger.debug(f"Hybrid scoring: {len(rules_scores)} rule categories, {len(ml_scores)} ML categories")
         else:
-            # Rules-only mode
+            # Rules-only mode: use only rule-based scores
             category_scores = rules_scores
-            # Adjust aggregator weights for rules-only
-            self.aggregator.rules_weight = 1.0
-            self.aggregator.ml_weight = 0.0
+            logger.debug(f"Rules-only scoring: {len(rules_scores)} categories")
 
         # Calculate overall risk score
         overall_score = self.aggregator.get_overall_risk_score(category_scores)

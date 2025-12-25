@@ -99,9 +99,11 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed technical documentation
 
 4. **Download ML models** (optional, for enhanced detection)
    ```bash
-   # Models will be downloaded automatically on first use
-   # This requires internet connection during setup only
-   # After setup, the app runs completely offline
+   # Download models for hybrid detection (requires internet during setup only)
+   python scripts/download_models.py
+   
+   # After download, the app runs completely offline
+   # If models are not downloaded, the app works in rules-only mode
    ```
 
 ### Running the Application
