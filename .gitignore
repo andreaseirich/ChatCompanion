@@ -55,3 +55,9 @@ Thumbs.db
 
 # Project-specific
 master_prompt.txt
+
+# GitHub workflows (not tracked in this repo)
+.github/
+
+# Cursor IDE files (not tracked in this repo)
+.cursor/
