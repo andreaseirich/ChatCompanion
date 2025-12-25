@@ -1,5 +1,10 @@
 # ChatCompanion 🛡️
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![CodeQL](https://github.com/andreaseirich/ChatCompanion/workflows/CodeQL%20Analysis/badge.svg)](https://github.com/andreaseirich/ChatCompanion/actions/workflows/codeql-analysis.yml)
+[![Privacy](https://img.shields.io/badge/Privacy-First%20Offline-green.svg)](docs/ETHICS.md)
+
 **Privacy-first assistant to help children and teenagers recognize risky chat patterns**
 
 ChatCompanion is a local, fully offline tool that helps identify concerning patterns in chat conversations such as bullying, manipulation, emotional pressure, secrecy demands, guilt-shifting, and grooming indicators. It explains situations in simple, child-friendly language and encourages healthy boundaries and seeking help—without surveillance and without uploading any chat data.
