@@ -56,3 +56,6 @@ Thumbs.db
 
 # Streamlit
 .streamlit/
+
+# Project-specific
+master_prompt.txt
