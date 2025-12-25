@@ -260,7 +260,7 @@ This is a hackathon project. For questions or suggestions:
 
 ## License
 
-[To be determined - open source license]
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
