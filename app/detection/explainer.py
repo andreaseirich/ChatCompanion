@@ -43,21 +43,19 @@ class ExplanationGenerator:
         ),
     }
 
-    # Advice messages - context-appropriate based on risk level
-    # These are base messages, will be filtered/selected by risk level
+    # Advice messages - context-appropriate, non-repetitive, specific to risk level
     ADVICE_MESSAGES_GREEN = [
-        "This conversation looks mostly okay.",
-        "There might be some stress or disagreement, but overall it does not show strong signs of bullying or manipulation.",
+        "No strong patterns of bullying, manipulation, or grooming were detected.",
     ]
     
     ADVICE_MESSAGES_YELLOW = [
-        "There are some tense or uncomfortable parts in this conversation.",
-        "It can help to set clear boundaries and talk honestly about how you feel.",
+        "Some patterns of pressure or discomfort were detected.",
+        "Consider setting clear boundaries and communicating your concerns directly.",
     ]
     
     ADVICE_MESSAGES_RED = [
-        "This conversation shows serious warning signs.",
-        "If you feel unsafe or pressured, talk to a trusted adult (parent, teacher, counselor or another person you trust) as soon as possible.",
+        "Serious warning signs detected: bullying, manipulation, or grooming patterns.",
+        "If you feel unsafe, talk to a trusted adult (parent, teacher, counselor) immediately.",
     ]
 
     def generate_explanation(
@@ -68,7 +66,7 @@ class ExplanationGenerator:
         overall_score: float = 0.0,
     ) -> str:
         """
-        Generate context-appropriate explanation for detected risks.
+        Generate context-appropriate, specific explanation for detected risks.
 
         Args:
             risk_level: Overall risk level (green/yellow/red)
@@ -77,54 +75,85 @@ class ExplanationGenerator:
             overall_score: Overall risk score (0.0 - 1.0)
 
         Returns:
-            Context-appropriate explanation text
+            Context-appropriate, specific explanation text
         """
-        # Context-appropriate guidance based on risk level
+        # Build explanation based on what was actually detected
+        explanation_parts = []
+        
+        # For GREEN: Explain what was analyzed and what was NOT found
         if risk_level == RiskLevel.GREEN or overall_score < 0.3:
-            # Neutral, context-agnostic message for low-risk conversations
-            return (
-                "This conversation looks mostly okay. There might be some stress or disagreement, "
-                "but overall it does not show strong signs of bullying or manipulation."
+            explanation_parts.append(
+                "Analysis checked for patterns of bullying, manipulation, pressure, secrecy demands, "
+                "guilt-shifting, and grooming indicators."
+            )
+            explanation_parts.append(
+                "No strong patterns of these risky behaviors were detected in this conversation."
+            )
+            if matches:
+                # Even in GREEN, if there are weak matches, mention them
+                evidence = self._extract_evidence(matches)
+                if evidence:
+                    explanation_parts.append(
+                        f"Some mild patterns were noted but are not concerning: {evidence}"
+                    )
+            return " ".join(explanation_parts)
+
+        # For YELLOW/RED: Explain what WAS detected
+        detected_categories = [cat for cat, score in category_scores.items() if score > 0]
+        
+        if detected_categories:
+            category_names = {
+                "bullying": "bullying",
+                "manipulation": "manipulation",
+                "pressure": "pressure",
+                "secrecy": "secrecy demands",
+                "guilt_shifting": "guilt-shifting",
+                "grooming": "grooming indicators",
+            }
+            detected_list = [category_names.get(cat, cat) for cat in detected_categories[:3]]
+            if len(detected_categories) > 3:
+                detected_list.append("and others")
+            
+            explanation_parts.append(
+                f"Analysis detected patterns of: {', '.join(detected_list)}."
             )
 
-        # Find the highest-risk categories
+        # Find the highest-risk category for specific explanation
         sorted_categories = sorted(
             category_scores.items(), key=lambda x: x[1], reverse=True
         )
         top_category = sorted_categories[0][0] if sorted_categories else None
 
-        explanation_parts = []
-
         # Add category-specific explanation (only for YELLOW/RED)
         if top_category and top_category in self.EXPLANATIONS:
-            # Adjust category explanations to be less child-focused for YELLOW
+            # Adjust category explanations to be context-appropriate
             if risk_level == RiskLevel.YELLOW:
-                # Use milder, more general language
+                # Use milder, more general language for YELLOW
                 category_explanation = self.EXPLANATIONS[top_category]
-                # Remove "trusted adult" references for YELLOW
+                # Remove "trusted adult" and child-focused language for YELLOW
                 category_explanation = category_explanation.replace("trusted adult", "someone you trust")
+                category_explanation = category_explanation.replace("kids", "people")
+                category_explanation = category_explanation.replace("kids", "people")
                 explanation_parts.append(category_explanation)
             else:
                 # RED: keep original child-focused explanation
                 explanation_parts.append(self.EXPLANATIONS[top_category])
 
-        # Add risk level context with appropriate severity
-        if risk_level == RiskLevel.RED:
-            explanation_parts.append(
-                "\n\n⚠️ This is a high-risk situation. Please talk to a trusted adult "
-                "right away."
-            )
-        elif risk_level == RiskLevel.YELLOW:
-            explanation_parts.append(
-                "\n\n⚠️ Be careful with this conversation. Pay attention to how it "
-                "makes you feel."
-            )
-
-        # Add specific evidence if available
+        # Add specific evidence - always show what was detected
         if matches:
             evidence = self._extract_evidence(matches)
             if evidence:
-                explanation_parts.append(f"\n\nSome concerning things we noticed: {evidence}")
+                explanation_parts.append(f"\n\nSpecific patterns detected: {evidence}")
+
+        # Add risk level context with appropriate severity
+        if risk_level == RiskLevel.RED:
+            explanation_parts.append(
+                "\n\n⚠️ This is a high-risk situation requiring immediate attention."
+            )
+        elif risk_level == RiskLevel.YELLOW:
+            explanation_parts.append(
+                "\n\n⚠️ Moderate concern: pay attention to how this conversation makes you feel."
+            )
 
         return " ".join(explanation_parts)
 

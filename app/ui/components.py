@@ -106,60 +106,62 @@ def render_advice(advice: list) -> None:
 
 def render_uneasy_button_and_help() -> None:
     """
-    Render "This makes me uneasy" button with toggleable help panel.
+    Render "I need more help" button with toggleable support panel.
     
     Uses Streamlit session state to persist the toggle state.
+    Provides clear, actionable support resources.
     """
     # Initialize session state for toggle
     if "show_uneasy_help" not in st.session_state:
         st.session_state.show_uneasy_help = False
     
-    # Button to toggle help panel
-    button_label = "🛡️ Show Additional Help" if not st.session_state.show_uneasy_help else "🛡️ Hide Additional Help"
+    # Button to toggle help panel - clearer label
+    button_label = "💬 I Need More Help" if not st.session_state.show_uneasy_help else "💬 Hide Help Resources"
     
-    if st.button(button_label, use_container_width=True):
+    if st.button(button_label, use_container_width=True, type="secondary"):
         st.session_state.show_uneasy_help = not st.session_state.show_uneasy_help
     
-    # Show help panel if toggled
+    # Show help panel if toggled - clear, actionable content
     if st.session_state.show_uneasy_help:
-        st.markdown("### Additional Support & Resources")
+        st.markdown("### Support & Next Steps")
         
         col1, col2 = st.columns(2)
         
         with col1:
             st.markdown("""
-            **What You Can Do:**
+            **Immediate Actions:**
             - Take a break from the conversation if needed
-            - Write down what happened and how it made you feel
-            - Talk to someone you trust about the situation
+            - Document what happened (write it down or save the conversation)
+            - Reach out to someone you trust for support
             """)
         
         with col2:
             st.markdown("""
             **Setting Boundaries:**
-            - It's okay to say no or ask for time to think
+            - You can say no or ask for time to think
             - You can end conversations that make you uncomfortable
-            - Your feelings and safety are important
+            - Your feelings and safety matter
             """)
         
         st.info(
-            "💡 **Note:** If you feel unsafe or need immediate support, reach out to someone you trust "
-            "or contact appropriate support services in your area."
+            "💡 **Remember:** If you feel unsafe or need immediate support, contact someone you trust "
+            "or reach out to appropriate support services in your area."
         )
 
 
 def render_help_section() -> None:
-    """Render help section with resources."""
-    with st.expander("Need Help?"):
+    """Render help section with resources (only for high-risk scenarios)."""
+    # Only show this section for high-risk situations
+    # For low/moderate risk, the main advice section is sufficient
+    with st.expander("Need Immediate Help?"):
         st.markdown(
             """
-            **If you're feeling unsafe or uncomfortable:**
-            - Talk to a trusted adult: parent, teacher, counselor, or family member
-            - Remember: you're not alone, and it's okay to ask for help
-            - Trust your feelings - if something feels wrong, it probably is
+            **If you're feeling unsafe or need immediate support:**
+            - Reach out to someone you trust: a parent, teacher, counselor, or another trusted person
+            - Contact appropriate support services in your area
+            - Trust your instincts - if something feels wrong, it probably is
             
-            **Important:** This tool is not a replacement for talking to trusted adults.
-            It's here to help you recognize patterns, but always trust your instincts.
+            **Important:** This tool helps recognize patterns but is not a replacement for professional support or trusted guidance.
             """
         )
 
