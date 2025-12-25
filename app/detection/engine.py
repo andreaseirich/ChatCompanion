@@ -106,6 +106,14 @@ class DetectionEngine:
         rules_result = self.rule_engine.analyze(normalized_text)
         rules_scores = rules_result["category_scores"]
         matches = rules_result["matches"]
+        
+        # Debug logging for detection
+        if rules_scores:
+            logger.debug(f"Rules detection: {len(rules_scores)} categories with scores > 0")
+            for cat, score in rules_scores.items():
+                logger.debug(f"  - {cat}: {score:.2f} ({len(matches.get(cat, []))} matches)")
+        else:
+            logger.debug("Rules detection: No patterns matched")
 
         # Run ML classifier if available (hybrid mode)
         ml_scores = {}

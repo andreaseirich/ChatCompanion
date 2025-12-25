@@ -19,7 +19,7 @@ rules:
 
   manipulation:
     patterns:
-      - pattern: "(?i)\\b(if you (really|actually) (love|care about) me|if you were my (friend|true friend))\\b"
+      - pattern: "(?i)\\b(if you (really|actually) (love|care about|care) me|if you were my (friend|true friend))\\b"
         confidence: 0.75
         description: "Conditional love/friendship"
       - pattern: "(?i)\\b(you owe me|after all i did|i did so much for you|you owe me this)\\b"
@@ -37,10 +37,19 @@ rules:
       - pattern: "(?i)\\b(this is how you treat me|this is what you do)\\b"
         confidence: 0.7
         description: "Guilt induction through framing"
+      - pattern: "(?i)\\b(prove it|show me proof|send me (a )?screenshot|send me (a )?screen shot)\\b"
+        confidence: 0.8
+        description: "Privacy invasion demands"
+      - pattern: "(?i)\\b(if you have nothing to hide|why won't you (show|prove|send))\\b"
+        confidence: 0.75
+        description: "Trust manipulation through proof demands"
+      - pattern: "(?i)\\b(this makes me (not )?trust you|i (don't|cannot) trust you|i (can't|cannot) trust)\\b"
+        confidence: 0.7
+        description: "Threat of withdrawal of trust"
 
   pressure:
     patterns:
-      - pattern: "(?i)\\b(you have to|you must|you need to|you should) (do|send|show|meet|respond)\\b"
+      - pattern: "(?i)\\b(you have to|you must|you need to|you should) (do|send|show|meet|respond|reply|answer)\\b"
         confidence: 0.7
         description: "Demanding language"
       - pattern: "(?i)\\b(right now|immediately|this instant|or else|within (\\d+ )?minutes?)\\b"
@@ -49,15 +58,18 @@ rules:
       - pattern: "(?i)\\b(don't be (a|such a) (baby|coward|chicken)|stop being (so|such a) (scared|afraid))\\b"
         confidence: 0.7
         description: "Peer pressure tactics"
-      - pattern: "(?i)\\b(respond (faster|quicker|sooner)|reply (faster|quicker|sooner)|answer (faster|quicker))\\b"
-        confidence: 0.7
+      - pattern: "(?i)\\b(respond (faster|quicker|sooner)|reply (faster|quicker|sooner)|answer (faster|quicker)|respond to my messages (faster|quicker))\\b"
+        confidence: 0.75
         description: "Communication frequency control"
-      - pattern: "(?i)\\b(if you don't|if you won't|unless you) (do|respond|reply|answer) (then|we're done|i'm done|it's over)\\b"
+      - pattern: "(?i)\\b(if you don't|if you won't|unless you) (do|respond|reply|answer|prove|show) (then|we're done|i'm done|it's over|maybe we shouldn't)\\b"
         confidence: 0.85
         description: "Ultimatums and relationship threats"
-      - pattern: "(?i)\\b(we're done|i'm done|it's over|this is it) (if|unless|i mean it)\\b"
+      - pattern: "(?i)\\b(we're done|i'm done|it's over|this is it|maybe we shouldn't (talk|speak)) (if|unless|i mean it)\\b"
         confidence: 0.8
         description: "Relationship ultimatums"
+      - pattern: "(?i)\\b(i need to know|i need you to|i really need)\\b"
+        confidence: 0.65
+        description: "Pressure through need framing"
 
   secrecy:
     patterns:

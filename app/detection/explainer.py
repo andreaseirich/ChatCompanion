@@ -81,7 +81,11 @@ class ExplanationGenerator:
         explanation_parts = []
         
         # For GREEN: Explain what was analyzed and what was NOT found
-        if risk_level == RiskLevel.GREEN or overall_score < 0.3:
+        # BUT: Only say "no strong patterns" if there are truly NO matches or very weak ones
+        has_any_matches = bool(matches) and any(len(m) > 0 for m in matches.values())
+        has_meaningful_scores = any(score >= 0.3 for score in category_scores.values())
+        
+        if (risk_level == RiskLevel.GREEN or overall_score < 0.3) and not has_meaningful_scores:
             explanation_parts.append(
                 "Analysis checked for patterns of bullying, manipulation, pressure, secrecy demands, "
                 "guilt-shifting, and grooming indicators."
@@ -89,13 +93,23 @@ class ExplanationGenerator:
             explanation_parts.append(
                 "No strong patterns of these risky behaviors were detected in this conversation."
             )
-            if matches:
+            if matches and has_any_matches:
                 # Even in GREEN, if there are weak matches, mention them
                 evidence = self._extract_evidence(matches)
                 if evidence:
                     explanation_parts.append(
                         f"Some mild patterns were noted but are not concerning: {evidence}"
                     )
+            return " ".join(explanation_parts)
+        
+        # If we have matches but still GREEN, it means weak signals - be more specific
+        if risk_level == RiskLevel.GREEN and has_any_matches:
+            explanation_parts.append(
+                "Analysis detected some patterns, but they appear to be isolated or mild."
+            )
+            evidence = self._extract_evidence(matches)
+            if evidence:
+                explanation_parts.append(f"Patterns noted: {evidence}")
             return " ".join(explanation_parts)
 
         # For YELLOW/RED: Explain what WAS detected with specific details
@@ -148,11 +162,35 @@ class ExplanationGenerator:
                 # RED: keep original child-focused explanation
                 explanation_parts.append(self.EXPLANATIONS[top_category])
 
-        # Add specific evidence - always show what was detected
+        # Add specific evidence - always show what was detected with category context
         if matches:
-            evidence = self._extract_evidence(matches)
-            if evidence:
-                explanation_parts.append(f"\n\nSpecific patterns detected: {evidence}")
+            evidence_by_category = {}
+            for category, category_matches in matches.items():
+                if category_matches:
+                    examples = category_matches[:2]
+                    evidence_items = []
+                    for match in examples:
+                        text = match.matched_text
+                        if len(text) > 50:
+                            text = text[:47] + "..."
+                        evidence_items.append(f'"{text}"')
+                    if evidence_items:
+                        evidence_by_category[category] = ", ".join(evidence_items)
+            
+            if evidence_by_category:
+                evidence_parts = []
+                for cat, evid in list(evidence_by_category.items())[:3]:  # Limit to 3 categories
+                    cat_name = {
+                        "bullying": "bullying",
+                        "manipulation": "manipulation",
+                        "pressure": "pressure",
+                        "secrecy": "secrecy",
+                        "guilt_shifting": "guilt-shifting",
+                        "grooming": "grooming",
+                    }.get(cat, cat)
+                    evidence_parts.append(f"{cat_name}: {evid}")
+                
+                explanation_parts.append(f"\n\nSpecific patterns detected: {'; '.join(evidence_parts)}")
 
         # Add risk level context with appropriate severity
         if risk_level == RiskLevel.RED:

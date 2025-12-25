@@ -26,6 +26,8 @@ def load_demo_chats(demo_dir: Path) -> dict:
         "workplace_stress.txt": "Workplace Conversation (Mia/Chris)",
         "professional_stress.txt": "Professional Conversation (Workplace)",
         "mild_teasing.txt": "Mild Teasing Example",
+        "manipulation_pressure.txt": "Manipulation & Pressure (Taylor/Jordan)",
+        "lena_mark.txt": "Privacy Invasion & Trust Manipulation (Lena/Mark)",
         "bullying_example.txt": "Bullying Example",
         "manipulation_example.txt": "Manipulation Example",
         "grooming_example.txt": "Grooming Example",
