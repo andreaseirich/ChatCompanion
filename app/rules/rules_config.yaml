@@ -22,6 +22,9 @@ rules:
       - pattern: "(?i)\\b(if you (really|actually) (love|care about|care) me|if you were my (friend|true friend))\\b"
         confidence: 0.75
         description: "Conditional love/friendship"
+      - pattern: "(?i)\\b(if you (cared|care), you (would|'d) (have|do)|if you (really|actually) (cared|care))\\b"
+        confidence: 0.8
+        description: "Guilt-inducing conditional statements"
       - pattern: "(?i)\\b(you owe me|after all i did|i did so much for you|you owe me this|after everything i (did|do) for you)\\b"
         confidence: 0.8
         description: "Obligation manipulation"
@@ -37,12 +40,18 @@ rules:
       - pattern: "(?i)\\b(this is how you treat me|this is what you do)\\b"
         confidence: 0.7
         description: "Guilt induction through framing"
-      - pattern: "(?i)\\b(prove it|show me proof|send me (a )?screenshot|send me (a )?screen shot)\\b"
+      - pattern: "(?i)\\b(send me (a )?screenshot|send me (a )?screen shot|show me (your|your )?(messages|phone|screen))\\b"
         confidence: 0.8
         description: "Privacy invasion demands"
-      - pattern: "(?i)\\b(if you have nothing to hide|why won't you (show|prove|send))\\b"
+      - pattern: "(?i)\\b(if you have nothing to hide|why won't you (show|prove|send) (me|it))\\b"
         confidence: 0.75
         description: "Trust manipulation through proof demands"
+      - pattern: "(?i)\\b(prove it|prove (to me|that)|show me proof)\\b"
+        confidence: 0.7
+        description: "Demands for proof or validation"
+      - pattern: "(?i)\\b(tell me (exactly|precisely) (what|how) you (feel|think)|describe (exactly|precisely) (what|how))\\b"
+        confidence: 0.75
+        description: "Forced emotional disclosure"
       - pattern: "(?i)\\b(this makes me (not )?trust you|i (don't|cannot) trust you|i (can't|cannot) trust)\\b"
         confidence: 0.7
         description: "Threat of withdrawal of trust"
@@ -61,6 +70,9 @@ rules:
       - pattern: "(?i)\\b(right now|immediately|this instant|or else|within (\\d+ )?minutes?)\\b"
         confidence: 0.75
         description: "Urgency pressure and time ultimatums"
+      - pattern: "(?i)\\b((tell|answer|respond|reply) (me )?(exactly|precisely|right now)|(right now|immediately) (tell|answer|respond))\\b"
+        confidence: 0.8
+        description: "Emotional pressure to respond right now"
       - pattern: "(?i)\\b(don't be (a|such a) (baby|coward|chicken)|stop being (so|such a) (scared|afraid))\\b"
         confidence: 0.7
         description: "Peer pressure tactics"

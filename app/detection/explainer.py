@@ -197,15 +197,36 @@ class ExplanationGenerator:
             # Provide context-specific explanation based on primary category and ACTUAL detected patterns
             # Only describe behaviors that were actually detected, not generic templates
             if top_category == "pressure" and top_score >= 0.6:
-                # Check if ultimatums were actually detected
+                # Check what pressure patterns were actually detected
                 pressure_matches = matches.get("pressure", [])
-                has_ultimatums = any(
-                    "ultimatum" in m.pattern.description.lower() or "threat" in m.pattern.description.lower()
+                has_withdrawal = any(
+                    "withdrawal" in m.pattern.description.lower() or
+                    "threats of withdrawal" in m.pattern.description.lower()
                     for m in pressure_matches
                 )
-                if has_ultimatums:
+                has_ultimatums = any(
+                    "ultimatum" in m.pattern.description.lower() or 
+                    "threat" in m.pattern.description.lower() or
+                    "relationship threats" in m.pattern.description.lower()
+                    for m in pressure_matches
+                )
+                has_emotional_pressure = any(
+                    "emotional pressure" in m.pattern.description.lower() or
+                    "respond right now" in m.pattern.description.lower()
+                    for m in pressure_matches
+                )
+                
+                if has_withdrawal:
+                    explanation_parts.append(
+                        "This conversation shows threats of withdrawal of affection or attention if demands are not met."
+                    )
+                elif has_ultimatums:
                     explanation_parts.append(
                         "This conversation shows repeated pressure with threats of consequences if demands are not met."
+                    )
+                elif has_emotional_pressure:
+                    explanation_parts.append(
+                        "This conversation shows emotional pressure to respond immediately or disclose feelings."
                     )
                 else:
                     explanation_parts.append(
@@ -215,16 +236,34 @@ class ExplanationGenerator:
                 # Check what manipulation patterns were actually detected
                 manip_matches = matches.get("manipulation", [])
                 has_privacy = any("privacy invasion" in m.pattern.description.lower() for m in manip_matches)
-                has_conditional = any("conditional" in m.pattern.description.lower() for m in manip_matches)
+                has_conditional = any(
+                    "conditional" in m.pattern.description.lower() or 
+                    "guilt-inducing" in m.pattern.description.lower()
+                    for m in manip_matches
+                )
+                has_forced_disclosure = any(
+                    "forced emotional disclosure" in m.pattern.description.lower() or
+                    "demands for proof" in m.pattern.description.lower()
+                    for m in manip_matches
+                )
                 has_boundary = any("boundaries" in m.pattern.description.lower() for m in manip_matches)
                 
-                if has_privacy:
+                # Priority: describe actual detected behaviors, not generic templates
+                if has_forced_disclosure and has_conditional:
                     explanation_parts.append(
-                        "This person is using emotional pressure and requests that invade privacy to control your behavior."
+                        "This person is using guilt-inducing conditional statements and forcing emotional disclosure to control your behavior."
                     )
                 elif has_conditional:
                     explanation_parts.append(
-                        "This person is using conditional statements linking care or trust to compliance."
+                        "This person is using guilt-inducing conditional statements linking care or trust to compliance."
+                    )
+                elif has_forced_disclosure:
+                    explanation_parts.append(
+                        "This person is forcing emotional disclosure and demanding proof of feelings."
+                    )
+                elif has_privacy:
+                    explanation_parts.append(
+                        "This person is using emotional pressure and requests that invade privacy to control your behavior."
                     )
                 elif has_boundary:
                     explanation_parts.append(
@@ -350,23 +389,37 @@ class ExplanationGenerator:
             # Describe behaviors based on category and match patterns
             # Focus on conversational dynamics, not keywords
             if category == "pressure":
-                # Analyze pressure patterns
+                # Analyze pressure patterns - check pattern descriptions, not matched_text
+                has_withdrawal_threats = any(
+                    "withdrawal" in m.pattern.description.lower() or
+                    "threats of withdrawal" in m.pattern.description.lower()
+                    for m in category_matches
+                )
                 has_ultimatums = any(
                     "ultimatum" in m.pattern.description.lower() or 
                     "threat" in m.pattern.description.lower() or
-                    "done" in m.matched_text.lower() or
-                    "over" in m.matched_text.lower()
+                    "relationship threats" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_emotional_pressure = any(
+                    "emotional pressure" in m.pattern.description.lower() or
+                    "respond right now" in m.pattern.description.lower()
                     for m in category_matches
                 )
                 has_time_pressure = any(
-                    "faster" in m.matched_text.lower() or 
-                    "respond" in m.matched_text.lower() or
-                    "minutes" in m.matched_text.lower()
+                    "urgency" in m.pattern.description.lower() or
+                    "time ultimatums" in m.pattern.description.lower() or
+                    "immediate" in m.pattern.description.lower()
                     for m in category_matches
                 )
                 
-                if has_ultimatums:
+                # Priority: specific behaviors first
+                if has_withdrawal_threats:
+                    behavior_parts.append("threats of withdrawal of affection or attention")
+                elif has_ultimatums:
                     behavior_parts.append("threats of withdrawal or relationship consequences")
+                elif has_emotional_pressure:
+                    behavior_parts.append("emotional pressure to respond right now")
                 elif has_time_pressure and match_count >= 2:
                     behavior_parts.append("repeated demands for immediate response")
                 elif match_count >= 3:
@@ -378,18 +431,23 @@ class ExplanationGenerator:
                 # Analyze manipulation patterns - ONLY describe what's actually present
                 # Check pattern descriptions to see what was actually matched
                 has_privacy_invasion = any(
-                    "privacy invasion" in m.pattern.description.lower() or
-                    "screenshot" in m.pattern.description.lower()
+                    "privacy invasion" in m.pattern.description.lower()
                     for m in category_matches
                 )
                 has_trust_manipulation = any(
-                    "trust" in m.pattern.description.lower() or
-                    "trust manipulation" in m.pattern.description.lower()
+                    "trust manipulation" in m.pattern.description.lower() or
+                    ("trust" in m.pattern.description.lower() and "withdrawal" in m.pattern.description.lower())
                     for m in category_matches
                 )
                 has_conditional = any(
                     "conditional" in m.pattern.description.lower() or
-                    "care" in m.pattern.description.lower() and "compliance" in m.pattern.description.lower()
+                    ("guilt-inducing" in m.pattern.description.lower()) or
+                    ("care" in m.pattern.description.lower() and "compliance" in m.pattern.description.lower())
+                    for m in category_matches
+                )
+                has_forced_disclosure = any(
+                    "forced emotional disclosure" in m.pattern.description.lower() or
+                    "demands for proof" in m.pattern.description.lower()
                     for m in category_matches
                 )
                 has_boundary_framing = any(
@@ -403,19 +461,22 @@ class ExplanationGenerator:
                 )
                 
                 # Only add descriptions for patterns that were ACTUALLY detected
+                # Priority: specific behaviors first, then generic
+                if has_forced_disclosure:
+                    behavior_parts.append("forced emotional disclosure")
+                if has_conditional:
+                    behavior_parts.append("guilt-inducing conditional statements")
                 if has_privacy_invasion:
                     behavior_parts.append("requests that invade privacy")
                 if has_trust_manipulation:
                     behavior_parts.append("threats of withdrawal of trust")
-                if has_conditional:
-                    behavior_parts.append("linking care or trust to compliance")
                 if has_boundary_framing:
                     behavior_parts.append("framing boundaries as rejection")
                 if has_isolation:
                     behavior_parts.append("attempts to isolate from others")
                 
                 # If no specific patterns matched, use generic description
-                if not (has_privacy_invasion or has_trust_manipulation or has_conditional or has_boundary_framing or has_isolation):
+                if not (has_privacy_invasion or has_trust_manipulation or has_conditional or has_forced_disclosure or has_boundary_framing or has_isolation):
                     if match_count >= 2:
                         behavior_parts.append("repeated attempts to control behavior through emotional pressure")
                     else:
