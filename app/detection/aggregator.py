@@ -78,19 +78,28 @@ class ScoreAggregator:
         num_categories = len(scores)
         avg_score = sum(scores) / num_categories
         
+        # Check for high-confidence patterns (>=0.75) - these should boost the score more
+        high_confidence_count = sum(1 for s in scores if s >= 0.75)
+        
         # Multiple moderate patterns (3+) should raise the risk level significantly
         # Example: 3 categories at 0.6 each should result in ~0.7-0.75 overall score
         if num_categories >= 3:
             # Multiple patterns: stronger boost to reflect cumulative risk
             # More categories = higher cumulative risk
-            pattern_boost = min((num_categories - 2) * 0.12, 0.25)  # Max +0.25 boost (increased from 0.2)
+            pattern_boost = min((num_categories - 2) * 0.12, 0.25)  # Max +0.25 boost
+            # Additional boost if multiple high-confidence patterns
+            if high_confidence_count >= 2:
+                pattern_boost += 0.1  # Extra boost for multiple strong patterns
             # Weighted combination: max_score gets more weight, but avg_score and boost matter
-            combined = (max_score * 0.55) + (avg_score * 0.35) + pattern_boost
+            combined = (max_score * 0.5) + (avg_score * 0.4) + pattern_boost
             return min(combined, 1.0)
         elif num_categories >= 2:
             # Two patterns: moderate boost
-            # Example: 2 categories at 0.6 each should result in ~0.65 overall score
-            combined = (max_score * 0.65) + (avg_score * 0.25) + 0.1  # Small boost for 2 patterns
+            # If both are high-confidence, boost more
+            if high_confidence_count >= 2:
+                combined = (max_score * 0.6) + (avg_score * 0.3) + 0.15  # Stronger boost
+            else:
+                combined = (max_score * 0.65) + (avg_score * 0.25) + 0.1  # Small boost
             return min(combined, 1.0)
         
         # Single category: use the score directly (but threshold is 0.8 for RED)

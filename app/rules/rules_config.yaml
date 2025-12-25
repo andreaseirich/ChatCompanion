@@ -16,6 +16,18 @@ rules:
       - pattern: "(?i)\\b(kill yourself|kys|go die)\\b"
         confidence: 0.95
         description: "Severe threats"
+      - pattern: "(?i)\\b(pathetic|dead weight|useless|burden|waste of (space|time))\\b"
+        confidence: 0.85
+        description: "Demeaning language and put-downs"
+      - pattern: "(?i)\\b(your (best|effort|work) is (pathetic|worthless|terrible|useless))\\b"
+        confidence: 0.8
+        description: "Dismissive put-downs of effort"
+      - pattern: "(?i)\\b(you're (the|just) (problem|issue|reason)|you (are|'re) (the|just) problem)\\b"
+        confidence: 0.8
+        description: "Victim-blaming statements"
+      - pattern: "(?i)\\b(you (just|always) (play|act like) (the|a) victim|stop playing the victim)\\b"
+        confidence: 0.85
+        description: "Victim-blaming and dismissal"
 
   manipulation:
     patterns:
@@ -94,6 +106,12 @@ rules:
       - pattern: "(?i)\\b(i need to know|i need you to|i really need)\\b"
         confidence: 0.65
         description: "Pressure through need framing"
+      - pattern: "(?i)\\b((either|or) (do it|you do it) (now|right now) (or|or else) (the|our) (friendship|relationship) (doesn't|does not|won't) (matter|count))\\b"
+        confidence: 0.9
+        description: "Emotional blackmail with friendship threat"
+      - pattern: "(?i)\\b(do it (now|right now)|(do|get) (it|this) done (now|right now))\\b"
+        confidence: 0.75
+        description: "Strong pressure commands"
       - pattern: "(?i)\\b(promise me|you have to promise|promise you (will|won't))\\b"
         confidence: 0.75
         description: "Pressure to promise compliance"
@@ -154,6 +172,12 @@ rules:
       - pattern: "(?i)\\b(you (don't|do not) (care|try|make an effort)|you're not (trying|making an effort))\\b"
         confidence: 0.75
         description: "Guilt-shifting through effort questioning"
+      - pattern: "(?i)\\b(you're (the|just) (problem|issue|reason)|you (are|'re) (the|just) problem)\\b"
+        confidence: 0.85
+        description: "Victim-blaming and responsibility shifting"
+      - pattern: "(?i)\\b(you (just|always) (play|act like) (the|a) victim|stop playing the victim)\\b"
+        confidence: 0.85
+        description: "Victim-blaming dismissal"
 
   grooming:
     patterns:

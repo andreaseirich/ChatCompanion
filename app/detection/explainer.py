@@ -202,6 +202,11 @@ class ExplanationGenerator:
             if top_category == "pressure" and top_score >= 0.6:
                 # Check what pressure patterns were actually detected
                 pressure_matches = matches.get("pressure", [])
+                has_blackmail = any(
+                    "emotional blackmail" in m.pattern.description.lower() or
+                    "friendship threat" in m.pattern.description.lower()
+                    for m in pressure_matches
+                )
                 has_withdrawal = any(
                     "withdrawal" in m.pattern.description.lower() or
                     "threats of withdrawal" in m.pattern.description.lower()
@@ -213,19 +218,32 @@ class ExplanationGenerator:
                     "relationship threats" in m.pattern.description.lower()
                     for m in pressure_matches
                 )
+                has_strong_commands = any(
+                    "strong pressure" in m.pattern.description.lower() or
+                    "commands" in m.pattern.description.lower()
+                    for m in pressure_matches
+                )
                 has_emotional_pressure = any(
                     "emotional pressure" in m.pattern.description.lower() or
                     "respond right now" in m.pattern.description.lower()
                     for m in pressure_matches
                 )
                 
-                if has_withdrawal:
+                if has_blackmail:
+                    explanation_parts.append(
+                        "This conversation shows emotional blackmail with threats to end the friendship if demands are not met immediately."
+                    )
+                elif has_withdrawal:
                     explanation_parts.append(
                         "This conversation shows threats of withdrawal of affection or attention if demands are not met."
                     )
                 elif has_ultimatums:
                     explanation_parts.append(
                         "This conversation shows repeated pressure with threats of consequences if demands are not met."
+                    )
+                elif has_strong_commands:
+                    explanation_parts.append(
+                        "This conversation shows strong pressure commands demanding immediate compliance."
                     )
                 elif has_emotional_pressure:
                     explanation_parts.append(
@@ -234,6 +252,45 @@ class ExplanationGenerator:
                 else:
                     explanation_parts.append(
                         "This conversation shows repeated pressure to act quickly or comply with demands."
+                    )
+            elif top_category == "bullying" and top_score >= 0.6:
+                # Check what bullying patterns were detected
+                bullying_matches = matches.get("bullying", [])
+                has_victim_blaming = any(
+                    "victim-blaming" in m.pattern.description.lower() or
+                    "victim" in m.pattern.description.lower()
+                    for m in bullying_matches
+                )
+                has_demeaning = any(
+                    "demeaning" in m.pattern.description.lower() or
+                    "put-down" in m.pattern.description.lower()
+                    for m in bullying_matches
+                )
+                has_severe = any(
+                    "severe" in m.pattern.description.lower() or
+                    m.confidence >= 0.9
+                    for m in bullying_matches
+                )
+                
+                if has_victim_blaming and has_demeaning:
+                    explanation_parts.append(
+                        "This conversation contains direct insults, demeaning language, and victim-blaming statements."
+                    )
+                elif has_victim_blaming:
+                    explanation_parts.append(
+                        "This conversation contains victim-blaming statements that shift responsibility and dismiss your concerns."
+                    )
+                elif has_demeaning:
+                    explanation_parts.append(
+                        "This conversation contains demeaning language and put-downs designed to hurt and belittle."
+                    )
+                elif has_severe:
+                    explanation_parts.append(
+                        "This conversation contains severe threats or extreme insults that are clearly abusive."
+                    )
+                else:
+                    explanation_parts.append(
+                        "This conversation contains mean comments and personal attacks."
                     )
             elif top_category == "manipulation" and top_score >= 0.6:
                 # Check what manipulation patterns were actually detected
@@ -337,12 +394,21 @@ class ExplanationGenerator:
         # Add risk level context with appropriate severity
         if risk_level == RiskLevel.RED:
             explanation_parts.append(
-                "\n\n⚠️ This is a high-risk situation requiring immediate attention."
+                "\n\n⚠️ This is a high-risk situation requiring immediate attention. "
+                "Consider getting help from a trusted adult or support service."
             )
         elif risk_level == RiskLevel.YELLOW:
-            explanation_parts.append(
-                "\n\n⚠️ Moderate concern: pay attention to how this conversation makes you feel."
-            )
+            # Check if multiple strong patterns are present (even if overall score is YELLOW)
+            strong_patterns = sum(1 for _, score in detected_categories if score >= 0.75)
+            if strong_patterns >= 2:
+                explanation_parts.append(
+                    "\n\n⚠️ Multiple concerning patterns detected. Pay close attention to how this conversation makes you feel. "
+                    "Consider setting clear boundaries or seeking support."
+                )
+            else:
+                explanation_parts.append(
+                    "\n\n⚠️ Moderate concern: pay attention to how this conversation makes you feel."
+                )
 
         return " ".join(explanation_parts)
 
@@ -530,7 +596,31 @@ class ExplanationGenerator:
                     behavior_parts.append("attempts to shift blame or induce guilt")
             
             elif category == "bullying":
-                behavior_parts.append("mean comments or personal attacks")
+                # Check for specific bullying patterns
+                has_victim_blaming = any(
+                    "victim-blaming" in m.pattern.description.lower() or
+                    "victim" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_demeaning = any(
+                    "demeaning" in m.pattern.description.lower() or
+                    "put-down" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_severe = any(
+                    "severe" in m.pattern.description.lower() or
+                    m.confidence >= 0.9
+                    for m in category_matches
+                )
+                
+                if has_victim_blaming:
+                    behavior_parts.append("victim-blaming and dismissive language")
+                elif has_demeaning:
+                    behavior_parts.append("demeaning language and put-downs")
+                elif has_severe:
+                    behavior_parts.append("severe threats or extreme insults")
+                else:
+                    behavior_parts.append("mean comments or personal attacks")
             
             elif category == "secrecy":
                 # Analyze secrecy patterns - check what was actually detected
