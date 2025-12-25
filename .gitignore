@@ -35,12 +35,8 @@ ENV/
 *~
 
 # Models (large files, should be downloaded separately)
-models/*.onnx
-models/*.bin
-models/*.pt
-models/*.pth
-models/*.safetensors
-models/*.json
+# Ignore entire models directory except .gitkeep
+models/*
 !models/.gitkeep
 
 # OS
