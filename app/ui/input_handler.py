@@ -23,6 +23,8 @@ def load_demo_chats(demo_dir: Path) -> dict:
     # Expected demo chat files
     demo_files = {
         "safe_chat.txt": "Safe Chat Example",
+        "professional_stress.txt": "Professional Conversation (Workplace)",
+        "mild_teasing.txt": "Mild Teasing Example",
         "bullying_example.txt": "Bullying Example",
         "manipulation_example.txt": "Manipulation Example",
         "grooming_example.txt": "Grooming Example",

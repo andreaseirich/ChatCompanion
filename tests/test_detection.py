@@ -80,6 +80,43 @@ def test_grooming_high_risk():
     assert result.overall_score >= 0.8
 
 
+def test_professional_conversation_low_risk():
+    """Test that professional/workplace conversations get appropriate guidance."""
+    engine = DetectionEngine(use_ml=False)
+    text = "Alex: Hey Sam, I need to talk about the bug fix. Sam: Sure, what's the issue? Alex: The code broke production. Sam: I'm so sorry! I'll fix it immediately."
+    result = engine.analyze(text)
+    
+    # Should be GREEN or low YELLOW (professional stress, not abuse)
+    assert result.risk_level in [RiskLevel.GREEN, RiskLevel.YELLOW]
+    assert result.overall_score < 0.8
+    
+    # Guidance should NOT mention "trusted adult" for professional context
+    assert "trusted adult" not in result.explanation.lower() or result.risk_level == RiskLevel.RED
+    # Advice should be context-appropriate
+    advice_text = " ".join(result.advice).lower()
+    if result.risk_level != RiskLevel.RED:
+        assert "trusted adult" not in advice_text
+
+
+def test_guidance_by_risk_level():
+    """Test that guidance messages match risk levels appropriately."""
+    engine = DetectionEngine(use_ml=False)
+    
+    # Low risk - should get neutral guidance
+    low_risk_text = "Hey! How was your day? Want to study together?"
+    low_result = engine.analyze(low_risk_text)
+    assert low_result.risk_level == RiskLevel.GREEN
+    assert "trusted adult" not in " ".join(low_result.advice).lower()
+    
+    # High risk - should get child-safety guidance
+    high_risk_text = "You're so stupid. Nobody likes you. Kill yourself."
+    high_result = engine.analyze(high_risk_text)
+    assert high_result.risk_level == RiskLevel.RED
+    # RED should mention trusted adult
+    advice_text = " ".join(high_result.advice).lower()
+    assert "trusted adult" in advice_text or "trusted adult" in high_result.explanation.lower()
+
+
 def test_explanation_generation():
     """Test that explanations are generated."""
     engine = DetectionEngine(use_ml=False)

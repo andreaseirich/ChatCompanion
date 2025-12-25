@@ -21,8 +21,7 @@ from app.ui.components import (
     render_explanation,
     render_help_section,
     render_traffic_light,
-    render_uneasy_button,
-    render_uneasy_help_panel,
+    render_uneasy_button_and_help,
 )
 from app.ui.input_handler import load_demo_chats
 
@@ -123,11 +122,9 @@ def main():
                 # Advice
                 render_advice(result.advice)
 
-                # "This makes me uneasy" button
+                # Additional help button (toggleable)
                 st.divider()
-                uneasy_clicked = render_uneasy_button()
-                if uneasy_clicked:
-                    render_uneasy_help_panel()
+                render_uneasy_button_and_help()
 
                 # Help section
                 render_help_section()

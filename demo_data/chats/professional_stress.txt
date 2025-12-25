@@ -1,0 +1,9 @@
+Alex: Hey Sam, I need to talk about the bug fix you submitted yesterday.
+Sam: Sure, what's the issue?
+Alex: The code broke production. This is really serious.
+Sam: I'm so sorry! I tested it locally and it worked fine.
+Alex: That's not good enough. We need to be more careful.
+Sam: You're absolutely right. I should have tested more thoroughly. I'll fix it immediately.
+Alex: Thanks. Let's make sure this doesn't happen again.
+Sam: Agreed. I'll add more test cases and review the code more carefully.
+

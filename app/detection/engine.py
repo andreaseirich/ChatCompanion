@@ -147,13 +147,13 @@ class DetectionEngine:
         # Determine risk level
         risk_level = self._determine_risk_level(overall_score)
 
-        # Generate explanation
+        # Generate explanation (with overall_score for context)
         explanation = self.explainer.generate_explanation(
-            risk_level, category_scores, matches
+            risk_level, category_scores, matches, overall_score
         )
 
-        # Get advice
-        advice = self.explainer.get_help_advice()
+        # Get context-appropriate advice based on risk level
+        advice = self.explainer.get_help_advice(risk_level, overall_score)
 
         return DetectionResult(
             risk_level=risk_level,

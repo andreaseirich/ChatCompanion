@@ -43,11 +43,21 @@ class ExplanationGenerator:
         ),
     }
 
-    # Advice messages - concise, non-repetitive, supportive
-    ADVICE_MESSAGES = [
-        "You have the right to feel safe and respected.",
-        "It's okay to say no and set boundaries.",
-        "Talk to a trusted adult if something doesn't feel right.",
+    # Advice messages - context-appropriate based on risk level
+    # These are base messages, will be filtered/selected by risk level
+    ADVICE_MESSAGES_GREEN = [
+        "This conversation looks mostly okay.",
+        "There might be some stress or disagreement, but overall it does not show strong signs of bullying or manipulation.",
+    ]
+    
+    ADVICE_MESSAGES_YELLOW = [
+        "There are some tense or uncomfortable parts in this conversation.",
+        "It can help to set clear boundaries and talk honestly about how you feel.",
+    ]
+    
+    ADVICE_MESSAGES_RED = [
+        "This conversation shows serious warning signs.",
+        "If you feel unsafe or pressured, talk to a trusted adult (parent, teacher, counselor or another person you trust) as soon as possible.",
     ]
 
     def generate_explanation(
@@ -55,22 +65,26 @@ class ExplanationGenerator:
         risk_level: RiskLevel,
         category_scores: Dict[str, float],
         matches: Dict[str, List[PatternMatch]],
+        overall_score: float = 0.0,
     ) -> str:
         """
-        Generate child-friendly explanation for detected risks.
+        Generate context-appropriate explanation for detected risks.
 
         Args:
             risk_level: Overall risk level (green/yellow/red)
             category_scores: Scores for each risk category
             matches: Pattern matches by category
+            overall_score: Overall risk score (0.0 - 1.0)
 
         Returns:
-            Child-friendly explanation text
+            Context-appropriate explanation text
         """
-        if risk_level == RiskLevel.GREEN:
+        # Context-appropriate guidance based on risk level
+        if risk_level == RiskLevel.GREEN or overall_score < 0.3:
+            # Neutral, context-agnostic message for low-risk conversations
             return (
-                "This conversation looks okay. Remember to always trust your feelings "
-                "and talk to a trusted adult if something doesn't feel right."
+                "This conversation looks mostly okay. There might be some stress or disagreement, "
+                "but overall it does not show strong signs of bullying or manipulation."
             )
 
         # Find the highest-risk categories
@@ -81,11 +95,20 @@ class ExplanationGenerator:
 
         explanation_parts = []
 
-        # Add category-specific explanation
+        # Add category-specific explanation (only for YELLOW/RED)
         if top_category and top_category in self.EXPLANATIONS:
-            explanation_parts.append(self.EXPLANATIONS[top_category])
+            # Adjust category explanations to be less child-focused for YELLOW
+            if risk_level == RiskLevel.YELLOW:
+                # Use milder, more general language
+                category_explanation = self.EXPLANATIONS[top_category]
+                # Remove "trusted adult" references for YELLOW
+                category_explanation = category_explanation.replace("trusted adult", "someone you trust")
+                explanation_parts.append(category_explanation)
+            else:
+                # RED: keep original child-focused explanation
+                explanation_parts.append(self.EXPLANATIONS[top_category])
 
-        # Add risk level context
+        # Add risk level context with appropriate severity
         if risk_level == RiskLevel.RED:
             explanation_parts.append(
                 "\n\n⚠️ This is a high-risk situation. Please talk to a trusted adult "
@@ -131,12 +154,22 @@ class ExplanationGenerator:
             return ", ".join(evidence_items[:3])  # Limit to 3 examples
         return ""
 
-    def get_help_advice(self) -> List[str]:
+    def get_help_advice(self, risk_level: RiskLevel, overall_score: float = 0.0) -> List[str]:
         """
-        Get list of help advice messages.
+        Get context-appropriate help advice messages based on risk level.
+
+        Args:
+            risk_level: Overall risk level (green/yellow/red)
+            overall_score: Overall risk score (0.0 - 1.0)
 
         Returns:
-            List of advice strings
+            List of context-appropriate advice strings
         """
-        return self.ADVICE_MESSAGES.copy()
+        # Use risk-level appropriate messages
+        if risk_level == RiskLevel.RED or overall_score >= 0.8:
+            return self.ADVICE_MESSAGES_RED.copy()
+        elif risk_level == RiskLevel.YELLOW or overall_score >= 0.3:
+            return self.ADVICE_MESSAGES_YELLOW.copy()
+        else:
+            return self.ADVICE_MESSAGES_GREEN.copy()
 
