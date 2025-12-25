@@ -122,6 +122,8 @@ class RuleEngine:
             r"(?i)\b(no pressure|that's okay|take your time|whenever you can|no rush|no hurry)\b",
             r"(?i)\b(it's (fine|okay|alright) (if|that) you (can't|don't|won't))\b",
             r"(?i)\b(no worries|don't worry|it's fine)\b",
+            r"(?i)\b(don't rush|only if you have time|whenever you're ready)\b",
+            r"(?i)\b(no need to (hurry|rush|worry)|there's no rush)\b",
         ]
         
         # Check if suppression phrases are present
@@ -143,9 +145,11 @@ class RuleEngine:
         
         # Apply suppression: remove pressure matches if suppression present and no contradiction
         if has_suppression and not has_contradiction and "pressure" in matches_by_category:
-            # Suppress pressure detection
+            # Suppress pressure detection - remove matches
             matches_by_category["pressure"] = []
 
+        # Recalculate category scores AFTER suppression
+        # This ensures suppressed categories have score 0.0
         category_scores = {}
         for category, matches in matches_by_category.items():
             category_scores[category] = self.get_category_score(matches)

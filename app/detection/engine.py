@@ -152,8 +152,18 @@ class DetectionEngine:
         # Calculate overall risk score
         overall_score = self.aggregator.get_overall_risk_score(category_scores)
 
+        # Hard rule for GREEN: if all category scores < 0.30 and zero pattern matches → force GREEN
+        # This ensures healthy conversations with "no pressure" phrases are correctly classified
+        has_any_matches = bool(matches) and any(len(m) > 0 for m in matches.values())
+        all_scores_below_threshold = all(score < 0.30 for score in category_scores.values()) if category_scores else True
+        
         # Determine risk level
-        risk_level = self._determine_risk_level(overall_score)
+        if all_scores_below_threshold and not has_any_matches:
+            # Force GREEN: no matches and all scores below threshold
+            risk_level = RiskLevel.GREEN
+            overall_score = 0.0  # Reset to 0.0 for truly safe conversations
+        else:
+            risk_level = self._determine_risk_level(overall_score)
 
         # Generate explanation (with overall_score for context)
         explanation = self.explainer.generate_explanation(

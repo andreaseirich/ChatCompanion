@@ -54,7 +54,7 @@ class ExplanationGenerator:
     ]
     
     ADVICE_MESSAGES_RED = [
-        "Serious warning signs detected: bullying, manipulation, or grooming patterns.",
+        # First message will be dynamically generated based on actual detected categories
         "If you feel unsafe, talk to a trusted person or support service immediately.",
     ]
 
@@ -93,6 +93,19 @@ class ExplanationGenerator:
         # - no secrecy or isolation demands
         # - explicit "no pressure" phrases suppress pressure detection
         
+        # Only generate explanation if there are actual matches OR meaningful scores
+        # If no matches and no meaningful scores, it's truly GREEN
+        if (risk_level == RiskLevel.GREEN or overall_score < 0.3) and not has_meaningful_scores and not has_any_matches:
+            explanation_parts.append(
+                "Analysis checked for patterns of bullying, manipulation, pressure, secrecy demands, "
+                "guilt-shifting, and grooming indicators."
+            )
+            explanation_parts.append(
+                "No warning signs detected in this conversation."
+            )
+            return " ".join(explanation_parts)
+        
+        # If GREEN but has matches (weak signals), explain differently
         if (risk_level == RiskLevel.GREEN or overall_score < 0.3) and not has_meaningful_scores:
             explanation_parts.append(
                 "Analysis checked for patterns of bullying, manipulation, pressure, secrecy demands, "
@@ -114,6 +127,20 @@ class ExplanationGenerator:
                         explanation_parts.append(
                             f"Some mild patterns were noted but are not concerning: {evidence}"
                         )
+            return " ".join(explanation_parts)
+        
+        # Only proceed with explanation if there are matches OR meaningful scores
+        # Do not generate warnings without evidence
+        if not has_any_matches and not has_meaningful_scores:
+            # No matches and no meaningful scores - should not happen if we got here
+            # but handle gracefully
+            explanation_parts.append(
+                "Analysis checked for patterns of bullying, manipulation, pressure, secrecy demands, "
+                "guilt-shifting, and grooming indicators."
+            )
+            explanation_parts.append(
+                "No warning signs detected in this conversation."
+            )
             return " ".join(explanation_parts)
         
         # If we have matches but still GREEN, it means weak signals - be more specific
@@ -224,6 +251,12 @@ class ExplanationGenerator:
                             f"Analysis detected patterns of {primary}."
                         )
 
+        # Check for guilt-shifting even if it's not the top category
+        # Mention it if score > 0.20 OR patterns detected
+        guilt_shifting_score = category_scores.get("guilt_shifting", 0.0)
+        guilt_matches = matches.get("guilt_shifting", [])
+        has_guilt_shifting = guilt_shifting_score > 0.20 or len(guilt_matches) > 0
+        
         # Add behavioral context explanation (focus on conversation dynamics)
         # Instead of generic category explanations, describe what's happening
         if detected_categories:
@@ -418,11 +451,85 @@ class ExplanationGenerator:
                     explanation_parts.append(
                         "This person is using emotional pressure to control your behavior."
                     )
-            elif top_category == "guilt_shifting" and top_score >= 0.6:
-                explanation_parts.append(
-                    "This conversation includes attempts to make you feel responsible for the other "
-                    "person's actions or emotions."
+            # Check for guilt-shifting even if it's not the top category
+            # Mention it if score > 0.20 OR patterns detected
+            guilt_shifting_score = category_scores.get("guilt_shifting", 0.0)
+            guilt_matches = matches.get("guilt_shifting", [])
+            has_guilt_shifting = guilt_shifting_score > 0.20 or len(guilt_matches) > 0
+            
+            if top_category == "guilt_shifting" and top_score >= 0.5:
+                # Check what guilt-shifting patterns were actually detected
+                # Lower threshold to 0.5 to catch more guilt-shifting cases
+                has_response_time = any(
+                    "response time questioning" in m.pattern.description.lower()
+                    for m in guilt_matches
                 )
+                has_conditional_care = any(
+                    "conditional care" in m.pattern.description.lower()
+                    for m in guilt_matches
+                )
+                has_emotional_blame = any(
+                    "emotional blame" in m.pattern.description.lower()
+                    for m in guilt_matches
+                )
+                has_effort_comparison = any(
+                    "effort comparison" in m.pattern.description.lower()
+                    for m in guilt_matches
+                )
+                has_direct_guilt = any(
+                    "guilt induction" in m.pattern.description.lower() or
+                    "direct guilt" in m.pattern.description.lower()
+                    for m in guilt_matches
+                )
+                
+                if has_response_time:
+                    explanation_parts.append(
+                        "This conversation includes guilt-shifting through questioning your response time or attention "
+                        "(e.g., 'If you cared, you'd have answered faster')."
+                    )
+                elif has_conditional_care:
+                    explanation_parts.append(
+                        "This conversation includes guilt-shifting through conditional statements about care "
+                        "(e.g., 'If you cared about me, you would...')."
+                    )
+                elif has_emotional_blame:
+                    explanation_parts.append(
+                        "This conversation includes guilt-shifting through blaming you for the other person's emotions "
+                        "(e.g., 'You make me feel bad because you didn't...')."
+                    )
+                elif has_effort_comparison:
+                    explanation_parts.append(
+                        "This conversation includes guilt-shifting through comparing efforts "
+                        "(e.g., 'I'm the only one trying')."
+                    )
+                elif has_direct_guilt:
+                    explanation_parts.append(
+                        "This conversation includes direct attempts to make you feel guilty "
+                        "(e.g., 'Maybe you should feel bad')."
+                    )
+                else:
+                    explanation_parts.append(
+                        "This conversation includes attempts to make you feel responsible for the other "
+                        "person's actions or emotions."
+                    )
+            # If guilt-shifting is present but not the top category, mention it explicitly
+            elif has_guilt_shifting and top_category != "guilt_shifting":
+                # Guilt-shifting detected but not primary - mention it explicitly
+                if guilt_matches:
+                    has_conditional = any(
+                        "conditional care" in m.pattern.description.lower() or
+                        "response time questioning" in m.pattern.description.lower()
+                        for m in guilt_matches
+                    )
+                    if has_conditional:
+                        explanation_parts.append(
+                            "This conversation includes guilt-inducing conditional statements "
+                            "(e.g., 'if you cared...') that were detected."
+                        )
+                    else:
+                        explanation_parts.append(
+                            "This conversation includes guilt-shifting patterns that were detected."
+                        )
             elif top_category == "secrecy" and top_score >= 0.6:
                 # Check what secrecy patterns were detected
                 secrecy_matches = matches.get("secrecy", [])
@@ -692,14 +799,42 @@ class ExplanationGenerator:
                 )
                 has_effort_questioning = any(
                     "effort questioning" in m.pattern.description.lower() or
-                    "don't care" in m.pattern.description.lower()
+                    "don't care" in m.pattern.description.lower() or
+                    "effort comparison" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_response_time_questioning = any(
+                    "response time questioning" in m.pattern.description.lower() or
+                    ("cared" in m.pattern.description.lower() and "answered" in m.pattern.description.lower())
+                    for m in category_matches
+                )
+                has_conditional_care = any(
+                    "conditional care" in m.pattern.description.lower()
+                    for m in category_matches
+                )
+                has_emotional_blame = any(
+                    "emotional blame" in m.pattern.description.lower() or
+                    ("make me feel" in m.pattern.description.lower() and "because" in m.pattern.description.lower())
+                    for m in category_matches
+                )
+                has_direct_guilt = any(
+                    "guilt induction" in m.pattern.description.lower() or
+                    "direct guilt" in m.pattern.description.lower()
                     for m in category_matches
                 )
                 
                 if has_importance_questioning:
                     behavior_parts.append("guilt-shifting through questioning your importance or care")
+                elif has_response_time_questioning:
+                    behavior_parts.append("guilt-shifting through questioning your response time or attention")
+                elif has_conditional_care:
+                    behavior_parts.append("guilt-shifting through conditional statements about care")
                 elif has_effort_questioning:
                     behavior_parts.append("guilt-shifting through questioning your effort or commitment")
+                elif has_emotional_blame:
+                    behavior_parts.append("guilt-shifting through blaming you for their emotions")
+                elif has_direct_guilt:
+                    behavior_parts.append("direct attempts to make you feel guilty")
                 elif match_count >= 2:
                     behavior_parts.append("repeated guilt induction and blame-shifting")
                 else:
@@ -782,20 +917,88 @@ class ExplanationGenerator:
         
         return ""
 
-    def get_help_advice(self, risk_level: RiskLevel, overall_score: float = 0.0) -> List[str]:
+    def get_help_advice(
+        self, 
+        risk_level: RiskLevel, 
+        overall_score: float = 0.0,
+        category_scores: Dict[str, float] = None,
+        matches: Dict[str, List] = None
+    ) -> List[str]:
         """
         Get context-appropriate help advice messages based on risk level.
 
         Args:
             risk_level: Overall risk level (green/yellow/red)
             overall_score: Overall risk score (0.0 - 1.0)
+            category_scores: Category scores for RED-specific messaging
+            matches: Pattern matches for RED-specific messaging
 
         Returns:
             List of context-appropriate advice strings
         """
         # Use risk-level appropriate messages
         if risk_level == RiskLevel.RED or overall_score >= 0.8:
-            return self.ADVICE_MESSAGES_RED.copy()
+            # For RED, generate dynamic message based on actual detected categories
+            if category_scores and matches:
+                # Identify dominant categories (score >= 0.6)
+                dominant_categories = [
+                    cat for cat, score in category_scores.items() 
+                    if score >= 0.6
+                ]
+                
+                # Map to readable names
+                category_names = {
+                    "coercive control": "coercive control",
+                    "manipulation": "coercive control" if "manipulation" in dominant_categories and category_scores.get("manipulation", 0) >= 0.7 else "manipulation",
+                    "secrecy": "secrecy demands",
+                    "pressure": "pressure" if "pressure" in dominant_categories else None,
+                    "bullying": "bullying",
+                    "grooming": "grooming indicators",
+                    "guilt_shifting": "guilt-shifting",
+                }
+                
+                # Check for specific high-risk patterns
+                has_secrecy = "secrecy" in dominant_categories or category_scores.get("secrecy", 0) >= 0.6
+                has_isolation = any(
+                    "isolation" in m.pattern.description.lower() or
+                    "discouraging" in m.pattern.description.lower()
+                    for cat_matches in matches.values()
+                    for m in cat_matches
+                ) if matches else False
+                has_proof_requests = any(
+                    "proof" in m.pattern.description.lower() or
+                    "delete" in m.pattern.description.lower()
+                    for cat_matches in matches.values()
+                    for m in cat_matches
+                ) if matches else False
+                has_coercive = "manipulation" in dominant_categories and category_scores.get("manipulation", 0) >= 0.7
+                
+                # Build message based on actual patterns
+                detected_terms = []
+                if has_coercive:
+                    detected_terms.append("coercive control")
+                if has_secrecy:
+                    detected_terms.append("secrecy demands")
+                if has_isolation:
+                    detected_terms.append("isolation from support")
+                if has_proof_requests:
+                    detected_terms.append("proof-of-compliance requests")
+                
+                # Only add bullying/grooming if they're actually dominant
+                if "bullying" in dominant_categories:
+                    detected_terms.append("bullying")
+                if "grooming" in dominant_categories and category_scores.get("grooming", 0) >= 0.6:
+                    detected_terms.append("grooming indicators")
+                
+                if detected_terms:
+                    message = f"Serious warning signs detected: {', '.join(detected_terms)}."
+                else:
+                    # Fallback if no specific patterns identified
+                    message = "Serious warning signs detected: manipulation or pressure patterns."
+                
+                return [message] + self.ADVICE_MESSAGES_RED.copy()
+            else:
+                return self.ADVICE_MESSAGES_RED.copy()
         elif risk_level == RiskLevel.YELLOW or overall_score >= 0.3:
             return self.ADVICE_MESSAGES_YELLOW.copy()
         else:

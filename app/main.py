@@ -121,11 +121,11 @@ def main():
                 # Advice
                 render_advice(result.advice)
 
-                # Help section
-                render_help_section()
+                # Help section (only for RED, softer for YELLOW)
+                render_help_section(result.risk_level)
 
                 # Debug info (collapsible, hidden by default - only for developers)
-                with st.expander("🔧 Developer Debug Info (click to expand)", expanded=False):
+                with st.expander("🔧 Technical Details (for developers)", expanded=False):
                     st.write(f"**Risk Level:** {result.risk_level.value}")
                     st.write(f"**Overall Score:** {result.overall_score:.2f}")
                     st.write(f"**ML Available:** {result.ml_available}")
@@ -136,7 +136,13 @@ def main():
                         st.write("**Pattern Matches:**")
                         for category, category_matches in result.matches.items():
                             if category_matches:
-                                st.write(f"  - {category}: {len(category_matches)} matches")
+                                # Count unique patterns and total instances
+                                unique_patterns = len(set(m.pattern.pattern for m in category_matches))
+                                total_instances = len(category_matches)
+                                if unique_patterns == 1:
+                                    st.write(f"  - {category}: {total_instances} instance(s) of 1 pattern")
+                                else:
+                                    st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} patterns")
 
             except Exception as e:
                 logger.error(f"Error during analysis: {e}", exc_info=True)

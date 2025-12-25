@@ -196,6 +196,21 @@ rules:
       - pattern: "(?i)\\b(you (don't|do not) (care|try|make an effort)|you're not (trying|making an effort))\\b"
         confidence: 0.75
         description: "Guilt-shifting through effort questioning"
+      - pattern: "(?i)\\b(if you (cared|care), you (would|'d) (have|do) (answered|responded|replied) (faster|sooner|right away|immediately))\\b"
+        confidence: 0.85
+        description: "Guilt-shifting through response time questioning"
+      - pattern: "(?i)\\b(if you (cared|care) (about|for) me, you (would|'d))\\b"
+        confidence: 0.85
+        description: "Guilt-shifting through conditional care"
+      - pattern: "(?i)\\b(i'm the only one (trying|who (tries|tried|is trying))|i'm the only one (who|that))\\b"
+        confidence: 0.8
+        description: "Guilt-shifting through effort comparison"
+      - pattern: "(?i)\\b(you make me feel (bad|terrible|awful|hurt|sad|disappointed) (because|when) you (didn't|don't|won't))\\b"
+        confidence: 0.85
+        description: "Guilt-shifting through emotional blame"
+      - pattern: "(?i)\\b(maybe you should feel (bad|guilty|sorry)|you should feel (bad|guilty|sorry))\\b"
+        confidence: 0.8
+        description: "Direct guilt induction"
       - pattern: "(?i)\\b(you're (the|just) (problem|issue|reason)|you (are|'re) (the|just) problem)\\b"
         confidence: 0.85
         description: "Victim-blaming and responsibility shifting"

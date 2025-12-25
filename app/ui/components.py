@@ -104,19 +104,26 @@ def render_advice(advice: list) -> None:
         st.markdown(f"• {item}")
 
 
-def render_help_section() -> None:
+def render_help_section(risk_level: RiskLevel) -> None:
     """Render help section with resources (only for high-risk scenarios)."""
-    # Only show this section for high-risk situations
-    # For low/moderate risk, the main advice section is sufficient
-    with st.expander("Need Immediate Help?"):
-        st.markdown(
-            """
-            **If you're feeling unsafe or need immediate support:**
-            - Reach out to someone you trust: a parent, teacher, counselor, or another trusted person
-            - Contact appropriate support services in your area
-            - Trust your instincts - if something feels wrong, it probably is
-            
-            **Important:** This tool helps recognize patterns but is not a replacement for professional support or trusted guidance.
-            """
+    # Only show this section for RED/high-risk situations
+    # For YELLOW, use softer phrasing
+    # For GREEN, don't show at all
+    
+    if risk_level == RiskLevel.RED:
+        with st.expander("Need Immediate Help?"):
+            st.markdown(
+                """
+                **If you're feeling unsafe or need immediate support:**
+                - Reach out to someone you trust: a parent, teacher, counselor, or another trusted person
+                - Contact appropriate support services in your area
+                - Trust your instincts - if something feels wrong, it probably is
+                
+                **Important:** This tool helps recognize patterns but is not a replacement for professional support or trusted guidance.
+                """
+            )
+    elif risk_level == RiskLevel.YELLOW:
+        st.info(
+            "If this pattern continues or you feel overwhelmed, consider talking to someone you trust."
         )
 
