@@ -211,16 +211,6 @@ The application is designed to run completely offline after initial setup. If ML
 
 See [ETHICS.md](docs/ETHICS.md) for detailed privacy and ethics information.
 
-## Developer Debug Information
-
-For developers and testers, the system provides debug information:
-
-- **Pattern Match Counts**: Format `"{category}: {total_instances} instance(s) across {unique_patterns} pattern(s)"`
-  - `total_instances`: Total number of pattern matches found (each occurrence counts)
-  - `unique_patterns`: Number of distinct pattern types that matched
-- **GREEN Debug Note**: When risk level is GREEN but category scores are non-zero, a debug note appears:
-  - "Note: GREEN suppresses risk. Category scores may show raw signals even when no patterns match."
-  - This clarifies why developers might see non-zero scores in GREEN state
 
 ## Limitations
 

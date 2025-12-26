@@ -56,6 +56,9 @@ Thumbs.db
 # Project-specific
 master_prompt.txt
 
+# Local development files (internal prompts, notes, etc.)
+.local/
+
 # GitHub (ignore everything except workflows)
 .github/*
 !.github/workflows/
