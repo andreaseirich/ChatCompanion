@@ -109,6 +109,24 @@ def inject_theme_css():
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
+        /* Primary button styling - neutral brand color (not red/danger) */
+        .stButton > button[kind="primary"],
+        .stButton > button[type="primary"] {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .stButton > button[kind="primary"]:hover,
+        .stButton > button[type="primary"]:hover {
+            background-color: #1557b0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+        
         /* Text area styling */
         .stTextArea > div > div > textarea {
             border-radius: 8px;
@@ -203,13 +221,31 @@ def inject_theme_css():
         
         .status-dot-container {
             text-align: center;
-            padding: 12px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            margin-bottom: 8px;
         }
         
         .status-dot-label {
             margin-top: 8px;
             font-size: 0.875rem;
             font-weight: 500;
+        }
+        
+        /* Compact spacing for Analysis Results section */
+        h2 + .status-dot-container {
+            margin-top: 8px;
+        }
+        
+        /* Reduce spacing after status dots */
+        .status-dot-container + hr {
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+        
+        /* Tighten spacing around result headline */
+        .status-dot-container ~ h3:first-of-type {
+            margin-top: 12px;
         }
         
         /* Modern container styling - flat design */
@@ -277,6 +313,49 @@ def inject_theme_css():
         .behavior-badge.grooming {
             background-color: #fff8e1;
             color: #f57f17;
+        }
+        
+        /* Hide anchor icons next to headings (judge-friendly polish) */
+        a[aria-label="Link to this section"] { 
+            display: none !important; 
+        }
+        a.header-anchor { 
+            display: none !important; 
+        }
+        a.anchor-link { 
+            display: none !important; 
+        }
+        .stMarkdown a[href^="#"][aria-label] { 
+            display: none !important; 
+        }
+        h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { 
+            display: none !important; 
+        }
+        /* Preserve external links - only hide anchor links */
+        .stMarkdown a[href^="http://"],
+        .stMarkdown a[href^="https://"] {
+            display: inline !important;
+        }
+        
+        /* Next Steps panel styling - clean panel feel */
+        /* Style containers that follow dividers and contain buttons/expanders (Next Steps section) */
+        /* This targets the container wrapping "Recommended Next Steps" */
+        hr + .element-container:has(button),
+        hr ~ .element-container:has(button) {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Ensure dividers themselves don't get panel styling */
+        hr {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
         }
     </style>
     """
