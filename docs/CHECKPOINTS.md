@@ -24,6 +24,12 @@ This file tracks project progress, phases, and tasks.
 - [x] Documentation (README, ARCHITECTURE, ETHICS, CHANGELOG)
 - [x] Rules-only fallback mode implemented
 - [x] Privacy and offline operation verified
+- [x] Slang normalization layer for youth/online language (2025-12-26)
+  - Slang normalizer module with abbreviation mappings
+  - Integration into detection pipeline
+  - Enhanced friendly teasing heuristics with slang support
+  - Comprehensive slang handling tests
+  - Documentation updates (README, ARCHITECTURE, ETHICS, CHANGELOG)
 
 ### In Progress 🔄
 

@@ -61,6 +61,30 @@ ChatCompanion provides:
 - Guidance on talking to trusted adults
 - Reminders about healthy boundaries
 
+## Language Support
+
+ChatCompanion is designed for **English** as the primary language.
+
+### Slang Normalization
+
+The system includes a slang normalization layer to handle common English youth/online slang and abbreviations. This helps ensure that:
+
+- **Common abbreviations are understood**: "u" → "you", "ur" → "your", "idk" → "I don't know", "lol" → "laughing", "jk" → "just kidding"
+- **Friendly teasing in youth style is not falsely flagged**: Mutual banter with slang and emojis is recognized as friendly
+- **Hostile slang remains recognized**: Abbreviations like "stfu" → "shut up" are still detected as hostile
+
+**Examples of normalized slang:**
+- Pronouns: `u` → `you`, `ur` → `your`
+- Common phrases: `idk` → `I don't know`, `brb` → `be right back`, `ttyl` → `talk to you later`
+- Expressions: `lol`/`lmao` → `laughing`, `jk` → `just kidding`, `np` → `no problem`
+- Hostile slang: `stfu` → `shut up` (preserves hostility)
+
+**Important Notes:**
+- Slang normalization is **heuristic-based, not perfect**
+- The tool is **supportive, not decisive**—it helps identify patterns but doesn't replace human judgment
+- Some slang or irony may be ambiguous and could lead to false positives or negatives
+- The system stays careful and non-judgmental in its approach
+
 ## Technology Stack
 
 ### Core Technologies

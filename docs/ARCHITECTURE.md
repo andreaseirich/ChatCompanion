@@ -20,17 +20,27 @@ ChatCompanion follows a modular, layered architecture with strict separation of 
                 │                       │
                 ▼                       ▼
 ┌──────────────────────────┐  ┌──────────────────────────────┐
-│      Rules Engine         │  │      Model Inference         │
-│  (Pattern matching,       │  │  (NLP embeddings,            │
-│   heuristic detection)    │  │   risk classification)       │
-└──────────────────────────┘  └──────────────────────────────┘
-                │                       │
-                └───────────┬───────────┘
-                            ▼
+│   Slang Normalizer        │  │      Rules Engine            │
+│  (Normalizes abbreviations│  │  (Pattern matching,          │
+│   and slang before        │  │   heuristic detection)       │
+│   pattern matching)       │  │                               │
+└──────────────┬───────────┘  └──────────────────────────────┘
+               │                       │
+               └───────────┬───────────┘
+                           │
+                           ▼
+                ┌──────────────────────────────┐
+                │      Model Inference         │
+                │  (NLP embeddings,            │
+                │   risk classification)       │
+                └──────────────────────────────┘
+                           │
+                           ▼
                 ┌──────────────────────┐
                 │   Explainability     │
                 │   (Risk scoring,     │
                 │    evidence tracing) │
+                │   Uses raw text      │
                 └──────────────────────┘
 ```
 
@@ -56,15 +66,24 @@ ChatCompanion follows a modular, layered architecture with strict separation of 
 - **engine.py**: Main orchestrator that coordinates rules and ML
 - **aggregator.py**: Combines scores from multiple sources
 - **explainer.py**: Generates child-friendly explanations
+- **slang_normalizer.py**: Normalizes youth/online slang and abbreviations
 
 **Responsibilities:**
 - Orchestrate the analysis pipeline
+- Normalize slang and abbreviations before pattern matching
 - Coordinate rules engine and model inference
 - Aggregate risk scores from multiple sources
 - Generate final risk level (green/yellow/red)
-- Produce explainable evidence for each flag
+- Produce explainable evidence for each flag (using raw text)
 
 **Key Feature:** Works in "rules-only" mode if ML models are unavailable.
+
+**Slang Normalization:**
+- Normalizes common English youth/online slang (e.g., "u" → "you", "lol" → "laughing")
+- Preserves raw text for user-facing explanations
+- Light emoji tone detection (joking vs. annoyed markers)
+- Runs before rule-based pattern matching to ensure patterns match normalized text
+- Hostile slang remains hostile (e.g., "stfu" → "shut up" still detected as hostile)
 
 ### Rules Engine (`app/rules/`)
 

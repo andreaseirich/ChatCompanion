@@ -60,6 +60,37 @@ Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
 - Child-friendly, non-shaming language
 - Clear ethics statement and privacy guarantees
 
+## [Unreleased]
+
+### Added
+
+- Slang normalization layer for English youth/online slang and abbreviations
+- Support for common abbreviations (e.g., "u" → "you", "lol" → "laughing", "jk" → "just kidding")
+- Emoji tone detection (joking vs. annoyed markers)
+- Enhanced friendly teasing heuristics that recognize slang joking markers
+- Comprehensive slang handling tests
+- Language Support section in README
+- Updated architecture documentation with slang normalizer role
+
+### Changed
+
+- Detection pipeline now includes slang normalization step before pattern matching
+- Friendly teasing detection now uses normalized message with emoji tone markers
+- Explanations continue to use raw text for user-facing output
+
+### Technical Details
+
+- New module: `app/detection/slang_normalizer.py`
+- NormalizedMessage dataclass for tracking replacements and tone markers
+- Slang normalization runs before rule-based pattern matching
+- Hostile slang remains hostile (e.g., "stfu" → "shut up" still detected)
+
+### Limitations
+
+- Slang normalization is heuristic-based, not perfect
+- Some slang or irony may be ambiguous and could lead to false positives/negatives
+- System stays careful and non-judgmental in its approach
+
 ---
 
 [0.1.0]: https://github.com/yourusername/ChatCompanion/releases/tag/v0.1.0
