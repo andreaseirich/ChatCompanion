@@ -139,10 +139,8 @@ def main():
                                 # Count unique patterns and total instances
                                 unique_patterns = len(set(m.pattern.pattern for m in category_matches))
                                 total_instances = len(category_matches)
-                                if unique_patterns == 1:
-                                    st.write(f"  - {category}: {total_instances} instance(s) of 1 pattern")
-                                else:
-                                    st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} patterns")
+                                # Always show "across" format for consistency
+                                st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
 
             except Exception as e:
                 logger.error(f"Error during analysis: {e}", exc_info=True)
