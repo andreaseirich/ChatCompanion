@@ -2,6 +2,7 @@
 
 import streamlit as st
 
+from app.ui.text_presets import TextPresets
 from app.utils.constants import RiskLevel
 
 
@@ -81,15 +82,28 @@ def render_traffic_light(risk_level: RiskLevel) -> None:
             )
 
 
-def render_explanation(explanation: str) -> None:
+def render_explanation(explanation: str, risk_level: RiskLevel) -> None:
     """
-    Render child-friendly explanation.
+    Render child-friendly explanation with preset title and message.
 
     Args:
-        explanation: Explanation text
+        explanation: Detailed explanation text
+        risk_level: Risk level (GREEN, YELLOW, or RED) for preset title/message
     """
-    st.markdown("### What This Means")
-    st.info(explanation)
+    # Get preset title and message for the risk level
+    title = TextPresets.get_title(risk_level)
+    message = TextPresets.get_message(risk_level)
+    
+    # Display preset title as main heading
+    st.markdown(f"### {title}")
+    
+    # Display preset message
+    st.info(message)
+    
+    # Display detailed explanation if it differs from the preset message
+    if explanation and explanation.strip() != message.strip():
+        st.markdown("#### Details")
+        st.markdown(explanation)
 
 
 def render_advice(advice: list) -> None:

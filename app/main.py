@@ -116,7 +116,7 @@ def main():
                 st.divider()
 
                 # Explanation
-                render_explanation(result.explanation)
+                render_explanation(result.explanation, result.risk_level)
 
                 # Advice
                 render_advice(result.advice)
