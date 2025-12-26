@@ -171,6 +171,113 @@ def inject_theme_css():
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
+        
+        /* Status dots with pulse animation */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.95;
+            }
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin: 0 auto;
+            transition: opacity 0.3s ease;
+        }
+        
+        .status-dot.active {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .status-dot.inactive {
+            opacity: 0.2;
+        }
+        
+        .status-dot-container {
+            text-align: center;
+            padding: 12px;
+        }
+        
+        .status-dot-label {
+            margin-top: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        /* Modern container styling - flat design */
+        .main .block-container {
+            border-radius: 15px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .streamlit-expanderContent {
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: none;
+        }
+        
+        .streamlit-expanderHeader {
+            border-radius: 15px 15px 0 0;
+            border: none;
+        }
+        
+        .stAlert {
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: none;
+        }
+        
+        /* Behavior badges */
+        .behavior-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 4px;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .behavior-badge.pressure {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+        
+        .behavior-badge.secrecy {
+            background-color: #f3e5f5;
+            color: #6a1b9a;
+        }
+        
+        .behavior-badge.manipulation {
+            background-color: #e1f5fe;
+            color: #01579b;
+        }
+        
+        .behavior-badge.guilt_shifting {
+            background-color: #fce4ec;
+            color: #880e4f;
+        }
+        
+        .behavior-badge.bullying {
+            background-color: #ffebee;
+            color: #b71c1c;
+        }
+        
+        .behavior-badge.grooming {
+            background-color: #fff8e1;
+            color: #f57f17;
+        }
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)

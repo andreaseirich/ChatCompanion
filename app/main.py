@@ -11,7 +11,9 @@ project_root_str = str(project_root.resolve())
 if project_root_str not in sys.path:
     sys.path.insert(0, project_root_str)
 
+import hashlib
 import logging
+import time
 
 import streamlit as st
 
@@ -25,7 +27,9 @@ from app.ui.components import (
 )
 from app.ui.input_handler import load_demo_chats
 from app.ui.theme import inject_theme_css
+from app.utils.constants import RiskLevel
 from app.utils.dev_mode import is_dev_mode
+from app.utils.test_mode import is_test_mode
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -161,9 +165,23 @@ def main():
 
     # Process analysis
     if analyze_button and chat_text.strip():
-        with st.spinner("Analyzing conversation..."):
+        with st.spinner("Scanning for risky patterns..."):
             try:
+                # Add processing delay (bypassed in test mode)
+                if not is_test_mode():
+                    time.sleep(1.5)
+                
                 result = engine.analyze(chat_text)
+                
+                # Generate unique result ID to prevent duplicate balloons
+                result_id = hashlib.md5((chat_text + str(result.risk_level.value)).encode()).hexdigest()
+                balloons_key = f"balloons_shown_{result_id}"
+                
+                # Show balloons for GREEN results (once per unique result)
+                if result.risk_level == RiskLevel.GREEN:
+                    if balloons_key not in st.session_state:
+                        st.balloons()
+                        st.session_state[balloons_key] = True
 
                 st.divider()
 
@@ -188,15 +206,36 @@ def main():
                     # Help section (only for RED, rendered once)
                     render_help_section(result.risk_level)
                 
-                # Details accordion (for observed behaviors, if present)
+                # Observed behaviors as badges
+                if result.matches:
+                    render_behavior_badges(result.matches)
+                
+                # Recommended Next Steps
+                render_next_steps(result.risk_level)
+                
+                # Details accordion (for pattern counts, if present)
                 if result.matches:
                     with st.expander("📋 Details", expanded=False):
-                        st.markdown("**Observed behaviors:**")
+                        st.markdown("**Pattern counts:**")
+                        col_label, col_count, col_patterns = st.columns([2, 1, 1])
+                        with col_label:
+                            st.markdown("**Category**")
+                        with col_count:
+                            st.markdown("**Instances**")
+                        with col_patterns:
+                            st.markdown("**Patterns**")
+                        
                         for category, category_matches in result.matches.items():
                             if category_matches:
                                 unique_patterns = len(set(m.pattern.pattern for m in category_matches))
                                 total_instances = len(category_matches)
-                                st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
+                                col_label, col_count, col_patterns = st.columns([2, 1, 1])
+                                with col_label:
+                                    st.write(category)
+                                with col_count:
+                                    st.write(str(total_instances))
+                                with col_patterns:
+                                    st.write(str(unique_patterns))
 
                 # Developer Debug Info (only shown in dev mode)
                 if is_dev_mode():
