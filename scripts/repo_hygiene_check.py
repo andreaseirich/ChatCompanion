@@ -85,6 +85,7 @@ ALLOWLIST = {
     "CONTRIBUTING.md": ["private", "secret"],  # Contributing guidelines
     ".gitignore": ["local", "private"],  # Gitignore patterns
     "README.md": ["private"],  # Privacy discussion
+    "scripts/repo_hygiene_check.py": ["postgresql", "mysql", "mongodb"],  # Contains regex patterns for detection
 }
 
 # Maximum file size to scan for content (1MB)
