@@ -119,6 +119,12 @@ class ScoreAggregator:
                 combined = (max_score * 0.65) + (avg_score * 0.25) + 0.1  # Small boost
             return min(combined, 1.0)
         
-        # Single category: use the score directly (but threshold is 0.8 for RED)
+        # Single category: use the score directly
+        # But if it's guilt_shifting alone, cap it to prevent RED classification
+        # Guilt-shifting alone should be YELLOW, not RED (RED requires more severe patterns)
+        if num_categories == 1 and "guilt_shifting" in category_scores:
+            # Guilt-shifting alone should max out at YELLOW level (0.74)
+            return min(max_score, 0.74)
+        
         return max_score
 

@@ -107,18 +107,33 @@ class DetectionEngine:
         rules_scores = rules_result["category_scores"]
         matches = rules_result["matches"]
         
-        # Check for friendly teasing context and down-weight bullying if detected
+        # Check for friendly teasing context and down-weight scores if detected
         # This reduces false positives for mutual teasing between friends
-        if rules_scores.get("bullying", 0.0) > 0:
-            is_friendly_teasing = self._check_friendly_teasing_context(text, normalized_text)
-            if is_friendly_teasing:
-                # Down-weight bullying score (multiply by 0.4)
-                original_bullying_score = rules_scores["bullying"]
-                rules_scores["bullying"] = original_bullying_score * 0.4
+        is_friendly_teasing = self._check_friendly_teasing_context(text, normalized_text)
+        is_professional_context = self._check_professional_context(normalized_text)
+        
+        if is_friendly_teasing:
+            # Down-weight all risk categories when friendly teasing is detected
+            # This ensures friendly banter doesn't trigger warnings
+            for category in list(rules_scores.keys()):
+                original_score = rules_scores[category]
+                rules_scores[category] = original_score * 0.3  # More aggressive reduction
                 logger.debug(
-                    f"Friendly teasing detected: down-weighted bullying from {original_bullying_score:.2f} "
-                    f"to {rules_scores['bullying']:.2f}"
+                    f"Friendly teasing detected: down-weighted {category} from {original_score:.2f} "
+                    f"to {rules_scores[category]:.2f}"
                 )
+        
+        if is_professional_context:
+            # Down-weight pressure/manipulation in professional/workplace contexts
+            # Professional urgency ("I'll fix it immediately") is not manipulation
+            for category in ["pressure", "manipulation"]:
+                if category in rules_scores and rules_scores[category] > 0:
+                    original_score = rules_scores[category]
+                    rules_scores[category] = original_score * 0.4
+                    logger.debug(
+                        f"Professional context: down-weighted {category} from {original_score:.2f} "
+                        f"to {rules_scores[category]:.2f}"
+                    )
         
         # Debug logging for detection
         if rules_scores:
@@ -285,6 +300,52 @@ class DetectionEngine:
         )
         
         return is_friendly
+
+    def _check_professional_context(self, normalized_text: str) -> bool:
+        """
+        Check if text shows signs of professional/workplace context.
+        
+        Professional context indicators:
+        - Work-related terms (bug, fix, code, production, project, deadline)
+        - Professional apologies ("I'm so sorry", "I apologize")
+        - Professional urgency ("I'll fix it immediately", "I'll get it done")
+        - No personal attacks or manipulation
+        
+        Args:
+            normalized_text: Normalized text (for pattern matching)
+            
+        Returns:
+            True if professional context is detected, False otherwise
+        """
+        import re
+        
+        # Check for work-related terms
+        work_terms = [
+            r"\b(bug|fix|code|production|project|deadline|task|work|job|client|customer|team|meeting)\b",
+            r"\b(I'll fix|I'll get|I'll handle|I'll resolve|I'll address)\b",
+            r"\b(I'm so sorry|I apologize|my apologies|my mistake|my fault)\b",
+        ]
+        has_work_terms = any(
+            re.search(pattern, normalized_text, re.IGNORECASE)
+            for pattern in work_terms
+        )
+        
+        # Check for personal attacks (if present, it's not professional)
+        personal_attacks = [
+            r"\b(you're (so|really|such a) (stupid|idiot|pathetic|ugly|worthless))\b",
+            r"\b(kill yourself|kys|go die|hate you)\b",
+        ]
+        has_personal_attacks = any(
+            re.search(pattern, normalized_text, re.IGNORECASE)
+            for pattern in personal_attacks
+        )
+        
+        # Professional context if:
+        # - Has work terms
+        # - AND no personal attacks
+        is_professional = has_work_terms and not has_personal_attacks
+        
+        return is_professional
 
     def _determine_risk_level(self, score: float) -> RiskLevel:
         """

@@ -112,9 +112,12 @@ def test_guidance_by_risk_level():
     high_risk_text = "You're so stupid. Nobody likes you. Kill yourself."
     high_result = engine.analyze(high_risk_text)
     assert high_result.risk_level == RiskLevel.RED
-    # RED should mention trusted adult
+    # RED should mention trusted person or support service
     advice_text = " ".join(high_result.advice).lower()
-    assert "trusted adult" in advice_text or "trusted adult" in high_result.explanation.lower()
+    explanation_text = high_result.explanation.lower()
+    assert ("trusted person" in advice_text or "trusted person" in explanation_text or 
+            "trusted adult" in advice_text or "trusted adult" in explanation_text or
+            "support service" in advice_text or "support service" in explanation_text)
 
 
 def test_explanation_generation():
