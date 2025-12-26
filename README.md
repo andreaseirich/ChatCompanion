@@ -370,9 +370,9 @@ ChatCompanion/
 - **[ETHICS.md](docs/ETHICS.md)**: Ethics statement and privacy principles
 - **[CHANGELOG.md](docs/CHANGELOG.md)**: Version history and changes
 
-## Contributing
+## Setup
 
-We welcome contributions! Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for guidelines on:
+For setup instructions, see [`docs/INSTALL.md`](docs/INSTALL.md).
 - Code style and conventions
 - Testing requirements
 - Commit message format

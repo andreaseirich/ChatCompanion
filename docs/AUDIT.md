@@ -13,7 +13,7 @@ This repository contains:
 3. **Demo Data**: Synthetic example chats for reproducibility (`demo_data/`)
 4. **Setup Files**: Requirements, setup scripts, run scripts
 5. **Scripts**: Model download and build scripts
-6. **License & Contributing**: LICENSE, CONTRIBUTING.md
+6. **License**: LICENSE
 7. **CI/CD**: GitHub Actions workflows
 
 **Excluded**: Internal development artifacts (prompts, planning docs, private notes) are excluded via `.gitignore`.

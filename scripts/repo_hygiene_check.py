@@ -82,7 +82,6 @@ ALLOWLIST = {
     "docs/ARCHITECTURE.md": ["prompt"],  # May discuss "prompt engineering"
     "docs/ETHICS.md": ["private"],  # May discuss "privacy"
     "docs/SECURITY.md": ["private", "secret"],  # Security documentation
-    "CONTRIBUTING.md": ["private", "secret"],  # Contributing guidelines
     ".gitignore": ["local", "private"],  # Gitignore patterns
     "README.md": ["private"],  # Privacy discussion
     "scripts/repo_hygiene_check.py": ["postgresql", "mysql", "mongodb"],  # Contains regex patterns for detection
