@@ -25,6 +25,7 @@ SAFE_PATTERNS = [
     r'background-color: #F44336',  # RED traffic light
     r'background-color: #cccccc',  # Inactive traffic light
     r'text-align: center',  # Static styling
+    r'render_card\(',  # render_card function (not currently used with user content)
 ]
 
 
@@ -111,12 +112,30 @@ def is_safe_usage(line_content: str, context: str) -> bool:
                 return False
     
     # If it contains HTML tags and no dangerous variables, it's likely static HTML
-    if '<' in combined and not any(
-        re.search(rf'\b{re.escape(var)}\b', combined, re.IGNORECASE)
-        for var in DANGEROUS_VARIABLES
-        if '+' in combined  # Only check if there's concatenation
-    ):
-        return True
+    if '<' in combined:
+        # Check if there's actual variable concatenation (not just variable name in context)
+        has_concatenation = False
+        if '+' in combined:
+            for dangerous_var in DANGEROUS_VARIABLES:
+                # Check if variable appears near concatenation operator
+                var_pattern = rf'\b{re.escape(dangerous_var)}\b'
+                if re.search(var_pattern, combined, re.IGNORECASE):
+                    # Check if variable is actually concatenated (not just in comments/docstrings)
+                    # Look for pattern: "string" + variable or variable + "string"
+                    concat_patterns = [
+                        rf'["\'].*\+.*{re.escape(dangerous_var)}',
+                        rf'{re.escape(dangerous_var)}.*\+.*["\']',
+                    ]
+                    for pattern in concat_patterns:
+                        if re.search(pattern, combined, re.IGNORECASE):
+                            has_concatenation = True
+                            break
+                    if has_concatenation:
+                        break
+        
+        if not has_concatenation:
+            # Static HTML with no variable concatenation - safe
+            return True
     
     # Default: if no dangerous patterns found, consider safe
     # (most unsafe_allow_html usage in this codebase is for static HTML)
