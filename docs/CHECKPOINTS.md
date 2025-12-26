@@ -30,6 +30,14 @@ This file tracks project progress, phases, and tasks.
   - Enhanced friendly teasing heuristics with slang support
   - Comprehensive slang handling tests
   - Documentation updates (README, ARCHITECTURE, ETHICS, CHANGELOG)
+- [x] Post-test fixes for detection accuracy and messaging (2025-12-26)
+  - Context gating for "right now"/"now" pressure patterns
+  - GREEN messaging cleanup (removed "mild patterns" phrasing)
+  - YELLOW explanation calibration (threats only when present)
+  - Pattern match counting improvements
+  - UI rendering verification
+  - Comprehensive test suite for context gating and explanation accuracy
+  - Documentation updates (README, ARCHITECTURE, CHANGELOG, CHECKPOINTS)
 
 ### In Progress 🔄
 

@@ -81,6 +81,7 @@ The system includes a slang normalization layer to handle common English youth/o
 
 **Important Notes:**
 - Slang normalization is **heuristic-based, not perfect**
+- **Context-Aware Detection**: Neutral scheduling words like "right now" alone do not trigger warnings—the system analyzes context to distinguish between self-reports ("I'm busy right now") and demands ("Answer right now")
 - The tool is **supportive, not decisive**—it helps identify patterns but doesn't replace human judgment
 - Some slang or irony may be ambiguous and could lead to false positives or negatives
 - The system stays careful and non-judgmental in its approach

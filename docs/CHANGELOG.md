@@ -71,12 +71,21 @@ Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
 - Comprehensive slang handling tests
 - Language Support section in README
 - Updated architecture documentation with slang normalizer role
+- Context gating for time-phrase patterns ("right now"/"now") to reduce false positives
+- Sentence context helper for analyzing demand vs self-report contexts
+- Pattern match counting improvements (instances vs patterns distinction)
+- Post-test fixes for explanation accuracy and messaging clarity
 
 ### Changed
 
 - Detection pipeline now includes slang normalization step before pattern matching
 - Friendly teasing detection now uses normalized message with emoji tone markers
 - Explanations continue to use raw text for user-facing output
+- Fixed "right now" pressure false positives with context gating (self-reports excluded)
+- Cleaned up GREEN messaging - removed "mild patterns" phrasing
+- Calibrated YELLOW explanations - only mention threats when actually present
+- Improved pattern match counting display (always shows instances and patterns)
+- Guilt-shifting threshold adjusted to 0.18 (from 0.20) for better detection
 
 ### Technical Details
 

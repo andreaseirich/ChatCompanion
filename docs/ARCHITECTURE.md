@@ -122,14 +122,17 @@ ChatCompanion follows a modular, layered architecture with strict separation of 
 ## Data Flow
 
 1. **Input**: User pastes chat text or selects demo chat
-2. **Preprocessing**: Text normalization, sentence segmentation (`app/utils/text_processing.py`)
-3. **Parallel Analysis**:
+2. **Preprocessing**: 
+   - Slang normalization (`app/detection/slang_normalizer.py`)
+   - Text normalization, sentence segmentation (`app/utils/text_processing.py`)
+3. **Context Gating**: Time-phrase patterns (e.g., "right now") are context-gated to reduce false positives—only matches in demand context are counted as pressure
+4. **Parallel Analysis**:
    - Rules engine scans for patterns (`app/rules/rule_engine.py`)
    - Model inference generates embeddings and classifications (`app/models_local/`)
-4. **Aggregation**: Detection engine combines results (`app/detection/aggregator.py`)
-5. **Scoring**: Risk level calculated (weighted combination)
-6. **Explanation**: Child-friendly text generated with evidence (`app/detection/explainer.py`)
-7. **Display**: UI shows traffic light, explanation, and advice
+5. **Aggregation**: Detection engine combines results (`app/detection/aggregator.py`)
+6. **Scoring**: Risk level calculated (weighted combination)
+7. **Explanation**: Child-friendly text generated with evidence (`app/detection/explainer.py`) - uses raw text for quotes
+8. **Display**: UI shows traffic light, explanation, and advice
 
 ## Technology Stack
 
@@ -145,6 +148,8 @@ ChatCompanion follows a modular, layered architecture with strict separation of 
 ### Text Processing
 - **spaCy**: Available for advanced text processing (currently using simple regex)
 - **nltk**: Available if additional preprocessing needed
+- **Context Gating**: Sentence-level context analysis for time-phrase patterns to reduce false positives
+- **Pattern Counting**: Accurate instance counting (total matches) vs pattern counting (unique pattern IDs)
 
 ### Configuration
 - **YAML**: Rule definitions (`app/rules/rules_config.yaml`)
