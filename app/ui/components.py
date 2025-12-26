@@ -186,9 +186,12 @@ def render_next_steps(risk_level: RiskLevel) -> None:
         risk_level: Current risk level (GREEN, YELLOW, or RED)
     """
     st.divider()
-    st.markdown("### Recommended Next Steps")
     
-    # Initialize session state for next steps buttons
+    # Wrap Next Steps in a visual panel (using Streamlit container for structure)
+    with st.container():
+        st.markdown("### Recommended Next Steps")
+        
+        # Initialize session state for next steps buttons
     if "show_no_examples" not in st.session_state:
         st.session_state.show_no_examples = False
     if "show_professional_help" not in st.session_state:
