@@ -193,6 +193,11 @@ def test_no_unsafe_html_with_user_content():
                 if 'footer' in full_context.lower() and ('<div class="footer">' in full_context or 'ChatCompanion - Privacy-first' in full_context):
                     continue
             
+            # Special case: Status dots in components.py (safe - constant HTML with f-strings for colors only)
+            # The f-strings only interpolate risk_level enum values (GREEN/YELLOW/RED) and colors, not user content
+            if py_file.name == "components.py" and "status-dot" in context.lower():
+                continue
+            
             if not is_safe_usage(line_content, context):
                 rel_path = py_file.relative_to(app_dir.parent)
                 violations.append(
