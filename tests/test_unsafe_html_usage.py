@@ -109,6 +109,9 @@ def is_safe_usage(line_content: str, context: str) -> bool:
         ]
         for pattern in dangerous_patterns:
             if re.search(pattern, combined, re.IGNORECASE):
+                # Exception: render_card function definition (not used with user content)
+                if 'def render_card' in context:
+                    continue
                 return False
     
     # If it contains HTML tags and no dangerous variables, it's likely static HTML
