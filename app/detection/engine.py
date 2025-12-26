@@ -107,6 +107,19 @@ class DetectionEngine:
         rules_scores = rules_result["category_scores"]
         matches = rules_result["matches"]
         
+        # Check for friendly teasing context and down-weight bullying if detected
+        # This reduces false positives for mutual teasing between friends
+        if rules_scores.get("bullying", 0.0) > 0:
+            is_friendly_teasing = self._check_friendly_teasing_context(text, normalized_text)
+            if is_friendly_teasing:
+                # Down-weight bullying score (multiply by 0.4)
+                original_bullying_score = rules_scores["bullying"]
+                rules_scores["bullying"] = original_bullying_score * 0.4
+                logger.debug(
+                    f"Friendly teasing detected: down-weighted bullying from {original_bullying_score:.2f} "
+                    f"to {rules_scores['bullying']:.2f}"
+                )
+        
         # Debug logging for detection
         if rules_scores:
             logger.debug(f"Rules detection: {len(rules_scores)} categories with scores > 0")
@@ -163,7 +176,14 @@ class DetectionEngine:
             risk_level = RiskLevel.GREEN
             overall_score = 0.0  # Reset to 0.0 for truly safe conversations
         else:
-            risk_level = self._determine_risk_level(overall_score)
+            # Rule: Do NOT raise yellow/red unless at least ONE matched pattern exists
+            # This prevents false positives from ML-only scores without pattern evidence
+            if not has_any_matches:
+                # No pattern matches found - force GREEN even if ML scores are high
+                risk_level = RiskLevel.GREEN
+                overall_score = 0.0
+            else:
+                risk_level = self._determine_risk_level(overall_score)
 
         # Generate explanation (with overall_score for context)
         explanation = self.explainer.generate_explanation(
@@ -182,6 +202,87 @@ class DetectionEngine:
             matches=matches,
             ml_available=self.ml_available,
         )
+
+    def _check_friendly_teasing_context(self, original_text: str, normalized_text: str) -> bool:
+        """
+        Check if text shows signs of friendly teasing rather than bullying.
+        
+        Friendly teasing indicators:
+        - Mutual teasing (both sides tease)
+        - Joking markers ("jk", "lol", "haha", emojis)
+        - Positive endings ("all good", "just joking", "no worries")
+        - No direct slurs or severe insults
+        
+        Args:
+            original_text: Original text (for emoji detection)
+            normalized_text: Normalized text (for pattern matching)
+            
+        Returns:
+            True if friendly teasing context is detected, False otherwise
+        """
+        import re
+        
+        # Check for joking markers
+        joking_patterns = [
+            r"\b(jk|just kidding|just joking|kidding|joking)\b",
+            r"\b(lol|haha|hehe|hahaha)\b",
+            r"\b(all good|no worries|no problem|it's fine|it's okay)\b",
+            r"\b(just joking|just kidding|only joking)\b",
+        ]
+        has_joking_markers = any(
+            re.search(pattern, normalized_text, re.IGNORECASE) 
+            for pattern in joking_patterns
+        )
+        
+        # Check for emojis (common in friendly teasing)
+        emoji_pattern = r"[😀-🙏🌀-🗿]"
+        has_emojis = bool(re.search(emoji_pattern, original_text))
+        
+        # Check for positive endings
+        positive_endings = [
+            r"\b(all good|no worries|it's fine|it's okay|just joking|no problem)\b",
+        ]
+        has_positive_ending = any(
+            re.search(pattern, normalized_text, re.IGNORECASE)
+            for pattern in positive_endings
+        )
+        
+        # Check for severe insults (if present, it's not friendly teasing)
+        severe_insult_patterns = [
+            r"\b(kill yourself|kys|go die|worthless|pathetic|dead weight)\b",
+            r"\b(you're (so|really|such a) (ugly|stupid|idiot|pathetic))\b",
+        ]
+        has_severe_insults = any(
+            re.search(pattern, normalized_text, re.IGNORECASE)
+            for pattern in severe_insult_patterns
+        )
+        
+        # If severe insults are present, it's not friendly teasing
+        if has_severe_insults:
+            return False
+        
+        # Check for mutual teasing (both sides have some form of teasing)
+        # Simple heuristic: look for multiple speakers and teasing patterns
+        lines = original_text.split('\n')
+        teasing_indicators = [
+            r"\b(you're|you are) (so|really|such a) (slow|bad|terrible|annoying|ridiculous)\b",
+            r"\b(being|acting) (so|really|such a) (baby|ridiculous|silly|dumb)\b",
+        ]
+        teasing_count = sum(
+            1 for line in lines
+            if any(re.search(pattern, line, re.IGNORECASE) for pattern in teasing_indicators)
+        )
+        has_mutual_teasing = teasing_count >= 2  # At least 2 instances suggests mutual teasing
+        
+        # Friendly teasing if:
+        # - Has joking markers OR emojis OR positive ending
+        # - AND (mutual teasing OR no severe insults)
+        is_friendly = (
+            (has_joking_markers or has_emojis or has_positive_ending) and
+            (has_mutual_teasing or not has_severe_insults)
+        )
+        
+        return is_friendly
 
     def _determine_risk_level(self, score: float) -> RiskLevel:
         """
