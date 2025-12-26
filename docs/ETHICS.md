@@ -48,6 +48,8 @@ ChatCompanion explicitly does NOT:
 ### Detection Accuracy
 
 - The system uses pattern matching and machine learning, which are not perfect
+- **Slang and Irony Ambiguity**: Youth language often uses slang, abbreviations, and irony that can be ambiguous. The system attempts to normalize common patterns (e.g., "u" → "you", "rn" → "right now") but may misinterpret context or miss nuanced meaning. There is a risk of false positives (safe banter flagged as risky) or false negatives (risky content missed due to slang/obfuscation)
+- **Tone Misinterpretation**: The system analyzes text patterns but cannot perfectly interpret tone, sarcasm, or cultural context. Friendly teasing may be flagged, or hostile content may be missed
 - Some risky conversations may not be detected
 - Some safe conversations may be flagged incorrectly
 - The system is a tool to help awareness, not a definitive safety guarantee

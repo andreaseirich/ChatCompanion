@@ -79,9 +79,17 @@ The system includes a slang normalization layer to handle common English youth/o
 - Expressions: `lol`/`lmao` → `laughing`, `jk` → `just kidding`, `np` → `no problem`
 - Hostile slang: `stfu` → `shut up` (preserves hostility)
 
+**Masked slang and obfuscation handling:**
+- Spacing variants: `r n` → `rn` → `right now`, `r.n.` → `rn` → `right now`
+- Letter repeats: `righttt` → `right`, `nowww` → `now` (normalized to max 2 repeats)
+- Common typos: `rite now` → `right now`
+- Obfuscation: `stf*u` → `stfu` → `shut up` (preserves hostility)
+- Zero-width characters are removed for consistent matching
+
 **Important Notes:**
 - Slang normalization is **heuristic-based, not perfect**
 - **Context-Aware Detection**: Neutral scheduling words like "right now" alone do not trigger warnings—the system analyzes context to distinguish between self-reports ("I'm busy right now") and demands ("Answer right now")
+- **Cross-Sentence Coercion**: The system detects coercion split across sentences (e.g., "Answer me. Right now.")
 - The tool is **supportive, not decisive**—it helps identify patterns but doesn't replace human judgment
 - Some slang or irony may be ambiguous and could lead to false positives or negatives
 - The system stays careful and non-judgmental in its approach

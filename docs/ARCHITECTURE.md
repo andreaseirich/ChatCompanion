@@ -80,6 +80,9 @@ ChatCompanion follows a modular, layered architecture with strict separation of 
 
 **Slang Normalization:**
 - Normalizes common English youth/online slang (e.g., "u" → "you", "lol" → "laughing")
+- Handles masked slang: spacing variants ("r n" → "rn"), letter repeats ("righttt" → "right"), typos ("rite now" → "right now")
+- Removes obfuscation: "stf*u" → "stfu" → "shut up" (preserves hostility)
+- Removes zero-width characters for consistent matching
 - Preserves raw text for user-facing explanations
 - Light emoji tone detection (joking vs. annoyed markers)
 - Runs before rule-based pattern matching to ensure patterns match normalized text
@@ -125,7 +128,7 @@ ChatCompanion follows a modular, layered architecture with strict separation of 
 2. **Preprocessing**: 
    - Slang normalization (`app/detection/slang_normalizer.py`)
    - Text normalization, sentence segmentation (`app/utils/text_processing.py`)
-3. **Context Gating**: Time-phrase patterns (e.g., "right now") are context-gated to reduce false positives—only matches in demand context are counted as pressure
+3. **Context Gating**: Time-phrase patterns (e.g., "right now") are context-gated to reduce false positives—only matches in demand context are counted as pressure. Includes cross-sentence coercion detection (demand verb in one sentence, time urgency in adjacent sentence)
 4. **Parallel Analysis**:
    - Rules engine scans for patterns (`app/rules/rule_engine.py`)
    - Model inference generates embeddings and classifications (`app/models_local/`)

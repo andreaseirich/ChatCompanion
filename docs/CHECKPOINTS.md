@@ -38,6 +38,12 @@ This file tracks project progress, phases, and tasks.
   - UI rendering verification
   - Comprehensive test suite for context gating and explanation accuracy
   - Documentation updates (README, ARCHITECTURE, CHANGELOG, CHECKPOINTS)
+- [x] Slang/Edge-Case Hardening (2025-12-26)
+  - Extended slang normalizer for masked slang, typos, obfuscation
+  - Added cross-sentence coercion detection
+  - Verified pattern counts are instance-based
+  - Created youth-language test fixtures
+  - Updated documentation for masked slang normalization
 
 ### In Progress 🔄
 

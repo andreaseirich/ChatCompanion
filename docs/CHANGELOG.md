@@ -81,6 +81,9 @@ Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
 - Detection pipeline now includes slang normalization step before pattern matching
 - Friendly teasing detection now uses normalized message with emoji tone markers
 - Explanations continue to use raw text for user-facing output
+- Enhanced slang normalization to handle masked slang, typos, and obfuscation
+- Added cross-sentence coercion detection for split demands
+- Improved pattern counting accuracy (instance-based counting verified)
 - Fixed "right now" pressure false positives with context gating (self-reports excluded)
 - Cleaned up GREEN messaging - removed "mild patterns" phrasing
 - Calibrated YELLOW explanations - only mention threats when actually present
