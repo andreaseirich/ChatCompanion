@@ -78,11 +78,13 @@ def is_safe_usage(line_content: str, context: str) -> bool:
     
     for dangerous_var in DANGEROUS_VARIABLES:
         # Look for variable usage patterns
+        # Escape the variable name for regex
+        escaped_var = re.escape(dangerous_var)
         patterns = [
-            rf'\b{dangerous_var}\b',  # Variable name
-            rf'\+.*{dangerous_var}',  # String concatenation
-            rf'{dangerous_var}\s*\+',  # Variable concatenation
-            rf'f["\'].*\{.*' + re.escape(dangerous_var),  # F-string
+            rf'\b{escaped_var}\b',  # Variable name
+            rf'\+.*{escaped_var}',  # String concatenation
+            rf'{escaped_var}\s*\+',  # Variable concatenation
+            rf'f["\'].*\{.*{escaped_var}',  # F-string
         ]
         for pattern in patterns:
             if re.search(pattern, combined, re.IGNORECASE):
