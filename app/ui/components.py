@@ -188,16 +188,57 @@ def render_next_steps(risk_level: RiskLevel) -> None:
     st.divider()
     st.markdown("### Recommended Next Steps")
     
-    col1, col2 = st.columns(2)
+    # Initialize session state for next steps buttons
+    if "show_no_examples" not in st.session_state:
+        st.session_state.show_no_examples = False
+    if "show_professional_help" not in st.session_state:
+        st.session_state.show_professional_help = False
     
-    with col1:
-        show_no_examples = st.button("Show how to say NO", use_container_width=True)
+    # Define callbacks for button clicks
+    def on_show_no_click():
+        st.session_state.show_no_examples = True
+        st.session_state.show_professional_help = False
     
-    with col2:
-        get_help = st.button("Get Professional Help", use_container_width=True)
+    def on_get_help_click():
+        st.session_state.show_professional_help = True
+        st.session_state.show_no_examples = False
     
-    # "Show how to say NO" expander
-    if show_no_examples:
+    # For GREEN: show only "Show how to say NO" button, with optional resources link below
+    # For YELLOW and RED: show both buttons prominently
+    if risk_level == RiskLevel.GREEN:
+        # Single button for GREEN
+        st.button("Show how to say NO", use_container_width=True, key="btn_show_no", on_click=on_show_no_click)
+        
+        # Small optional resources expander for GREEN (non-intrusive, collapsed by default)
+        with st.expander("Optional resources", expanded=False):
+            st.markdown(
+                """
+                **If you need support or have questions:**
+                
+                - **klicksafe.de** - Information and support for online safety
+                - Talk to someone you trust: a parent, teacher, counselor, or another trusted person
+                
+                **Remember:** It's always okay to ask for help, even if you're not sure if something is wrong.
+                
+                **klicksafe.de**: https://www.klicksafe.de
+                
+                (You can copy this link and open it in your browser)
+                """
+            )
+    else:
+        # YELLOW and RED: show both buttons prominently
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Use on_click callback to set state before rerun
+            st.button("Show how to say NO", use_container_width=True, key="btn_show_no", on_click=on_show_no_click)
+        
+        with col2:
+            # Use on_click callback to set state before rerun
+            st.button("Get Professional Help", use_container_width=True, key="btn_get_help", on_click=on_get_help_click)
+    
+    # "Show how to say NO" expander - only render if state is True
+    if st.session_state.show_no_examples:
         with st.expander("Ways to say NO", expanded=True):
             st.markdown(
                 """
@@ -214,8 +255,8 @@ def render_next_steps(risk_level: RiskLevel) -> None:
                 """
             )
     
-    # "Get Professional Help" section
-    if get_help:
+    # "Get Professional Help" section - only render if state is True
+    if st.session_state.show_professional_help:
         with st.expander("Professional Support Resources", expanded=True):
             if risk_level == RiskLevel.RED:
                 st.markdown(
