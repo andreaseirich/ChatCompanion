@@ -44,6 +44,8 @@ DANGEROUS_VARIABLES = [
     'content',
     'message',
     'advice',
+    'user_input',  # Common variable name in tests
+    'user_content',  # Common variable name in tests
 ]
 
 
@@ -113,16 +115,24 @@ def is_safe_usage(line_content: str, context: str) -> bool:
     # STRICT CHECK: Fail if string concatenation with variables
     # Pattern: "<div>" + variable + "</div>" or variable + "<div>"
     if '+' in combined:
-        for dangerous_var in DANGEROUS_VARIABLES:
-            escaped_var = re.escape(dangerous_var)
-            # Check for concatenation patterns
-            concat_patterns = [
-                rf'["\'].*\+.*\b{escaped_var}\b',  # String + variable
-                rf'\b{escaped_var}\b.*\+.*["\']',  # Variable + string
-            ]
-            for pattern in concat_patterns:
-                if re.search(pattern, combined, re.IGNORECASE):
-                    return False
+        # Check for any variable-like identifier (word characters) near + operator
+        # Pattern: "string" + identifier or identifier + "string"
+        concat_pattern = r'["\'].*\+.*[a-zA-Z_][a-zA-Z0-9_]*|[a-zA-Z_][a-zA-Z0-9_].*\+.*["\']'
+        if re.search(concat_pattern, combined):
+            # Additional check: if it's a known dangerous variable, definitely fail
+            for dangerous_var in DANGEROUS_VARIABLES:
+                escaped_var = re.escape(dangerous_var)
+                concat_patterns = [
+                    rf'["\'].*\+.*\b{escaped_var}\b',  # String + variable
+                    rf'\b{escaped_var}\b.*\+.*["\']',  # Variable + string
+                ]
+                for pattern in concat_patterns:
+                    if re.search(pattern, combined, re.IGNORECASE):
+                        return False
+            # If it's any identifier (not a known safe constant), fail
+            # Safe constants would be things like True, False, None, numbers
+            # But identifiers like user_input, content, etc. are unsafe
+            return False
     
     # STRICT CHECK: Fail if st.markdown called with variable directly
     # Pattern: st.markdown(variable, unsafe_allow_html=True)
