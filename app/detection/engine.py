@@ -235,7 +235,9 @@ class DetectionEngine:
         )
         
         # Check for emojis (common in friendly teasing)
-        emoji_pattern = r"[😀-🙏🌀-🗿]"
+        # Use explicit emoji ranges to avoid CodeQL warnings about overly large ranges
+        # Match common emoji ranges: Emoticons, Miscellaneous Symbols, Dingbats, etc.
+        emoji_pattern = r"[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U00002600-\U000026FF\U00002700-\U000027BF]"
         has_emojis = bool(re.search(emoji_pattern, original_text))
         
         # Check for positive endings
