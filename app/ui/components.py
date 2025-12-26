@@ -85,6 +85,7 @@ def render_traffic_light(risk_level: RiskLevel) -> None:
 def render_explanation(explanation: str, risk_level: RiskLevel) -> None:
     """
     Render child-friendly explanation with preset title and message.
+    Ensures exactly ONE main explanation box is rendered.
 
     Args:
         explanation: Detailed explanation text
@@ -101,6 +102,7 @@ def render_explanation(explanation: str, risk_level: RiskLevel) -> None:
     st.info(message)
     
     # Display detailed explanation if it differs from the preset message
+    # This ensures we have exactly ONE main explanation box
     if explanation and explanation.strip() != message.strip():
         st.markdown("#### Details")
         st.markdown(explanation)
@@ -125,7 +127,7 @@ def render_help_section(risk_level: RiskLevel) -> None:
     # For GREEN, don't show at all
     
     if risk_level == RiskLevel.RED:
-        with st.expander("Need Immediate Help?"):
+        with st.expander("Need Immediate Help?", expanded=False):
             st.markdown(
                 """
                 **If you're feeling unsafe or need immediate support:**
@@ -139,5 +141,28 @@ def render_help_section(risk_level: RiskLevel) -> None:
     elif risk_level == RiskLevel.YELLOW:
         st.info(
             "If this pattern continues or you feel overwhelmed, consider talking to someone you trust."
+        )
+
+
+def render_what_this_tool_can_do() -> None:
+    """Render collapsed section explaining what the tool can and cannot do."""
+    with st.expander("What this tool can and cannot do", expanded=False):
+        st.markdown(
+            """
+            **What ChatCompanion can do:**
+            - Help you recognize patterns in chat conversations that might be concerning
+            - Explain what patterns were detected in simple, easy-to-understand language
+            - Give you guidance on setting boundaries and seeking help
+            - Work completely offline - your conversations never leave your device
+            
+            **What ChatCompanion cannot do:**
+            - Promise perfect detection - it might miss some risky conversations or flag safe ones incorrectly
+            - Replace talking to trusted adults or professional help
+            - Make decisions for you - you're always in control
+            - Monitor conversations automatically - you choose when to analyze
+            
+            **Remember:** This tool is here to help you understand patterns and make informed decisions. 
+            Always trust your instincts and talk to someone you trust if something feels wrong.
+            """
         )
 

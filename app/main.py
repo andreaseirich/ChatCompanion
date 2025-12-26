@@ -21,8 +21,10 @@ from app.ui.components import (
     render_explanation,
     render_help_section,
     render_traffic_light,
+    render_what_this_tool_can_do,
 )
 from app.ui.input_handler import load_demo_chats
+from app.ui.theme import inject_theme_css, render_badge
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -45,10 +47,18 @@ def get_detection_engine():
 
 def main():
     """Main application function."""
-    # Header
+    # Inject theme CSS
+    inject_theme_css()
+    
+    # ============================================================
+    # ZONE 1: Header
+    # ============================================================
     st.title("🛡️ ChatCompanion")
     st.markdown(
-        "**Privacy-first assistant to help recognize risky chat patterns**\n\n"
+        "**Privacy-first assistant to help recognize risky chat patterns** "
+        + render_badge("Offline / on-device")
+    )
+    st.markdown(
         "Paste a chat conversation below, and we'll help you understand if there are "
         "any concerning patterns. All processing happens locally on your device - "
         "nothing is uploaded or saved."
@@ -58,46 +68,84 @@ def main():
 
     # Initialize detection engine
     engine = get_detection_engine()
+    
+    # Load demo chats
+    demo_dir = Path(__file__).parent.parent / "demo_data"
+    demo_chats = load_demo_chats(demo_dir)
+    
+    # Load specific example chats for buttons
+    chats_dir = demo_dir / "chats"
+    example_green = ""
+    example_yellow = ""
+    example_red = ""
+    
+    if (chats_dir / "safe_chat.txt").exists():
+        with open(chats_dir / "safe_chat.txt", "r", encoding="utf-8") as f:
+            example_green = f.read().strip()
+    
+    if (chats_dir / "manipulation_pressure.txt").exists():
+        with open(chats_dir / "manipulation_pressure.txt", "r", encoding="utf-8") as f:
+            example_yellow = f.read().strip()
+    
+    if (chats_dir / "grooming_example.txt").exists():
+        with open(chats_dir / "grooming_example.txt", "r", encoding="utf-8") as f:
+            example_red = f.read().strip()
 
-    # Sidebar with demo chats
-    with st.sidebar:
-        st.header("Demo Chats")
-        st.markdown("Try these example conversations to see how ChatCompanion works:")
-
-        demo_dir = Path(__file__).parent.parent / "demo_data"
-        demo_chats = load_demo_chats(demo_dir)
-
-        selected_demo = None
-        if demo_chats:
-            selected_demo = st.selectbox(
-                "Select a demo chat:",
-                options=["None"] + list(demo_chats.keys()),
-            )
-
-    # Main input area
+    # ============================================================
+    # ZONE 2: Input Area
+    # ============================================================
     st.header("Chat Input")
-
-    # Get chat text (from demo or manual input)
+    
+    # Example buttons
+    col1, col2, col3 = st.columns(3)
+    example_selected = None
+    
+    with col1:
+        if st.button("🟢 Try GREEN Example", use_container_width=True):
+            example_selected = "green"
+    
+    with col2:
+        if st.button("🟡 Try YELLOW Example", use_container_width=True):
+            example_selected = "yellow"
+    
+    with col3:
+        if st.button("🔴 Try RED Example", use_container_width=True):
+            example_selected = "red"
+    
+    # Get chat text (from example buttons or manual input)
     chat_text = ""
-    if selected_demo and selected_demo != "None" and selected_demo in demo_chats:
-        chat_text = demo_chats[selected_demo]
-        st.text_area(
-            "Chat conversation:",
-            value=chat_text,
-            height=200,
-            key="chat_input_demo",
-        )
-    else:
-        chat_text = st.text_area(
-            "Paste a chat conversation here:",
-            height=200,
-            key="chat_input_manual",
-            help="You can paste a conversation from any messaging app. "
-            "The text is processed locally and never saved.",
-        )
-
-    # Analyze button
-    analyze_button = st.button("🔍 Analyze Chat", type="primary", use_container_width=True)
+    
+    # Initialize session state for chat input if not exists
+    if "chat_input" not in st.session_state:
+        st.session_state.chat_input = ""
+    
+    # Handle example button clicks
+    if example_selected == "green" and example_green:
+        st.session_state.chat_input = example_green
+    elif example_selected == "yellow" and example_yellow:
+        st.session_state.chat_input = example_yellow
+    elif example_selected == "red" and example_red:
+        st.session_state.chat_input = example_red
+    
+    # Text area for chat input
+    chat_text = st.text_area(
+        "Paste a chat conversation here:",
+        value=st.session_state.chat_input,
+        height=200,
+        key="chat_input",
+        help="You can paste a conversation from any messaging app. "
+        "The text is processed locally and never saved.",
+    )
+    
+    # Clear button
+    col_clear, col_analyze = st.columns([1, 3])
+    with col_clear:
+        if st.button("Clear", use_container_width=True):
+            st.session_state.chat_input = ""
+            st.rerun()
+    
+    with col_analyze:
+        analyze_button = st.button("🔍 Analyze Chat", type="primary", use_container_width=True)
 
     # Process analysis
     if analyze_button and chat_text.strip():
@@ -107,25 +155,39 @@ def main():
 
                 st.divider()
 
-                # Display results
+                # ============================================================
+                # ZONE 3: Results Area
+                # ============================================================
                 st.header("Analysis Results")
 
-                # Traffic light
-                render_traffic_light(result.risk_level)
+                # Main result card: Traffic light + Explanation
+                with st.container():
+                    # Traffic light
+                    render_traffic_light(result.risk_level)
+                    
+                    st.divider()
+                    
+                    # Explanation (single main explanation box)
+                    render_explanation(result.explanation, result.risk_level)
+                    
+                    # Advice
+                    render_advice(result.advice)
+                    
+                    # Help section (only for RED, rendered once)
+                    render_help_section(result.risk_level)
+                
+                # Details accordion (for observed behaviors, if present)
+                if result.matches:
+                    with st.expander("📋 Details", expanded=False):
+                        st.markdown("**Observed behaviors:**")
+                        for category, category_matches in result.matches.items():
+                            if category_matches:
+                                unique_patterns = len(set(m.pattern.pattern for m in category_matches))
+                                total_instances = len(category_matches)
+                                st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
 
-                st.divider()
-
-                # Explanation
-                render_explanation(result.explanation, result.risk_level)
-
-                # Advice
-                render_advice(result.advice)
-
-                # Help section (only for RED, softer for YELLOW)
-                render_help_section(result.risk_level)
-
-                # Debug info (collapsible, hidden by default - only for developers)
-                with st.expander("🔧 Technical Details (for developers)", expanded=False):
+                # Developer Debug Info (clearly separate, collapsed by default)
+                with st.expander("🔧 Developer Debug Info", expanded=False):
                     st.write(f"**Risk Level:** {result.risk_level.value}")
                     st.write(f"**Overall Score:** {result.overall_score:.2f}")
                     st.write(f"**ML Available:** {result.ml_available}")
@@ -136,10 +198,8 @@ def main():
                         st.write("**Pattern Matches:**")
                         for category, category_matches in result.matches.items():
                             if category_matches:
-                                # Count unique patterns and total instances
                                 unique_patterns = len(set(m.pattern.pattern for m in category_matches))
                                 total_instances = len(category_matches)
-                                # Always show "across" format for consistency
                                 st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
 
             except Exception as e:
@@ -151,11 +211,15 @@ def main():
     elif analyze_button:
         st.warning("Please enter some chat text to analyze.")
 
+    # What this tool can/can't do section
+    st.divider()
+    render_what_this_tool_can_do()
+
     # Footer
     st.divider()
     st.markdown(
-        "<small>ChatCompanion - Privacy-first risk detection. "
-        "All processing happens locally. No data is saved or uploaded.</small>",
+        '<div class="footer">ChatCompanion - Privacy-first risk detection. '
+        "All processing happens locally. No data is saved or uploaded.</div>",
         unsafe_allow_html=True,
     )
 
