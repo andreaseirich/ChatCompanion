@@ -8,6 +8,7 @@ import yaml
 
 from app.rules.patterns import Pattern, PatternMatch, PatternRegistry
 from app.utils.constants import RiskCategory
+from app.utils.text_processing import get_sentence_context
 
 
 class RuleEngine:
@@ -47,6 +48,60 @@ class RuleEngine:
                 )
                 self.registry.add_pattern(pattern)
 
+    def _check_pressure_context(self, text: str, match_position: int, matched_text: str) -> bool:
+        """
+        Check if "right now"/"now" appears in a demand context (not self-report).
+
+        Args:
+            text: Full text
+            match_position: Position of the match in text
+            matched_text: The matched text (e.g., "right now", "now")
+
+        Returns:
+            True if match is in demand context (should be counted as pressure),
+            False if it's a self-report (should NOT be counted as pressure)
+        """
+        # Only apply context gating to "right now" or "now" patterns
+        if not re.search(r"(?i)\b(right now|now)\b", matched_text):
+            return True  # Not a time phrase pattern, always count
+        
+        # Get sentence context (±1 sentence window)
+        context = get_sentence_context(text, match_position, window=1)
+        context_lower = context.lower()
+        
+        # Self-report exclusion patterns (NOT pressure)
+        self_report_patterns = [
+            r"\b(i'?m|i am|i'm) (busy|not available|unavailable) (right now|now)\b",
+            r"\b(not|can'?t|cannot) (right now|now)\b",
+            r"\b(can we|can you) (talk|chat) (later|after|tomorrow)\b",
+            r"\b(no pressure|take your time|whenever)\b",
+        ]
+        
+        # If self-report pattern found, it's NOT pressure
+        for pattern in self_report_patterns:
+            if re.search(pattern, context_lower):
+                return False
+        
+        # Demand indicators (IS pressure)
+        demand_indicators = [
+            # Imperative verbs
+            r"\b(answer|reply|call|do it|send|prove|decide|respond|tell me|show me)\b",
+            # Coercive phrasing
+            r"\b(you (have to|must|need to|should))\b",
+            r"\b(no excuses|don'?t get time|no more time)\b",
+            # Ultimatum markers
+            r"\b(or else|if you don'?t|we'?re done|don'?t expect)\b",
+        ]
+        
+        # Check if any demand indicator is present in context
+        for indicator in demand_indicators:
+            if re.search(indicator, context_lower):
+                return True  # Demand context - count as pressure
+        
+        # Default: if no clear demand context, be conservative and count it
+        # (better to have false positive than miss real pressure)
+        return True
+
     def detect(self, text: str) -> Dict[str, List[PatternMatch]]:
         """
         Detect risks in text using pattern matching.
@@ -62,10 +117,19 @@ class RuleEngine:
         for pattern in self.registry.get_all_patterns():
             regex = re.compile(pattern.pattern)
             for match in regex.finditer(text):
+                matched_text = match.group(0)
+                match_position = match.start()
+                
+                # Apply context gating for pressure patterns with "right now"/"now"
+                if pattern.category == "pressure":
+                    if not self._check_pressure_context(text, match_position, matched_text):
+                        # Context gate failed - skip this match
+                        continue
+                
                 pattern_match = PatternMatch(
                     pattern=pattern,
-                    matched_text=match.group(0),
-                    position=match.start(),
+                    matched_text=matched_text,
+                    position=match_position,
                     confidence=pattern.confidence,
                 )
 

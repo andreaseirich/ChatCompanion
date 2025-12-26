@@ -59,3 +59,40 @@ def extract_message_pairs(text: str) -> List[tuple]:
         # No structure found, return as single message
         return [(None, text)]
 
+
+def get_sentence_context(text: str, position: int, window: int = 1) -> str:
+    """
+    Get sentence context around a given position.
+
+    Args:
+        text: Full text
+        position: Character position in text
+        window: Number of adjacent sentences to include (default: 1)
+
+    Returns:
+        Context string containing the sentence with the position and adjacent sentences
+    """
+    sentences = segment_sentences(text)
+    
+    # Find which sentence contains the position
+    current_pos = 0
+    sentence_index = -1
+    
+    for i, sentence in enumerate(sentences):
+        sentence_end = current_pos + len(sentence)
+        if current_pos <= position < sentence_end:
+            sentence_index = i
+            break
+        current_pos = sentence_end + 1  # +1 for sentence delimiter
+    
+    if sentence_index == -1:
+        # Position not found in any sentence, return empty
+        return ""
+    
+    # Get context window: sentence_index ± window
+    start_idx = max(0, sentence_index - window)
+    end_idx = min(len(sentences), sentence_index + window + 1)
+    
+    context_sentences = sentences[start_idx:end_idx]
+    return " ".join(context_sentences)
+

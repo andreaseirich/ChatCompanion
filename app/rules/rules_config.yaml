@@ -102,7 +102,7 @@ rules:
         description: "Suggestive language (should - lower confidence, can be harmless)"
       - pattern: "(?i)\\b(right now|immediately|this instant|or else|within (\\d+ )?minutes?)\\b"
         confidence: 0.75
-        description: "Urgency pressure and time ultimatums"
+        description: "Urgency pressure and time ultimatums (context-gated: only matches in demand context)"
       - pattern: "(?i)\\b((tell|answer|respond|reply) (me )?(exactly|precisely|right now)|(right now|immediately) (tell|answer|respond))\\b"
         confidence: 0.8
         description: "Emotional pressure to respond right now"
