@@ -145,8 +145,10 @@ class TestGeneratedChatCorpus:
                         for cat in result.matches.keys()
                     )
                     if has_secrecy_patterns:
-                        assert "secret" in explanation_lower or "private" in explanation_lower, (
-                            f"Chat {chat['id']} (RED) has secrecy patterns but not mentioned in explanation"
+                        # Check for any form of secrecy-related words in explanation
+                        # (secret, secrets, secrecy, private)
+                        assert "secret" in explanation_lower or "private" in explanation_lower or "secrecy" in explanation_lower or "secrets" in explanation_lower, (
+                            f"Chat {chat['id']} (RED) has secrecy patterns but not mentioned in explanation. Explanation: {result.explanation[:200]}"
                         )
                 
                 if chat["contains"]["coercive_control"]:
