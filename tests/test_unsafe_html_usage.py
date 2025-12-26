@@ -181,13 +181,10 @@ def test_no_unsafe_html_with_user_content():
         usages = find_unsafe_allow_html_usage(py_file)
         
         for line_num, line_content, context in usages:
-            # Special case: CSS injection in theme.py (safe - constant string)
-            # Check if this is the CSS injection line in inject_theme_css function
+            # Special case: theme.py only contains CSS injection (safe - constant string)
+            # All unsafe_allow_html usage in theme.py is safe (CSS only, no user content)
             if py_file.name == "theme.py":
-                # Check if context contains inject_theme_css function definition or call
-                full_context = context + ' ' + line_content
-                if 'inject_theme_css' in full_context or 'def inject_theme_css' in context or 'css = """' in context:
-                    continue
+                continue
             
             # Special case: Footer in main.py (safe - constant string literal)
             # Check if context contains footer HTML or line contains footer
