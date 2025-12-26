@@ -84,7 +84,7 @@ def is_safe_usage(line_content: str, context: str) -> bool:
             rf'\b{escaped_var}\b',  # Variable name
             rf'\+.*{escaped_var}',  # String concatenation
             rf'{escaped_var}\s*\+',  # Variable concatenation
-            rf'f["\'].*\{.*{escaped_var}',  # F-string
+            r'f["\'].*\{.*' + escaped_var,  # F-string (use regular string to avoid f-string syntax issues)
         ]
         for pattern in patterns:
             if re.search(pattern, combined, re.IGNORECASE):
