@@ -85,6 +85,18 @@ def inject_theme_css():
             margin-left: 8px;
         }
         
+        /* Static badge for header (safe: constant string only) */
+        .badge-static {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            margin-top: 8px;
+        }
+        
         /* Button spacing */
         .stButton > button {
             border-radius: 8px;

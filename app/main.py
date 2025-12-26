@@ -24,7 +24,7 @@ from app.ui.components import (
     render_what_this_tool_can_do,
 )
 from app.ui.input_handler import load_demo_chats
-from app.ui.theme import inject_theme_css, render_badge
+from app.ui.theme import inject_theme_css
 from app.utils.dev_mode import is_dev_mode
 
 # Configure logging
@@ -55,9 +55,10 @@ def main():
     # ZONE 1: Header
     # ============================================================
     st.title("🛡️ ChatCompanion")
+    st.markdown("**Privacy-first assistant to help recognize risky chat patterns**")
+    # Static badge - safe: constant string only, no user content
     st.markdown(
-        "**Privacy-first assistant to help recognize risky chat patterns** "
-        + render_badge("Offline / on-device"),
+        '<span class="badge-static">Offline / on-device</span>',
         unsafe_allow_html=True
     )
     st.markdown(
