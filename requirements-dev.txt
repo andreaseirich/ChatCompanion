@@ -1,5 +1,0 @@
-# Development dependencies
-# Minimal set for CI testing
-
-pytest>=7.0.0
-
