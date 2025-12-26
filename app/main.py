@@ -20,8 +20,10 @@ import streamlit as st
 from app.detection.engine import DetectionEngine
 from app.ui.components import (
     render_advice,
+    render_behavior_badges,
     render_explanation,
     render_help_section,
+    render_next_steps,
     render_traffic_light,
     render_what_this_tool_can_do,
 )
@@ -29,6 +31,7 @@ from app.ui.input_handler import load_demo_chats
 from app.ui.theme import inject_theme_css
 from app.utils.constants import RiskLevel
 from app.utils.dev_mode import is_dev_mode
+from app.utils.fun_ui import is_fun_ui_enabled
 from app.utils.test_mode import is_test_mode
 
 # Configure logging
@@ -119,9 +122,6 @@ def main():
         if st.button("🔴 Try RED Example", use_container_width=True):
             example_selected = "red"
     
-    # Get chat text (from example buttons or manual input)
-    chat_text = ""
-    
     # Initialize session state for chat input if not exists
     if "chat_input" not in st.session_state:
         st.session_state.chat_input = ""
@@ -135,18 +135,22 @@ def main():
         st.session_state.chat_input = ""
         st.session_state.clear_requested = False
     
-    # Handle example button clicks
+    # Handle example button clicks - use rerun to avoid widget conflict
     if example_selected == "green" and example_green:
         st.session_state.chat_input = example_green
+        st.rerun()
     elif example_selected == "yellow" and example_yellow:
         st.session_state.chat_input = example_yellow
+        st.rerun()
     elif example_selected == "red" and example_red:
         st.session_state.chat_input = example_red
+        st.rerun()
     
     # Text area for chat input
+    # Don't set value parameter - Streamlit will automatically use session_state[key] if it exists
+    # This avoids the warning about default value + Session State API conflict
     chat_text = st.text_area(
         "Paste a chat conversation here:",
-        value=st.session_state.chat_input,
         height=200,
         key="chat_input",
         help="You can paste a conversation from any messaging app. "
@@ -158,6 +162,11 @@ def main():
     with col_clear:
         if st.button("Clear", use_container_width=True):
             st.session_state.clear_requested = True
+            # Clear analysis results when clearing chat input
+            if "last_result" in st.session_state:
+                del st.session_state.last_result
+            if "last_chat_text" in st.session_state:
+                del st.session_state.last_chat_text
             st.rerun()
     
     with col_analyze:
@@ -173,95 +182,118 @@ def main():
                 
                 result = engine.analyze(chat_text)
                 
+                # Store result in session state (convert to dict for serialization)
+                st.session_state.last_result = {
+                    "risk_level": result.risk_level.value,
+                    "overall_score": result.overall_score,
+                    "category_scores": result.category_scores,
+                    "explanation": result.explanation,
+                    "advice": result.advice,
+                    "matches": result.matches,  # This contains PatternMatch objects - may need special handling
+                    "ml_available": result.ml_available,
+                }
+                st.session_state.last_chat_text = chat_text
+                
                 # Generate unique result ID to prevent duplicate balloons
                 result_id = hashlib.md5((chat_text + str(result.risk_level.value)).encode()).hexdigest()
                 balloons_key = f"balloons_shown_{result_id}"
                 
-                # Show balloons for GREEN results (once per unique result)
-                if result.risk_level == RiskLevel.GREEN:
+                # Show balloons for GREEN results (once per unique result) if fun UI is enabled
+                if result.risk_level == RiskLevel.GREEN and is_fun_ui_enabled():
                     if balloons_key not in st.session_state:
                         st.balloons()
                         st.session_state[balloons_key] = True
-
-                st.divider()
-
-                # ============================================================
-                # ZONE 3: Results Area
-                # ============================================================
-                st.header("Analysis Results")
-
-                # Main result card: Traffic light + Explanation
-                with st.container():
-                    # Traffic light
-                    render_traffic_light(result.risk_level)
-                    
-                    st.divider()
-                    
-                    # Explanation (single main explanation box)
-                    render_explanation(result.explanation, result.risk_level)
-                    
-                    # Advice
-                    render_advice(result.advice)
-                    
-                    # Help section (only for RED, rendered once)
-                    render_help_section(result.risk_level)
-                
-                # Observed behaviors as badges
-                if result.matches:
-                    render_behavior_badges(result.matches)
-                
-                # Recommended Next Steps
-                render_next_steps(result.risk_level)
-                
-                # Details accordion (for pattern counts, if present)
-                if result.matches:
-                    with st.expander("📋 Details", expanded=False):
-                        st.markdown("**Pattern counts:**")
-                        col_label, col_count, col_patterns = st.columns([2, 1, 1])
-                        with col_label:
-                            st.markdown("**Category**")
-                        with col_count:
-                            st.markdown("**Instances**")
-                        with col_patterns:
-                            st.markdown("**Patterns**")
-                        
-                        for category, category_matches in result.matches.items():
-                            if category_matches:
-                                unique_patterns = len(set(m.pattern.pattern for m in category_matches))
-                                total_instances = len(category_matches)
-                                col_label, col_count, col_patterns = st.columns([2, 1, 1])
-                                with col_label:
-                                    st.write(category)
-                                with col_count:
-                                    st.write(str(total_instances))
-                                with col_patterns:
-                                    st.write(str(unique_patterns))
-
-                # Developer Debug Info (only shown in dev mode)
-                if is_dev_mode():
-                    with st.expander("🔧 Developer Debug Info", expanded=False):
-                        st.write(f"**Risk Level:** {result.risk_level.value}")
-                        st.write(f"**Overall Score:** {result.overall_score:.2f}")
-                        st.write(f"**ML Available:** {result.ml_available}")
-                        st.write("**Category Scores:**")
-                        for category, score in result.category_scores.items():
-                            st.write(f"  - {category}: {score:.2f}")
-                        if result.matches:
-                            st.write("**Pattern Matches:**")
-                            for category, category_matches in result.matches.items():
-                                if category_matches:
-                                    unique_patterns = len(set(m.pattern.pattern for m in category_matches))
-                                    total_instances = len(category_matches)
-                                    st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
 
             except Exception as e:
                 logger.error(f"Error during analysis: {e}", exc_info=True)
                 st.error(
                     "An error occurred while analyzing the chat. Please try again or check the logs."
                 )
+                # Clear result on error
+                if "last_result" in st.session_state:
+                    del st.session_state.last_result
+                if "last_chat_text" in st.session_state:
+                    del st.session_state.last_chat_text
 
     elif analyze_button:
         st.warning("Please enter some chat text to analyze.")
+    
+    # Display results if available (either from new analysis or from session state)
+    if "last_result" in st.session_state and st.session_state.last_result:
+        result_dict = st.session_state.last_result
+        # Reconstruct RiskLevel enum
+        risk_level = RiskLevel(result_dict["risk_level"])
+        
+        st.divider()
+
+        # ============================================================
+        # ZONE 3: Results Area
+        # ============================================================
+        st.header("Analysis Results")
+
+        # Main result card: Traffic light + Explanation
+        with st.container():
+            # Traffic light
+            render_traffic_light(risk_level)
+            
+            st.divider()
+            
+            # Explanation (single main explanation box)
+            render_explanation(result_dict["explanation"], risk_level)
+            
+            # Advice
+            render_advice(result_dict["advice"])
+            
+            # Help section (only for RED, rendered once)
+            render_help_section(risk_level)
+        
+        # Observed behaviors as badges
+        if result_dict["matches"]:
+            render_behavior_badges(result_dict["matches"])
+        
+        # Recommended Next Steps
+        render_next_steps(risk_level)
+        
+        # Details accordion (for pattern counts, if present)
+        if result_dict["matches"]:
+            with st.expander("📋 Details", expanded=False):
+                st.markdown("**Pattern counts:**")
+                col_label, col_count, col_patterns = st.columns([2, 1, 1])
+                with col_label:
+                    st.markdown("**Category**")
+                with col_count:
+                    st.markdown("**Instances**")
+                with col_patterns:
+                    st.markdown("**Patterns**")
+                
+                for category, category_matches in result_dict["matches"].items():
+                    if category_matches:
+                        unique_patterns = len(set(m.pattern.pattern for m in category_matches))
+                        total_instances = len(category_matches)
+                        col_label, col_count, col_patterns = st.columns([2, 1, 1])
+                        with col_label:
+                            st.write(category)
+                        with col_count:
+                            st.write(str(total_instances))
+                        with col_patterns:
+                            st.write(str(unique_patterns))
+
+        # Developer Debug Info (only shown in dev mode)
+        if is_dev_mode():
+            with st.expander("🔧 Developer Debug Info", expanded=False):
+                st.write(f"**Risk Level:** {result_dict['risk_level']}")
+                st.write(f"**Overall Score:** {result_dict['overall_score']:.2f}")
+                st.write(f"**ML Available:** {result_dict['ml_available']}")
+                st.write("**Category Scores:**")
+                for category, score in result_dict["category_scores"].items():
+                    st.write(f"  - {category}: {score:.2f}")
+                if result_dict["matches"]:
+                    st.write("**Pattern Matches:**")
+                    for category, category_matches in result_dict["matches"].items():
+                        if category_matches:
+                            unique_patterns = len(set(m.pattern.pattern for m in category_matches))
+                            total_instances = len(category_matches)
+                            st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
 
     # What this tool can/can't do section
     st.divider()
