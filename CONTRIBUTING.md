@@ -103,10 +103,40 @@ Use clear, descriptive commit messages:
 - **Packaging**: Standalone executables, installers
 - **Integration**: Browser extensions, mobile apps
 
+## Repository Hygiene
+
+### Internal Files Must Stay Local
+
+**CRITICAL**: Internal development artifacts must NEVER be committed to the public repository.
+
+**Files that must remain in `.local/`**:
+- Internal prompts (Master Prompt, Cursor prompts, debug prompts, evaluation prompts)
+- Internal planning documents (checkpoints, benchmarks, quality gates)
+- Private notes or scratch files
+- Internal audit documents
+
+**Rules**:
+1. All internal prompts, notes, and planning documents must be placed in `.local/` directory
+2. The `.local/` directory is gitignored and will not be committed
+3. Before committing, run the repository hygiene checker:
+   ```bash
+   python3 scripts/repo_hygiene_check.py
+   ```
+4. If violations are found, move files to `.local/` before committing
+
+**Repository Hygiene Checker**:
+- Script: `scripts/repo_hygiene_check.py`
+- Scans for disallowed patterns in filenames (prompt, debug_prompt, private, notes, scratch, local)
+- Can be integrated into CI/CD pipelines
+- Exit code 1 if violations found, 0 if clean
+
+See [`docs/REPO_PUBLIC_AUDIT.md`](docs/REPO_PUBLIC_AUDIT.md) for complete public repository definition.
+
 ## Important Notes
 
 ### What NOT to Include
-- ❌ Internal development prompts or heuristics
+- ❌ Internal development prompts or heuristics (must be in `.local/`)
+- ❌ Internal planning documents (checkpoints, benchmarks, quality gates)
 - ❌ Hardcoded secrets or API keys
 - ❌ Telemetry or tracking code
 - ❌ Features that require internet connection (runtime must be offline)
