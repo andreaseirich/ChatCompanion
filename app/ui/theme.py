@@ -10,6 +10,13 @@ def inject_theme_css():
     """Inject custom CSS theme for kid-friendly, product-like UI."""
     css = """
     <style>
+        /* Brand color system - CSS variables for consistency */
+        :root {
+            --brand-primary: #1e7ae8;
+            --brand-primary-hover: #1557b0;
+            --focus-ring: 0 0 0 3px rgba(30, 122, 232, 0.3);
+        }
+        
         /* Base typography - kid-friendly fonts */
         * {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 
@@ -18,9 +25,18 @@ def inject_theme_css():
         
         /* Main container - centered, max-width for readability */
         .main .block-container {
-            max-width: 1200px;
+            max-width: 1000px;
             padding-top: 2rem;
             padding-bottom: 2rem;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .main .block-container {
+                max-width: 100%;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
         }
         
         /* Card styling - rounded corners, subtle shadows */
@@ -54,7 +70,7 @@ def inject_theme_css():
         
         /* Header styling */
         h1 {
-            color: #1a73e8;
+            color: var(--brand-primary);
             font-weight: 600;
             margin-bottom: 8px;
         }
@@ -81,7 +97,7 @@ def inject_theme_css():
             font-size: 0.75rem;
             font-weight: 500;
             background-color: #e8f0fe;
-            color: #1a73e8;
+            color: var(--brand-primary);
             margin-left: 8px;
         }
         
@@ -93,7 +109,7 @@ def inject_theme_css():
             font-size: 0.75rem;
             font-weight: 500;
             background-color: #e8f0fe;
-            color: #1a73e8;
+            color: var(--brand-primary);
             margin-top: 8px;
         }
         
@@ -112,7 +128,7 @@ def inject_theme_css():
         /* Primary button styling - neutral brand color (not red/danger) */
         .stButton > button[kind="primary"],
         .stButton > button[type="primary"] {
-            background-color: #1a73e8;
+            background-color: var(--brand-primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -122,9 +138,26 @@ def inject_theme_css():
         
         .stButton > button[kind="primary"]:hover,
         .stButton > button[type="primary"]:hover {
-            background-color: #1557b0;
+            background-color: var(--brand-primary-hover);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+            box-shadow: 0 4px 12px rgba(30, 122, 232, 0.3);
+        }
+        
+        /* Focus states for accessibility */
+        .stButton > button:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
+        }
+        
+        .stTextArea > div > div > textarea:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
+            border-color: var(--brand-primary);
+        }
+        
+        .streamlit-expanderHeader:focus-visible {
+            outline: none;
+            box-shadow: var(--focus-ring);
         }
         
         /* Text area styling */
@@ -248,7 +281,7 @@ def inject_theme_css():
             margin-top: 12px;
         }
         
-        /* Modern container styling - flat design */
+        /* Modern container styling - flat design (max-width already set above) */
         .main .block-container {
             border-radius: 15px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
@@ -315,7 +348,11 @@ def inject_theme_css():
             color: #f57f17;
         }
         
-        /* Hide anchor icons next to headings (judge-friendly polish) */
+        /* Hide anchor icons next to headings (judge-friendly polish)
+         * Intent: Hide only the anchor/link icons (🔗) that appear next to headings.
+         * Content links (e.g., klicksafe.de) remain visible and clickable.
+         * External links (http://, https://) are explicitly preserved.
+         */
         a[aria-label="Link to this section"] { 
             display: none !important; 
         }
@@ -325,15 +362,32 @@ def inject_theme_css():
         a.anchor-link { 
             display: none !important; 
         }
+        a[class*="anchor"] { 
+            display: none !important; 
+        }
+        a[class*="header"] { 
+            display: none !important; 
+        }
         .stMarkdown a[href^="#"][aria-label] { 
             display: none !important; 
+        }
+        .stMarkdown h1 > a,
+        .stMarkdown h2 > a,
+        .stMarkdown h3 > a,
+        .stMarkdown h4 > a,
+        .stMarkdown h5 > a,
+        .stMarkdown h6 > a {
+            display: none !important;
         }
         h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { 
             display: none !important; 
         }
-        /* Preserve external links - only hide anchor links */
+        /* Preserve external links and content links - only hide anchor links */
         .stMarkdown a[href^="http://"],
         .stMarkdown a[href^="https://"] {
+            display: inline !important;
+        }
+        .stMarkdown a:not([href^="#"]) {
             display: inline !important;
         }
         

@@ -153,3 +153,15 @@ All critical checks passed:
 
 **Ready for CodeSpring submission and recruiter review.**
 
+---
+
+## UI Polish Smoke Checklist
+
+Manual verification steps for final UI polish:
+
+1. Heading anchor icon (🔗) is hidden - no chain icon appears next to headings
+2. klicksafe.de link is visible and clickable in "Get Professional Help" expander
+3. Tab key shows focus ring on buttons and textarea when navigating with keyboard
+4. GREEN/YELLOW/RED flows behave as expected - status dots, explanations, and help sections render correctly
+5. Primary button uses brand color (neutral blue, not red/danger) - "Analyze Chat" button is styled with brand blue
+
