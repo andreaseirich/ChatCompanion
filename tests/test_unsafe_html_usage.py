@@ -73,6 +73,13 @@ def is_safe_usage(line_content: str, context: str) -> bool:
     """
     Check if unsafe_allow_html usage is safe (static content only).
     
+    STRICT RULES:
+    - Only constant literal strings are allowed
+    - NO f-strings with variables
+    - NO .format() with variables
+    - NO string concatenation with variables
+    - NO variable-derived content
+    
     Args:
         line_content: The line containing unsafe_allow_html
         context: Surrounding code context
@@ -83,67 +90,70 @@ def is_safe_usage(line_content: str, context: str) -> bool:
     combined = (line_content + ' ' + context)
     combined_lower = combined.lower()
     
-    # Exception: render_card function definition (not used with user content, function not called anywhere)
-    # This function is defined but never used, so it's safe to ignore
-    if 'def render_card' in context:
-        return True
-    
     # First check if it matches any safe patterns (static HTML, CSS, etc.)
     for safe_pattern in SAFE_PATTERNS:
         if re.search(safe_pattern, combined_lower, re.IGNORECASE):
             return True
     
-    # Check if it's a static HTML string (quoted string with HTML tags)
+    # STRICT CHECK: Fail if f-string with variable interpolation
+    # Pattern: f"<div>{variable}</div>" or f'<div>{variable}</div>'
+    if re.search(r'f["\']', combined):
+        # Check if f-string contains variable interpolation (curly braces with content)
+        if re.search(r'\{[^}]+\}', combined):
+            # This is an f-string with interpolation - fail
+            return False
+    
+    # STRICT CHECK: Fail if .format() is used
+    # Pattern: "<div>{}</div>".format(variable) or "<div>{var}</div>".format(var=variable)
+    if '.format(' in combined:
+        # Check if it's in the context of st.markdown with unsafe_allow_html
+        if 'st.markdown' in combined_lower and 'unsafe_allow_html' in combined_lower:
+            return False
+    
+    # STRICT CHECK: Fail if string concatenation with variables
+    # Pattern: "<div>" + variable + "</div>" or variable + "<div>"
+    if '+' in combined:
+        for dangerous_var in DANGEROUS_VARIABLES:
+            escaped_var = re.escape(dangerous_var)
+            # Check for concatenation patterns
+            concat_patterns = [
+                rf'["\'].*\+.*\b{escaped_var}\b',  # String + variable
+                rf'\b{escaped_var}\b.*\+.*["\']',  # Variable + string
+            ]
+            for pattern in concat_patterns:
+                if re.search(pattern, combined, re.IGNORECASE):
+                    return False
+    
+    # STRICT CHECK: Fail if st.markdown called with variable directly
+    # Pattern: st.markdown(variable, unsafe_allow_html=True)
+    # Extract the first argument to st.markdown
+    markdown_match = re.search(r'st\.markdown\s*\(([^,)]+)', combined, re.IGNORECASE)
+    if markdown_match:
+        first_arg = markdown_match.group(1).strip()
+        # If first arg is not a quoted string, it's likely a variable
+        if not (first_arg.startswith('"') or first_arg.startswith("'")):
+            # Check if it's a dangerous variable
+            for dangerous_var in DANGEROUS_VARIABLES:
+                if dangerous_var in first_arg:
+                    return False
+    
+    # Check if it's a static HTML string (quoted string with HTML tags, no variables)
     # Static HTML strings are safe - they don't contain user content
     if re.search(r'st\.markdown\(["\']<', combined):
-        # Static HTML string in quotes - safe
-        return True
-    
-    # Check if any dangerous variables are actually concatenated into the HTML
-    # Look for patterns where the variable is used in the HTML rendering
-    for dangerous_var in DANGEROUS_VARIABLES:
-        escaped_var = re.escape(dangerous_var)
-        # Pattern: variable used in string concatenation with HTML
-        # e.g., "text" + variable or variable + "text" or f"text {variable}"
-        dangerous_patterns = [
-            rf'["\'].*\+.*\b{escaped_var}\b',  # String + variable
-            rf'\b{escaped_var}\b.*\+.*["\']',  # Variable + string
-            r'f["\'].*\{.*' + escaped_var,  # F-string with variable (use regular string)
-            rf'st\.markdown\([^)]*{escaped_var}',  # st.markdown with variable directly
-        ]
-        for pattern in dangerous_patterns:
-            if re.search(pattern, combined, re.IGNORECASE):
+        # Verify it's a constant literal (not f-string, not .format, not concatenated)
+        # Extract the string argument
+        string_match = re.search(r'st\.markdown\(["\']([^"\']*)["\']', combined)
+        if string_match:
+            string_content = string_match.group(1)
+            # If it contains { or } or +, it might be dynamic
+            if '{' in string_content or '}' in string_content:
+                # Could be f-string or .format - already checked above, but double-check
                 return False
-    
-    # If it contains HTML tags and no dangerous variables, it's likely static HTML
-    if '<' in combined:
-        # Check if there's actual variable concatenation (not just variable name in context)
-        has_concatenation = False
-        if '+' in combined:
-            for dangerous_var in DANGEROUS_VARIABLES:
-                # Check if variable appears near concatenation operator
-                var_pattern = rf'\b{re.escape(dangerous_var)}\b'
-                if re.search(var_pattern, combined, re.IGNORECASE):
-                    # Check if variable is actually concatenated (not just in comments/docstrings)
-                    # Look for pattern: "string" + variable or variable + "string"
-                    concat_patterns = [
-                        rf'["\'].*\+.*{re.escape(dangerous_var)}',
-                        rf'{re.escape(dangerous_var)}.*\+.*["\']',
-                    ]
-                    for pattern in concat_patterns:
-                        if re.search(pattern, combined, re.IGNORECASE):
-                            has_concatenation = True
-                            break
-                    if has_concatenation:
-                        break
-        
-        if not has_concatenation:
-            # Static HTML with no variable concatenation - safe
+            # If it's a simple quoted string with HTML, it's safe
             return True
     
-    # Default: if no dangerous patterns found, consider safe
-    # (most unsafe_allow_html usage in this codebase is for static HTML)
-    return True
+    # Default: fail if uncertain (conservative approach)
+    return False
 
 
 def test_no_unsafe_html_with_user_content():
