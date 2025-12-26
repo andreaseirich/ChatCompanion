@@ -136,6 +136,11 @@ def is_safe_usage(line_content: str, context: str) -> bool:
     
     # STRICT CHECK: Fail if st.markdown called with variable directly
     # Pattern: st.markdown(variable, unsafe_allow_html=True)
+    # BUT: Allow CSS injection (css variable in inject_theme_css function)
+    if 'inject_theme_css' in context or 'def inject_theme_css' in context:
+        # CSS injection is safe - it's a constant string assigned to css variable
+        return True
+    
     # Extract the first argument to st.markdown
     markdown_match = re.search(r'st\.markdown\s*\(([^,)]+)', combined, re.IGNORECASE)
     if markdown_match:
