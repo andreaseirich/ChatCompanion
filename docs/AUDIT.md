@@ -112,7 +112,13 @@ To prevent future inclusion of internal artifacts:
 1. **Repository Hygiene Checker**: `scripts/repo_hygiene_check.py` scans for disallowed patterns
 2. **Gitignore Rules**: Build artifacts and excluded directories are gitignored
 3. **Contributing Guidelines**: CONTRIBUTING.md includes rules about excluding internal files
-4. **CI/CD Integration**: Hygiene checker can be integrated into GitHub Actions
+4. **CI/CD Integration**: Hygiene checker runs automatically via GitHub Actions workflow
+
+## Git History
+
+**Note**: Some internal files may exist in Git history from previous commits. These files have been removed from the current repository and are excluded via `.gitignore`. 
+
+If history cleanup is needed (e.g., for sensitive content), see [`docs/HISTORY_CLEANUP.md`](HISTORY_CLEANUP.md) for instructions on using `git filter-repo` or BFG Repo-Cleaner.
 
 ---
 
