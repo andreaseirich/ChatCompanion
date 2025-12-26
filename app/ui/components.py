@@ -136,7 +136,7 @@ def render_behavior_badges(matches: dict) -> None:
     if not matches:
         return
     
-    # Category to icon mapping
+    # Category to icon mapping (safe: constant mapping)
     category_icons = {
         "pressure": "⏳",
         "secrecy": "🤫",
@@ -147,7 +147,7 @@ def render_behavior_badges(matches: dict) -> None:
         "grooming": "⚠️",
     }
     
-    # Category to display name mapping
+    # Category to display name mapping (safe: constant mapping)
     category_names = {
         "pressure": "Pressure",
         "secrecy": "Secrecy",
@@ -160,24 +160,22 @@ def render_behavior_badges(matches: dict) -> None:
     
     st.markdown("**Observed behaviors:**")
     
-    # Render badges in a flex container
-    badge_html = '<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">'
+    # Render badges using Streamlit columns (safer than HTML)
+    # Use native components to avoid unsafe HTML with category names
+    badge_cols = st.columns(min(len([c for c in matches.values() if c]), 4))
+    col_idx = 0
     
     for category, category_matches in matches.items():
         if category_matches:
+            if col_idx >= len(badge_cols):
+                break
             icon = category_icons.get(category.lower(), "•")
             name = category_names.get(category.lower(), category)
-            badge_class = f"behavior-badge {category.lower().replace('_', '_')}"
             
-            badge_html += (
-                f'<span class="{badge_class}">'
-                f'{icon} {name}'
-                f'</span>'
-            )
-    
-    badge_html += '</div>'
-    
-    st.markdown(badge_html, unsafe_allow_html=True)
+            with badge_cols[col_idx]:
+                # Use Streamlit native markdown with emoji (safe)
+                st.markdown(f"{icon} **{name}**")
+            col_idx += 1
 
 
 def render_next_steps(risk_level: RiskLevel) -> None:
