@@ -130,13 +130,14 @@ ChatCompanion follows a modular, layered architecture with strict separation of 
    - Text normalization, sentence segmentation (`app/utils/text_processing.py`)
 3. **Context Gating**: Time-phrase patterns (e.g., "right now") are context-gated to reduce false positives—only matches in demand context are counted as pressure. Includes cross-sentence coercion detection (demand verb in one sentence, time urgency in adjacent sentence)
 4. **Banter Detection**: Stricter banter heuristics require mutuality (both sides use joking markers) AND repair markers (closure phrases) to suppress bullying scores. Hard blockers (coercive control, threats, severe insults) prevent banter suppression
-4. **Parallel Analysis**:
+5. **Parallel Analysis**:
    - Rules engine scans for patterns (`app/rules/rule_engine.py`)
    - Model inference generates embeddings and classifications (`app/models_local/`)
-5. **Aggregation**: Detection engine combines results (`app/detection/aggregator.py`)
-6. **Scoring**: Risk level calculated (weighted combination)
-7. **Explanation**: Child-friendly text generated with evidence (`app/detection/explainer.py`) - uses raw text for quotes
-8. **Display**: UI shows traffic light, explanation, and advice
+6. **Aggregation**: Detection engine combines results (`app/detection/aggregator.py`)
+7. **Scoring**: Risk level calculated (weighted combination)
+8. **Threat-Gating**: Before generating explanations, the system checks if threat/ultimatum patterns actually matched. Threat language (e.g., "threats", "consequences", "withdrawal") appears in explanations ONLY when threat patterns are detected. Supports cross-sentence threat detection (threat markers in proximity to matched patterns)
+9. **Explanation**: Child-friendly text generated with evidence (`app/detection/explainer.py`) - uses raw text for quotes. Observed behaviors are strictly evidence-based (derived from matched patterns only)
+10. **Display**: UI shows traffic light, explanation, and advice
 
 ## Technology Stack
 
@@ -207,6 +208,20 @@ The system provides explainable results through:
 2. **Category Scores**: Risk level for each category (bullying, manipulation, etc.)
 3. **Evidence Extraction**: Specific phrases that caused flags
 4. **Child-Friendly Explanations**: Simple language explaining what was detected
+5. **Evidence-Based Observed Behaviors**: Behaviors listed in explanations are derived only from matched patterns—no false accusations
+6. **Strict Threat-Gating**: Threat language (e.g., "threats", "consequences", "withdrawal") appears in explanations only when threat/ultimatum patterns are actually matched. Supports cross-sentence detection (threat markers in proximity to matched patterns)
+
+### Debug Counters
+
+For developers, the system provides debug information with standardized format:
+
+- **Pattern Match Counts**: `"{category}: {total_instances} instance(s) across {unique_patterns} pattern(s)"`
+  - **Instances**: Total number of pattern matches found (each occurrence counts as one instance)
+  - **Patterns**: Number of distinct pattern types that matched (unique pattern IDs)
+  - Example: If "answer now" appears 3 times and "reply immediately" appears 2 times, that's 5 instances across 2 patterns
+- **GREEN Debug Note**: When risk level is GREEN but category scores are non-zero, a debug note appears:
+  - "Note: GREEN suppresses risk. Category scores may show raw signals even when no patterns match."
+  - This clarifies why developers might see non-zero scores in GREEN state (raw ML signals without pattern evidence)
 
 ## Error Handling
 

@@ -69,6 +69,8 @@ ChatCompanion is designed with privacy and security in mind:
 - **No Telemetry**: No tracking or analytics
 - **No Persistence**: Chat text is not saved by default
 - **Open Source**: Code is available for security review
+- **Automated Security Scanning**: CodeQL analysis runs on push and pull requests (see `.github/workflows/codeql-analysis.yml`)
+- **Dependency Updates**: Regular dependency updates recommended (check `requirements.txt`)
 
 We encourage security researchers and users to review the code and report any concerns.
 

@@ -51,6 +51,14 @@ This file tracks project progress, phases, and tasks.
   - Added hard blockers to prevent banter suppression for coercive control
   - Comprehensive test suite for youth slang and banter detection
   - Documentation updates (README, ARCHITECTURE, ETHICS, CHANGELOG, CHECKPOINTS)
+- [x] Post-Test Calibration: Threat-Gating + GREEN Debug Consistency (2025-01-27)
+  - Implemented strict threat-gating: threat language only when threat patterns match
+  - Evidence-based observed behaviors: all descriptions derived from matched patterns
+  - GREEN debug note for non-zero scores without matches
+  - Standardized pattern match counts format (instances vs patterns)
+  - Cross-sentence threat detection support
+  - Comprehensive explanation accuracy tests
+  - Documentation sync (README, ARCHITECTURE, ETHICS, CHANGELOG, CHECKPOINTS)
 
 ### In Progress 🔄
 

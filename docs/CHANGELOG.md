@@ -64,6 +64,11 @@ Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
 
 ### Added
 
+- Strict threat-gating in explanations (2025-01-27): threat language appears only when threat/ultimatum patterns match (supports cross-sentence detection via full_text proximity checking)
+- Evidence-based observed behaviors: all behavior descriptions in explanations are derived from matched patterns only—no false accusations
+- GREEN debug note: "Note: GREEN suppresses risk. Category scores may show raw signals even when no patterns match." (clarifies non-zero scores in GREEN state)
+- Standardized pattern match counts format: "{category}: {total_instances} instance(s) across {unique_patterns} pattern(s)" (distinguishes instances vs unique patterns)
+- Explanation accuracy tests for threat-gating: YELLOW without threats, YELLOW/RED with ultimatums, evidence-based behavior validation
 - Slang normalization layer for English youth/online slang and abbreviations
 - Support for common abbreviations (e.g., "u" → "you", "lol" → "laughing", "jk" → "just kidding")
 - Emoji tone detection (joking vs. annoyed markers)

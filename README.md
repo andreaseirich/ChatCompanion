@@ -46,15 +46,16 @@ ChatCompanion provides:
 - Grooming indicators
 
 ✅ **Traffic Light Indicator**
-- 🟢 Green: Conversation looks safe
-- 🟡 Yellow: Some concerning patterns detected
-- 🔴 Red: High-risk situation—talk to a trusted adult
+- 🟢 Green: Conversation looks safe - "No warning signs detected" (clean messaging, no pattern callouts)
+- 🟡 Yellow: Some concerning patterns detected - mentions "pressure or guilt-making language" by default; threats only when threat patterns match
+- 🔴 Red: High-risk situation—talk to a trusted adult - "Need Immediate Help?" appears only in RED
 
 ✅ **Child-Friendly Explanations**
 - Simple language suitable for ages 10-16
 - Clear, calm titles and messages for each risk level
-- Evidence snippets showing what was flagged
+- **Evidence-based**: Observed behaviors are listed only when supported by matched patterns
 - Supportive, non-shaming tone
+- No false accusations: explanations match evidence (no "threats" wording unless threat patterns actually match)
 
 ✅ **Help & Advice**
 - "This makes me uneasy" button for immediate support
@@ -110,6 +111,8 @@ The system includes a slang normalization layer to handle common English youth/o
 - **Hybrid Detection**: Combines rule-based pattern matching (60%) with ML semantic analysis (40%)
 - **Rules-Only Fallback**: Works fully offline even if ML models aren't available
 - **Explainable Results**: Every detection includes evidence and reasoning
+- **Evidence-Based Explanations**: Observed behaviors are listed only when supported by matched patterns
+- **Strict Threat-Gating**: Threat language appears only when threat/ultimatum patterns match (including cross-sentence detection)
 
 See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed technical documentation.
 
@@ -208,6 +211,17 @@ The application is designed to run completely offline after initial setup. If ML
 
 See [ETHICS.md](docs/ETHICS.md) for detailed privacy and ethics information.
 
+## Developer Debug Information
+
+For developers and testers, the system provides debug information:
+
+- **Pattern Match Counts**: Format `"{category}: {total_instances} instance(s) across {unique_patterns} pattern(s)"`
+  - `total_instances`: Total number of pattern matches found (each occurrence counts)
+  - `unique_patterns`: Number of distinct pattern types that matched
+- **GREEN Debug Note**: When risk level is GREEN but category scores are non-zero, a debug note appears:
+  - "Note: GREEN suppresses risk. Category scores may show raw signals even when no patterns match."
+  - This clarifies why developers might see non-zero scores in GREEN state
+
 ## Limitations
 
 ### Detection Accuracy
@@ -216,6 +230,7 @@ See [ETHICS.md](docs/ETHICS.md) for detailed privacy and ethics information.
 - Some risky conversations may not be detected
 - Some safe conversations may be flagged incorrectly
 - The system is a **tool to help awareness**, not a definitive safety guarantee
+- **Evidence-Based**: Explanations are derived from matched patterns only—no false accusations
 
 ### Scope
 

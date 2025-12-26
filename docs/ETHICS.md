@@ -69,6 +69,7 @@ ChatCompanion explicitly does NOT:
 - **False positives/negatives possible**: Friendly banter with slang or irony may occasionally be flagged, or hostile slang may be missed—the tool is a helper, not a definitive judge
 - **System stays careful and non-judgmental**: The system is designed to be supportive rather than decisive, recognizing that language interpretation requires human judgment
 - **RED signals protected**: Coercive control, secrecy/isolation, and proof-of-compliance patterns are never weakened by banter suppression
+- **Evidence-based explanations**: The system avoids false accusations—explanations and observed behaviors are derived only from matched patterns. Threat language appears only when threat/ultimatum patterns are actually detected
 
 ## User Responsibility
 
