@@ -1,5 +1,6 @@
 """Explanation generation for risk detection results."""
 
+import re
 from typing import Dict, List
 
 from app.rules.patterns import PatternMatch
@@ -105,28 +106,17 @@ class ExplanationGenerator:
             )
             return " ".join(explanation_parts)
         
-        # If GREEN but has matches (weak signals), explain differently
+        # If GREEN but has matches (weak signals), still say "No warning signs"
+        # Do NOT mention patterns or evidence in user-facing text
         if (risk_level == RiskLevel.GREEN or overall_score < 0.3) and not has_meaningful_scores:
             explanation_parts.append(
                 "Analysis checked for patterns of bullying, manipulation, pressure, secrecy demands, "
                 "guilt-shifting, and grooming indicators."
             )
             explanation_parts.append(
-                "No strong patterns of these risky behaviors were detected in this conversation."
+                "No warning signs detected in this conversation."
             )
-            # Only mention weak matches if they're actually present and meaningful
-            if matches and has_any_matches:
-                # Filter out very weak matches (confidence < 0.5)
-                meaningful_matches = {
-                    cat: [m for m in cat_matches if m.confidence >= 0.5]
-                    for cat, cat_matches in matches.items()
-                }
-                if any(len(m) > 0 for m in meaningful_matches.values()):
-                    evidence = self._extract_evidence(meaningful_matches)
-                    if evidence:
-                        explanation_parts.append(
-                            f"Some mild patterns were noted but are not concerning: {evidence}"
-                        )
+            # Do NOT mention patterns or evidence - keep it clean for GREEN
             return " ".join(explanation_parts)
         
         # Only proceed with explanation if there are matches OR meaningful scores
@@ -143,25 +133,17 @@ class ExplanationGenerator:
             )
             return " ".join(explanation_parts)
         
-        # If we have matches but still GREEN, it means weak signals - be more specific
+        # If we have matches but still GREEN, it means weak signals
+        # Still return clean "No warning signs" message - no pattern mentions
         if risk_level == RiskLevel.GREEN and has_any_matches:
-            # Check if matches are truly weak (all confidence < 0.5)
-            all_weak = all(
-                all(m.confidence < 0.5 for m in cat_matches)
-                for cat_matches in matches.values()
-                if cat_matches
+            explanation_parts.append(
+                "Analysis checked for patterns of bullying, manipulation, pressure, secrecy demands, "
+                "guilt-shifting, and grooming indicators."
             )
-            if all_weak:
-                explanation_parts.append(
-                    "Analysis detected some very mild patterns, but they appear to be isolated and not concerning."
-                )
-            else:
-                explanation_parts.append(
-                    "Analysis detected some patterns, but they appear to be isolated or mild."
-                )
-            evidence = self._extract_evidence(matches)
-            if evidence:
-                explanation_parts.append(f"Patterns noted: {evidence}")
+            explanation_parts.append(
+                "No warning signs detected in this conversation."
+            )
+            # Do NOT mention patterns or evidence - keep GREEN explanations clean
             return " ".join(explanation_parts)
 
         # For YELLOW/RED: Explain what WAS detected with specific details
@@ -268,22 +250,27 @@ class ExplanationGenerator:
             if top_category == "pressure" and top_score >= 0.6:
                 # Check what pressure patterns were actually detected
                 pressure_matches = matches.get("pressure", [])
+                # Check for actual threat patterns (not just any pressure)
                 has_blackmail = any(
                     "emotional blackmail" in m.pattern.description.lower() or
                     "friendship threat" in m.pattern.description.lower()
                     for m in pressure_matches
                 )
                 has_withdrawal = any(
-                    "withdrawal" in m.pattern.description.lower() or
                     "threats of withdrawal" in m.pattern.description.lower()
                     for m in pressure_matches
                 )
                 has_ultimatums = any(
-                    "ultimatum" in m.pattern.description.lower() or 
-                    "threat" in m.pattern.description.lower() or
-                    "relationship threats" in m.pattern.description.lower()
+                    "ultimatum" in m.pattern.description.lower() or
+                    ("relationship threat" in m.pattern.description.lower() and "threat" in m.pattern.description.lower())
                     for m in pressure_matches
                 )
+                # Check matched text for threat markers
+                has_threat_in_text = any(
+                    re.search(r"\b(or else|we'?re done|don'?t expect|if you don'?t)", m.matched_text, re.IGNORECASE)
+                    for m in pressure_matches
+                )
+                
                 has_strong_commands = any(
                     "strong pressure" in m.pattern.description.lower() or
                     "commands" in m.pattern.description.lower()
@@ -295,18 +282,21 @@ class ExplanationGenerator:
                     for m in pressure_matches
                 )
                 
+                # Only mention threats if threat patterns are actually detected
                 if has_blackmail:
                     explanation_parts.append(
                         "This conversation shows emotional blackmail with threats to end the friendship if demands are not met immediately."
                     )
-                elif has_withdrawal:
-                    explanation_parts.append(
-                        "This conversation shows threats of withdrawal of affection or attention if demands are not met."
-                    )
-                elif has_ultimatums:
-                    explanation_parts.append(
-                        "This conversation shows repeated pressure with threats of consequences if demands are not met."
-                    )
+                elif has_withdrawal or has_ultimatums or has_threat_in_text:
+                    # Threat patterns detected
+                    if has_withdrawal:
+                        explanation_parts.append(
+                            "This conversation shows threats of withdrawal of affection or attention if demands are not met."
+                        )
+                    elif has_ultimatums or has_threat_in_text:
+                        explanation_parts.append(
+                            "This conversation shows pressure with threats of consequences if demands are not met."
+                        )
                 elif has_strong_commands:
                     explanation_parts.append(
                         "This conversation shows strong pressure commands demanding immediate compliance."
@@ -316,8 +306,9 @@ class ExplanationGenerator:
                         "This conversation shows emotional pressure to respond immediately or disclose feelings."
                     )
                 else:
+                    # Default: pressure without threats
                     explanation_parts.append(
-                        "This conversation shows repeated pressure to act quickly or comply with demands."
+                        "This conversation shows pressure to act quickly or comply with demands."
                     )
             elif top_category == "bullying" and top_score >= 0.6:
                 # Check what bullying patterns were detected
@@ -455,7 +446,7 @@ class ExplanationGenerator:
             # Mention it if score > 0.20 OR patterns detected
             guilt_shifting_score = category_scores.get("guilt_shifting", 0.0)
             guilt_matches = matches.get("guilt_shifting", [])
-            has_guilt_shifting = guilt_shifting_score > 0.20 or len(guilt_matches) > 0
+            has_guilt_shifting = guilt_shifting_score >= 0.18 or len(guilt_matches) > 0
             
             if top_category == "guilt_shifting" and top_score >= 0.5:
                 # Check what guilt-shifting patterns were actually detected
@@ -671,10 +662,14 @@ class ExplanationGenerator:
                     "threats of withdrawal" in m.pattern.description.lower()
                     for m in category_matches
                 )
+                # Check for actual threat patterns in matched text
                 has_ultimatums = any(
-                    "ultimatum" in m.pattern.description.lower() or 
-                    "threat" in m.pattern.description.lower() or
-                    "relationship threats" in m.pattern.description.lower()
+                    "ultimatum" in m.pattern.description.lower() or
+                    ("relationship threat" in m.pattern.description.lower() and "threat" in m.pattern.description.lower())
+                    for m in category_matches
+                )
+                has_threat_in_text = any(
+                    re.search(r"\b(or else|we'?re done|don'?t expect|if you don'?t)", m.matched_text, re.IGNORECASE)
                     for m in category_matches
                 )
                 has_emotional_pressure = any(
@@ -690,9 +685,10 @@ class ExplanationGenerator:
                 )
                 
                 # Priority: specific behaviors first
+                # Only mention threats if threat patterns are actually detected
                 if has_withdrawal_threats:
                     behavior_parts.append("threats of withdrawal of affection or attention")
-                elif has_ultimatums:
+                elif has_ultimatums or has_threat_in_text:
                     behavior_parts.append("threats of withdrawal or relationship consequences")
                 elif has_emotional_pressure:
                     behavior_parts.append("emotional pressure to respond right now")
