@@ -26,7 +26,7 @@ DISALLOWED_PATTERNS = [
     "private",
     "notes",
     "scratch",
-    "local",  # Except .local/ directory itself
+    "local",
 ]
 
 # Allowed directories (excluded from scanning)
