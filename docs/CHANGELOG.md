@@ -62,6 +62,13 @@ Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
 
 ## [Unreleased]
 
+### 2025-01-27 - Final Submission Readiness Audit
+- **Audit**: Comprehensive final review for CodeSpring submission
+- **CI**: Verified workflows (hygiene check + tests) run correctly on push/PR
+- **Docs**: Verified all documentation consistency with code behavior
+- **Hygiene**: Confirmed no internal files or secrets tracked
+- **Status**: Repository confirmed submission-ready
+
 ### Added
 
 - Strict threat-gating in explanations (2025-01-27): threat language appears only when threat/ultimatum patterns match (supports cross-sentence detection via full_text proximity checking)
