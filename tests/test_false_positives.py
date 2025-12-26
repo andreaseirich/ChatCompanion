@@ -212,3 +212,26 @@ def test_acceptance_criteria_red_coercive_control():
         f"Expected multiple pattern matches for RED case, got {total_matches}"
     )
 
+
+def test_youth_friendly_banter_slang():
+    """Test that youth-friendly banter with slang abbreviations is classified as GREEN."""
+    engine = DetectionEngine(use_ml=False)
+    
+    text = """
+    Friend: ur being so ridiculous rn lol
+    You: idk what u mean jk 😂
+    Friend: haha all good np
+    You: ttyl
+    """
+    
+    result = engine.analyze(text)
+    
+    assert result.risk_level == RiskLevel.GREEN, (
+        f"Expected GREEN for youth-friendly banter with slang, got {result.risk_level}. "
+        f"Overall score: {result.overall_score}"
+    )
+    assert result.category_scores.get("bullying", 0.0) < 0.5, (
+        f"Bullying score should be low for friendly banter, "
+        f"got {result.category_scores.get('bullying', 0.0)}"
+    )
+
