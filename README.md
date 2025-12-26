@@ -251,6 +251,8 @@ The test suite includes:
 
 See [`tests/`](tests/) for complete test coverage.
 
+**Note**: Tests run automatically in CI on every push and pull request.
+
 ## Privacy & Data Handling
 
 ### Privacy Guarantees

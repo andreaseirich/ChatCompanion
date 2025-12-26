@@ -45,18 +45,23 @@ DISALLOWED_FILENAMES = [
     r"master_prompt",
 ]
 
-# Secret-like content patterns (regex)
+# Secret-like content patterns (regex) - only strong signatures
 SECRET_PATTERNS = [
     (r"BEGIN\s+(RSA\s+)?PRIVATE\s+KEY", "Private key detected"),
-    (r"-----BEGIN", "Encoded key/certificate detected"),
-    (r"api[_-]?key\s*=\s*['\"]?[a-zA-Z0-9]{20,}", "API key pattern detected"),
-    (r"token\s*=\s*['\"]?[a-zA-Z0-9]{20,}", "Token pattern detected"),
-    (r"secret\s*=\s*['\"]?[a-zA-Z0-9]{20,}", "Secret pattern detected"),
-    (r"password\s*=\s*['\"]?[^'\"]{8,}", "Password pattern detected"),
-    (r"AWS_ACCESS_KEY_ID\s*=", "AWS access key detected"),
-    (r"AWS_SECRET_ACCESS_KEY\s*=", "AWS secret key detected"),
-    (r"GITHUB_TOKEN\s*=", "GitHub token detected"),
-    (r"SLACK_TOKEN\s*=", "Slack token detected"),
+    (r"-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY", "Private key block detected"),
+    (r"-----BEGIN\s+(CERTIFICATE|X509)", "Certificate detected"),
+    (r"api[_-]?key\s*=\s*['\"]?[a-zA-Z0-9]{32,}", "API key pattern detected (32+ chars)"),
+    (r"token\s*=\s*['\"]?[a-zA-Z0-9]{32,}", "Token pattern detected (32+ chars)"),
+    (r"secret[_-]?key\s*=\s*['\"]?[a-zA-Z0-9]{32,}", "Secret key pattern detected"),
+    (r"password\s*=\s*['\"]?[^'\"]{12,}", "Password pattern detected (12+ chars)"),
+    (r"AWS_ACCESS_KEY_ID\s*=\s*['\"]?[A-Z0-9]{20,}", "AWS access key ID detected"),
+    (r"AWS_SECRET_ACCESS_KEY\s*=\s*['\"]?[A-Za-z0-9/+=]{40,}", "AWS secret access key detected"),
+    (r"GITHUB_TOKEN\s*=\s*['\"]?(ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9]{36,}", "GitHub token detected"),
+    (r"SLACK_TOKEN\s*=\s*['\"]?xox[baprs]-[0-9a-zA-Z-]{10,}", "Slack token detected"),
+    (r"connection[_-]?string\s*=\s*['\"].*password.*['\"]", "Connection string with password detected"),
+    (r"mongodb[+srv]*://[^:]+:[^@]+@", "MongoDB connection string with credentials detected"),
+    (r"postgresql://[^:]+:[^@]+@", "PostgreSQL connection string with credentials detected"),
+    (r"mysql://[^:]+:[^@]+@", "MySQL connection string with credentials detected"),
 ]
 
 # Allowed directories (excluded from scanning)
@@ -119,12 +124,27 @@ def check_filename_patterns(filename: str) -> List[str]:
     return violations
 
 
+def is_binary_file(file_path: Path) -> bool:
+    """Check if file is binary by looking for null bytes."""
+    try:
+        with open(file_path, 'rb') as f:
+            chunk = f.read(8192)  # Read first 8KB
+            return b'\x00' in chunk
+    except (OSError, PermissionError):
+        return True  # Assume binary if we can't read
+    
+    # Also check common binary extensions
+    binary_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.pdf', '.zip', '.tar', '.gz', 
+                         '.so', '.dll', '.exe', '.bin', '.safetensors', '.pt', '.pth', '.onnx'}
+    return file_path.suffix.lower() in binary_extensions
+
+
 def check_file_content(file_path: Path) -> List[Tuple[int, str]]:
     """Check file content for secret patterns. Returns list of (line_number, violation)."""
     violations = []
     
-    # Skip code files - they may contain patterns as strings/regex
-    if file_path.suffix in ['.py', '.js', '.ts', '.java', '.cpp', '.c', '.go', '.rs']:
+    # Skip binary files
+    if is_binary_file(file_path):
         return violations
     
     # Check if file is too large
@@ -144,6 +164,12 @@ def check_file_content(file_path: Path) -> List[Tuple[int, str]]:
     try:
         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
             for line_num, line in enumerate(f, 1):
+                # Skip comments in code files (reduce false positives)
+                stripped = line.strip()
+                if stripped.startswith('#') or stripped.startswith('//') or stripped.startswith('*'):
+                    # Still check for strong signatures even in comments
+                    pass
+                
                 for pattern, message in SECRET_PATTERNS:
                     # Skip if pattern is in allowlist
                     pattern_key = pattern.split()[0].lower() if pattern.split() else ""
@@ -151,7 +177,9 @@ def check_file_content(file_path: Path) -> List[Tuple[int, str]]:
                         continue
                     
                     if re.search(pattern, line, re.IGNORECASE):
-                        violations.append((line_num, f"{message}: {line.strip()[:60]}"))
+                        # Show context but truncate long lines
+                        context = line.strip()[:80]
+                        violations.append((line_num, f"{message}: {context}"))
     except (UnicodeDecodeError, PermissionError, OSError):
         # Skip binary files or files we can't read
         pass
