@@ -141,7 +141,7 @@ class ExplanationGenerator:
         has_any_matches = bool(matches) and any(len(m) > 0 for m in matches.values())
         has_meaningful_scores = any(score >= 0.3 for score in category_scores.values())
         
-        # GREEN criteria from Master Prompt:
+        # GREEN criteria:
         # - boundaries are expressed AND respected
         # - scheduling or delays are accepted
         # - no guilt language

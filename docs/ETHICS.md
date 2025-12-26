@@ -115,5 +115,5 @@ We are committed to:
 
 ---
 
-*This ethics statement is aligned with the Master Prompt and project goals. It will be updated as the project evolves.*
+*This ethics statement reflects the project's core principles and will be updated as the project evolves.*
 
