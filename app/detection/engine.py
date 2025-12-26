@@ -233,10 +233,20 @@ class DetectionEngine:
                 overall_score = 0.0
             else:
                 risk_level = self._determine_risk_level(overall_score)
+        
+        # Debug note for GREEN: if category scores are non-zero but no patterns match
+        # This clarifies why developers might see non-zero scores in GREEN state
+        if risk_level == RiskLevel.GREEN and not has_any_matches:
+            has_non_zero_scores = any(score > 0.0 for score in category_scores.values()) if category_scores else False
+            if has_non_zero_scores:
+                logger.debug(
+                    "Note: GREEN suppresses risk. Category scores may show raw signals even when no patterns match."
+                )
 
         # Generate explanation (with overall_score for context)
+        # Pass original text for threat detection in cross-sentence contexts
         explanation = self.explainer.generate_explanation(
-            risk_level, category_scores, matches, overall_score
+            risk_level, category_scores, matches, overall_score, original_text=text
         )
 
         # Get context-appropriate advice based on risk level
@@ -295,12 +305,16 @@ class DetectionEngine:
             True if mutuality detected (both sides have joking markers)
         """
         import re
+        from app.detection.slang_normalizer import SlangNormalizer
         
         if len(turns) < 2:
             return False
         
         # Get last 6 turns
         recent_turns = turns[-6:] if len(turns) > 6 else turns
+        
+        # Normalize messages before checking for joking markers
+        normalizer = SlangNormalizer()
         
         # Joking markers (normalized)
         joking_patterns = [
@@ -314,9 +328,13 @@ class DetectionEngine:
         for speaker, message in recent_turns:
             if not speaker:
                 continue
-            # Check if this message has joking markers
+            # Normalize the message before checking for joking markers
+            normalized_message = normalizer.normalize_message(message)
+            normalized_msg_text = normalized_message.normalized_text.lower()
+            
+            # Check if this message has joking markers (in normalized form)
             has_joking = any(
-                re.search(pattern, message, re.IGNORECASE)
+                re.search(pattern, normalized_msg_text, re.IGNORECASE)
                 for pattern in joking_patterns
             )
             if has_joking:
@@ -337,6 +355,7 @@ class DetectionEngine:
             True if repair markers found near the end
         """
         import re
+        from app.detection.slang_normalizer import SlangNormalizer
         
         if len(turns) == 0:
             return False
@@ -344,16 +363,23 @@ class DetectionEngine:
         # Check last 2-3 messages
         last_messages = turns[-3:] if len(turns) >= 3 else turns
         
-        # Repair/closure markers
+        # Normalize messages before checking for repair markers
+        normalizer = SlangNormalizer()
+        
+        # Repair/closure markers (normalized)
         repair_patterns = [
             r"\b(jk|just kidding|just joking|kidding)\b",
             r"\b(all good|no worries|my bad|didn'?t mean it)\b",
-            r"\b(lol jk|haha jk)\b",
+            r"\b(lol jk|haha jk|laughing jk)\b",
         ]
         
         # Check if any of the last messages contain repair markers
         for speaker, message in last_messages:
-            if any(re.search(pattern, message, re.IGNORECASE) for pattern in repair_patterns):
+            # Normalize the message before checking for repair markers
+            normalized_message = normalizer.normalize_message(message)
+            normalized_msg_text = normalized_message.normalized_text.lower()
+            
+            if any(re.search(pattern, normalized_msg_text, re.IGNORECASE) for pattern in repair_patterns):
                 return True
         
         return False
@@ -451,7 +477,8 @@ class DetectionEngine:
         tone_markers = normalized_message.tone_markers
         
         # Hard blockers check FIRST - if present, banter suppression should NOT apply
-        if self._check_hard_blockers(normalized_text, matches):
+        has_hard_blockers = self._check_hard_blockers(normalized_text, matches)
+        if has_hard_blockers:
             return False
         
         # Extract message turns

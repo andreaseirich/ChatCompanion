@@ -59,12 +59,67 @@ class ExplanationGenerator:
         "If you feel unsafe, talk to a trusted person or support service immediately.",
     ]
 
+    def _has_threat_patterns(self, matches: Dict[str, List[PatternMatch]], full_text: str = "") -> bool:
+        """
+        Check if any threat/ultimatum patterns are matched.
+        
+        Threat patterns are ONLY explicit ultimatums/withdrawal/consequence pressure:
+        - Patterns with descriptions containing: "ultimatum", "relationship threat", 
+          "threats of withdrawal", "or else", "we're done", "if you don't... then..."
+        - Check both pattern descriptions AND matched text for threat markers
+        - Also check full_text for threat markers if provided (for cross-sentence threats)
+        
+        Args:
+            matches: Dictionary of category -> list of PatternMatch objects
+            full_text: Optional full text to check for threat markers (for cross-sentence threats)
+            
+        Returns:
+            True only if threat patterns are actually matched
+        """
+        threat_keywords = [
+            "ultimatum", "relationship threat", "threats of withdrawal",
+            "or else", "we're done", "i'm done", "it's over"
+        ]
+        
+        # Check pattern descriptions
+        for category, match_list in matches.items():
+            for match in match_list:
+                desc_lower = match.pattern.description.lower()
+                if any(keyword in desc_lower for keyword in threat_keywords):
+                    return True
+                
+                # Check matched text for explicit threat markers
+                matched_text_lower = match.matched_text.lower()
+                if re.search(r"\b(or else|we'?re done|i'?m done|it'?s over|if you don'?t.*then)\b", matched_text_lower):
+                    return True
+        
+        # Check full_text for threat markers if provided (for cross-sentence threats)
+        # This handles cases where threat is in a different sentence than the matched pattern
+        if full_text:
+            full_text_lower = full_text.lower()
+            if re.search(r"\b(or else|we'?re done|i'?m done|it'?s over|if you don'?t.*then)\b", full_text_lower):
+                # Verify that threat markers are in proximity to matched patterns
+                # (within same sentence or adjacent sentences)
+                for category, match_list in matches.items():
+                    for match in match_list:
+                        # Check if threat is in same sentence or adjacent to match
+                        threat_match = re.search(r"\b(or else|we'?re done|i'?m done|it'?s over|if you don'?t.*then)\b", full_text_lower)
+                        if threat_match:
+                            # Simple proximity check: threat within 200 chars of match
+                            threat_pos = threat_match.start()
+                            match_pos = match.position
+                            if abs(threat_pos - match_pos) < 200:
+                                return True
+        
+        return False
+
     def generate_explanation(
         self,
         risk_level: RiskLevel,
         category_scores: Dict[str, float],
         matches: Dict[str, List[PatternMatch]],
         overall_score: float = 0.0,
+        original_text: str = "",
     ) -> str:
         """
         Generate context-appropriate, specific explanation for detected risks.
@@ -250,26 +305,9 @@ class ExplanationGenerator:
             if top_category == "pressure" and top_score >= 0.6:
                 # Check what pressure patterns were actually detected
                 pressure_matches = matches.get("pressure", [])
-                # Check for actual threat patterns (not just any pressure)
-                has_blackmail = any(
-                    "emotional blackmail" in m.pattern.description.lower() or
-                    "friendship threat" in m.pattern.description.lower()
-                    for m in pressure_matches
-                )
-                has_withdrawal = any(
-                    "threats of withdrawal" in m.pattern.description.lower()
-                    for m in pressure_matches
-                )
-                has_ultimatums = any(
-                    "ultimatum" in m.pattern.description.lower() or
-                    ("relationship threat" in m.pattern.description.lower() and "threat" in m.pattern.description.lower())
-                    for m in pressure_matches
-                )
-                # Check matched text for threat markers
-                has_threat_in_text = any(
-                    re.search(r"\b(or else|we'?re done|don'?t expect|if you don'?t)", m.matched_text, re.IGNORECASE)
-                    for m in pressure_matches
-                )
+                
+                # Use strict threat detection - only mention threats if threat patterns are actually matched
+                has_threat = self._has_threat_patterns(matches, original_text)
                 
                 has_strong_commands = any(
                     "strong pressure" in m.pattern.description.lower() or
@@ -282,18 +320,28 @@ class ExplanationGenerator:
                     for m in pressure_matches
                 )
                 
-                # Only mention threats if threat patterns are actually detected
-                if has_blackmail:
-                    explanation_parts.append(
-                        "This conversation shows emotional blackmail with threats to end the friendship if demands are not met immediately."
+                # Strict threat gating: only mention threats if threat patterns are actually detected
+                if has_threat:
+                    # Check for specific threat types for more precise messaging
+                    has_withdrawal = any(
+                        "threats of withdrawal" in m.pattern.description.lower()
+                        for m in pressure_matches
                     )
-                elif has_withdrawal or has_ultimatums or has_threat_in_text:
-                    # Threat patterns detected
-                    if has_withdrawal:
+                    has_blackmail = any(
+                        "emotional blackmail" in m.pattern.description.lower() or
+                        "friendship threat" in m.pattern.description.lower()
+                        for m in pressure_matches
+                    )
+                    
+                    if has_blackmail:
+                        explanation_parts.append(
+                            "This conversation shows emotional blackmail with threats to end the friendship if demands are not met immediately."
+                        )
+                    elif has_withdrawal:
                         explanation_parts.append(
                             "This conversation shows threats of withdrawal of affection or attention if demands are not met."
                         )
-                    elif has_ultimatums or has_threat_in_text:
+                    else:
                         explanation_parts.append(
                             "This conversation shows pressure with threats of consequences if demands are not met."
                         )
@@ -306,10 +354,15 @@ class ExplanationGenerator:
                         "This conversation shows emotional pressure to respond immediately or disclose feelings."
                     )
                 else:
-                    # Default: pressure without threats
-                    explanation_parts.append(
-                        "This conversation shows pressure to act quickly or comply with demands."
-                    )
+                    # Default: pressure without threats - use neutral phrasing
+                    if has_guilt_shifting:
+                        explanation_parts.append(
+                            "This conversation shows pressure or guilt-making language."
+                        )
+                    else:
+                        explanation_parts.append(
+                            "This conversation shows pressure to act quickly or comply with demands."
+                        )
             elif top_category == "bullying" and top_score >= 0.6:
                 # Check what bullying patterns were detected
                 bullying_matches = matches.get("bullying", [])
@@ -524,14 +577,15 @@ class ExplanationGenerator:
             elif top_category == "secrecy" and top_score >= 0.6:
                 # Check what secrecy patterns were detected
                 secrecy_matches = matches.get("secrecy", [])
+                # Use strict threat detection - only mention threats if threat patterns are actually matched
+                has_threat = self._has_threat_patterns(matches, original_text)
+                
                 has_isolation = any("isolation" in m.pattern.description.lower() or "discouraging" in m.pattern.description.lower() 
                                   for m in secrecy_matches)
                 has_proof_destruction = any(
                     "delete" in m.pattern.description.lower() and "prove" in m.pattern.description.lower()
                     for m in secrecy_matches
                 )
-                has_relationship_threat = any("relationship threat" in m.pattern.description.lower() or "finished" in m.pattern.description.lower()
-                                             for m in secrecy_matches)
                 has_privacy_redef = any("privacy" in m.pattern.description.lower() and "secrecy" in m.pattern.description.lower()
                                        for m in secrecy_matches)
                 
@@ -544,7 +598,8 @@ class ExplanationGenerator:
                     explanation_parts.append(
                         "This conversation includes secrecy demands and attempts to isolate you from support."
                     )
-                elif has_relationship_threat:
+                elif has_threat:
+                    # Only mention threats if threat patterns are actually detected
                     explanation_parts.append(
                         "This conversation includes secrecy demands with threats to end the relationship if you tell anyone."
                     )
@@ -564,14 +619,27 @@ class ExplanationGenerator:
                     category_explanation = category_explanation.replace("kids", "people")
                     explanation_parts.append(category_explanation)
             elif risk_level == RiskLevel.RED:
-                # For RED, use full explanation
-                if top_category in self.EXPLANATIONS:
+                # For RED, check if threats are present and mention them appropriately
+                has_threat = self._has_threat_patterns(matches)
+                
+                if top_category == "secrecy":
+                    # Check for relationship threats in secrecy context
+                    secrecy_matches = matches.get("secrecy", [])
+                    if has_threat:
+                        explanation_parts.append(
+                            "This conversation includes secrecy demands with threats to end the relationship if you tell anyone."
+                        )
+                    else:
+                        # Use standard secrecy explanation without threat language
+                        if top_category in self.EXPLANATIONS:
+                            explanation_parts.append(self.EXPLANATIONS[top_category])
+                elif top_category in self.EXPLANATIONS:
                     explanation_parts.append(self.EXPLANATIONS[top_category])
 
         # Add behavioral description instead of raw keyword quotes
         # Describe what behaviors were observed in conversational context
         if matches:
-            behavior_descriptions = self._describe_behaviors(matches, category_scores, detected_categories)
+            behavior_descriptions = self._describe_behaviors(matches, category_scores, detected_categories, original_text)
             if behavior_descriptions:
                 explanation_parts.append(f"\n\nObserved behaviors: {behavior_descriptions}")
 
@@ -626,7 +694,8 @@ class ExplanationGenerator:
         self, 
         matches: Dict[str, List[PatternMatch]], 
         category_scores: Dict[str, float],
-        detected_categories: List[tuple]
+        detected_categories: List[tuple],
+        original_text: str = ""
     ) -> str:
         """
         Describe observed behaviors in conversational context, not just keywords.
@@ -636,6 +705,7 @@ class ExplanationGenerator:
             matches: Pattern matches by category
             category_scores: Scores for each category
             detected_categories: List of (category, score) tuples, sorted by score
+            original_text: Optional full text for cross-sentence threat detection
 
         Returns:
             Behavioral description string focusing on conversation dynamics
@@ -655,23 +725,10 @@ class ExplanationGenerator:
             
             # Describe behaviors based on category and match patterns
             # Focus on conversational dynamics, not keywords
+            # Use strict threat detection - only mention threats if threat patterns are actually matched
+            has_threat = self._has_threat_patterns({category: category_matches}, original_text)
+            
             if category == "pressure":
-                # Analyze pressure patterns - check pattern descriptions, not matched_text
-                has_withdrawal_threats = any(
-                    "withdrawal" in m.pattern.description.lower() or
-                    "threats of withdrawal" in m.pattern.description.lower()
-                    for m in category_matches
-                )
-                # Check for actual threat patterns in matched text
-                has_ultimatums = any(
-                    "ultimatum" in m.pattern.description.lower() or
-                    ("relationship threat" in m.pattern.description.lower() and "threat" in m.pattern.description.lower())
-                    for m in category_matches
-                )
-                has_threat_in_text = any(
-                    re.search(r"\b(or else|we'?re done|don'?t expect|if you don'?t)", m.matched_text, re.IGNORECASE)
-                    for m in category_matches
-                )
                 has_emotional_pressure = any(
                     "emotional pressure" in m.pattern.description.lower() or
                     "respond right now" in m.pattern.description.lower()
@@ -686,10 +743,17 @@ class ExplanationGenerator:
                 
                 # Priority: specific behaviors first
                 # Only mention threats if threat patterns are actually detected
-                if has_withdrawal_threats:
-                    behavior_parts.append("threats of withdrawal of affection or attention")
-                elif has_ultimatums or has_threat_in_text:
-                    behavior_parts.append("threats of withdrawal or relationship consequences")
+                if has_threat:
+                    # Check for specific threat types
+                    has_withdrawal_threats = any(
+                        "withdrawal" in m.pattern.description.lower() or
+                        "threats of withdrawal" in m.pattern.description.lower()
+                        for m in category_matches
+                    )
+                    if has_withdrawal_threats:
+                        behavior_parts.append("threats of withdrawal of affection or attention")
+                    else:
+                        behavior_parts.append("threats of withdrawal or relationship consequences")
                 elif has_emotional_pressure:
                     behavior_parts.append("emotional pressure to respond right now")
                 elif has_time_pressure and match_count >= 2:
@@ -865,6 +929,10 @@ class ExplanationGenerator:
             
             elif category == "secrecy":
                 # Analyze secrecy patterns - check what was actually detected
+                # Use strict threat detection - only mention threats if threat patterns are actually matched
+                # Check threats in full_text context for cross-sentence threats
+                has_threat = self._has_threat_patterns({category: category_matches}, original_text)
+                
                 has_isolation_secrecy = any(
                     "isolation" in m.pattern.description.lower() or
                     "discouraging" in m.pattern.description.lower()
@@ -874,22 +942,19 @@ class ExplanationGenerator:
                     "delete" in m.pattern.description.lower() and "prove" in m.pattern.description.lower()
                     for m in category_matches
                 )
-                has_relationship_threat = any(
-                    "relationship threat" in m.pattern.description.lower() or
-                    "finished" in m.pattern.description.lower()
-                    for m in category_matches
-                )
                 has_privacy_redefinition = any(
                     "privacy" in m.pattern.description.lower() and "secrecy" in m.pattern.description.lower()
                     for m in category_matches
                 )
                 
-                if has_proof_destruction:
+                # Priority: threats first (most severe), then proof destruction, then isolation
+                if has_threat:
+                    # Only mention threats if threat patterns are actually detected
+                    behavior_parts.append("secrecy demands with relationship threats")
+                elif has_proof_destruction:
                     behavior_parts.append("secrecy demands with proof-of-compliance requests (delete messages)")
                 elif has_isolation_secrecy:
                     behavior_parts.append("secrecy demands and isolation from support")
-                elif has_relationship_threat:
-                    behavior_parts.append("secrecy demands with relationship threats")
                 elif has_privacy_redefinition:
                     behavior_parts.append("redefining privacy as keeping secrets")
                 else:

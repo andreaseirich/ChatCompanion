@@ -102,6 +102,16 @@ class RuleEngine:
             if re.search(indicator, context_lower):
                 return True  # Demand context - count as pressure
         
+        # If no demand indicator found, check if it's a question (harmless)
+        # Questions like "what are you doing right now?" should NOT count as pressure
+        question_patterns = [
+            r"\b(what|where|when|who|how|why)\s+(are|is|do|does|did|will|would|can|could|should)\s+(you|they|we|he|she|it)",
+            r"\b(what|where|when|who|how|why)\s+(are|is|do|does|did|will|would|can|could|should)\s+.*\?",
+        ]
+        if any(re.search(pattern, context_lower) for pattern in question_patterns):
+            # It's a question without demand verbs - NOT pressure
+            return False
+        
         # Cross-sentence coercion check:
         # If time urgency token is in sentence N and demand verb in sentence N-1 or N+1
         sentences = segment_sentences(text)

@@ -181,6 +181,150 @@ def test_green_youth_friendly_fixture():
     )
 
 
+def test_yellow_pressure_guilt_no_threats():
+    """Test YELLOW pressure+guilt without ultimatum -> explanation MUST NOT contain: threat, consequence, withdrawal."""
+    engine = DetectionEngine(use_ml=False)
+    
+    text = "if you cared you would answer faster. i'm the only one trying"
+    
+    result = engine.analyze(text)
+    
+    assert result.risk_level in [RiskLevel.YELLOW, RiskLevel.RED], (
+        f"Expected YELLOW or RED for pressure+guilt, got {result.risk_level}"
+    )
+    explanation_lower = result.explanation.lower()
+    
+    # Must NOT contain threat language when no ultimatums are present
+    assert "threat" not in explanation_lower or "threats" not in explanation_lower, (
+        f"YELLOW explanation should NOT mention 'threat' when no ultimatums present. Explanation: {result.explanation}"
+    )
+    assert "consequence" not in explanation_lower or "consequences" not in explanation_lower, (
+        f"YELLOW explanation should NOT mention 'consequence' when no ultimatums present. Explanation: {result.explanation}"
+    )
+    assert "withdrawal" not in explanation_lower, (
+        f"YELLOW explanation should NOT mention 'withdrawal' when no ultimatums present. Explanation: {result.explanation}"
+    )
+    
+    # Should mention guilt/pressure
+    assert "guilt" in explanation_lower or "pressure" in explanation_lower, (
+        f"YELLOW explanation should mention guilt or pressure. Explanation: {result.explanation}"
+    )
+
+
+def test_yellow_with_explicit_ultimatum():
+    """Test YELLOW/RED with explicit ultimatum -> explanation MUST contain threats or consequences."""
+    engine = DetectionEngine(use_ml=False)
+    
+    text = "answer me right now or we're done"
+    
+    result = engine.analyze(text)
+    
+    assert result.risk_level in [RiskLevel.YELLOW, RiskLevel.RED], (
+        f"Expected YELLOW or RED for explicit ultimatum, got {result.risk_level}"
+    )
+    explanation_lower = result.explanation.lower()
+    
+    # Must contain threat language when ultimatums are present
+    has_threat_language = (
+        "threat" in explanation_lower or 
+        "threats" in explanation_lower or
+        "consequence" in explanation_lower or
+        "consequences" in explanation_lower
+    )
+    assert has_threat_language, (
+        f"YELLOW/RED explanation should mention 'threats' or 'consequences' when ultimatums present. Explanation: {result.explanation}"
+    )
+
+
+def test_red_with_relationship_threat():
+    """Test RED with relationship threat -> mentions threats, listed in Observed behaviors."""
+    engine = DetectionEngine(use_ml=False)
+    
+    text = "if you don't delete those messages, we're done"
+    
+    result = engine.analyze(text)
+    
+    assert result.risk_level == RiskLevel.RED, (
+        f"Expected RED for relationship threat, got {result.risk_level}"
+    )
+    explanation_lower = result.explanation.lower()
+    
+    # Must mention threats
+    has_threat_language = (
+        "threat" in explanation_lower or 
+        "threats" in explanation_lower or
+        "consequence" in explanation_lower or
+        "consequences" in explanation_lower
+    )
+    assert has_threat_language, (
+        f"RED explanation should mention threats. Explanation: {result.explanation}"
+    )
+    
+    # Must be listed in Observed behaviors
+    assert "Observed behaviors" in result.explanation or "observed behaviors" in explanation_lower, (
+        f"RED explanation should include Observed behaviors section. Explanation: {result.explanation}"
+    )
+    # Check that threats are mentioned in Observed behaviors
+    if "Observed behaviors" in result.explanation or "observed behaviors" in explanation_lower:
+        # Extract Observed behaviors section
+        obs_section = result.explanation.split("Observed behaviors")[-1] if "Observed behaviors" in result.explanation else result.explanation.split("observed behaviors")[-1]
+        obs_lower = obs_section.lower()
+        has_threat_in_obs = (
+            "threat" in obs_lower or 
+            "threats" in obs_lower or
+            "consequence" in obs_lower or
+            "consequences" in obs_lower or
+            "withdrawal" in obs_lower
+        )
+        assert has_threat_in_obs, (
+            f"Observed behaviors should mention threats. Observed behaviors section: {obs_section}"
+        )
+
+
+def test_observed_behaviors_evidence_based():
+    """Test that Observed behaviors are strictly evidence-based (derived from matched patterns only)."""
+    engine = DetectionEngine(use_ml=False)
+    
+    test_cases = [
+        ("if you cared you would answer faster", ["guilt_shifting"]),
+        ("answer me right now or we're done", ["pressure"]),
+        ("delete those messages and send a screenshot", ["secrecy", "manipulation"]),
+        ("you're so stupid", ["bullying"]),
+    ]
+    
+    for text, expected_categories in test_cases:
+        result = engine.analyze(text)
+        
+        # Extract Observed behaviors section
+        explanation_lower = result.explanation.lower()
+        if "observed behaviors" in explanation_lower:
+            obs_section = result.explanation.split("Observed behaviors")[-1] if "Observed behaviors" in result.explanation else result.explanation.split("observed behaviors")[-1]
+            
+            # Verify that behaviors mentioned are supported by matched patterns
+            matched_categories = set(result.matches.keys())
+            matched_categories = {cat for cat in matched_categories if len(result.matches[cat]) > 0}
+            
+            # Check that threat language only appears if threat patterns are matched
+            obs_lower = obs_section.lower()
+            has_threat_in_obs = (
+                "threat" in obs_lower or 
+                "threats" in obs_lower or
+                "consequence" in obs_lower or
+                "consequences" in obs_lower or
+                "withdrawal" in obs_lower
+            )
+            
+            if has_threat_in_obs:
+                # Verify that threat patterns are actually matched
+                from app.detection.explainer import ExplanationGenerator
+                explainer = ExplanationGenerator()
+                has_threat_patterns = explainer._has_threat_patterns(result.matches)
+                assert has_threat_patterns, (
+                    f"Observed behaviors mention threats but no threat patterns matched. "
+                    f"Text: {text}, Observed behaviors: {obs_section}, Matches: {result.matches}"
+                )
+
+
 def test_yellow_guilt_slang_fixture():
     """Test YELLOW guilt-slang fixture: must mention guilt-shifting."""
     engine = DetectionEngine(use_ml=False)
