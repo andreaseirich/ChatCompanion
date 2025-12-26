@@ -62,7 +62,7 @@ Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
 
 ## [Unreleased]
 
-### 2025-01-27 - Final Submission Readiness Audit
+### 2025-12-26 - Final Submission Readiness Audit
 - **Audit**: Comprehensive final review for CodeSpring submission
 - **CI**: Verified workflows (hygiene check + tests) run correctly on push/PR
 - **Docs**: Verified all documentation consistency with code behavior
@@ -71,7 +71,7 @@ Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
 
 ### Added
 
-- Strict threat-gating in explanations (2025-01-27): threat language appears only when threat/ultimatum patterns match (supports cross-sentence detection via full_text proximity checking)
+- Strict threat-gating in explanations (2025-12-26): threat language appears only when threat/ultimatum patterns match (supports cross-sentence detection via full_text proximity checking)
 - Evidence-based observed behaviors: all behavior descriptions in explanations are derived from matched patterns only—no false accusations
 - GREEN debug note: "Note: GREEN suppresses risk. Category scores may show raw signals even when no patterns match." (clarifies non-zero scores in GREEN state)
 - Standardized pattern match counts format: "{category}: {total_instances} instance(s) across {unique_patterns} pattern(s)" (distinguishes instances vs unique patterns)
