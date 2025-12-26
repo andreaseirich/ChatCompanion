@@ -177,13 +177,6 @@ For detailed installation instructions, see [INSTALL.md](docs/INSTALL.md).
 
 The application will open in your default web browser at `http://localhost:8501`.
 
-**Option 2: Using Setup Script**
-
-If available, use the setup script:
-```bash
-./run.sh
-```
-
 **Note:** For non-technical users, we're working on a standalone executable installer. See [INSTALL.md](docs/INSTALL.md) for details.
 
 ## Setup vs. Runtime

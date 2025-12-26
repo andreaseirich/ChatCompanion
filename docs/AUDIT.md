@@ -26,7 +26,7 @@ This repository contains:
 |----------|-------|---------|
 | **Code** | `app/`, `tests/` | Application source code and test suite |
 | **Documentation** | `README.md`, `docs/*.md` | Project documentation and guides |
-| **Setup** | `requirements.txt`, `run.sh` | Dependencies and setup scripts |
+| **Setup** | `requirements.txt` | Dependencies |
 | **Demo Data** | `demo_data/` | Example chats for testing |
 | **CI/CD** | `.github/workflows/` | Automated checks and workflows |
 
