@@ -122,6 +122,15 @@ def main():
     if "chat_input" not in st.session_state:
         st.session_state.chat_input = ""
     
+    # Initialize clear flag if not exists
+    if "clear_requested" not in st.session_state:
+        st.session_state.clear_requested = False
+    
+    # Handle clear request BEFORE widget creation
+    if st.session_state.clear_requested:
+        st.session_state.chat_input = ""
+        st.session_state.clear_requested = False
+    
     # Handle example button clicks
     if example_selected == "green" and example_green:
         st.session_state.chat_input = example_green
@@ -140,11 +149,11 @@ def main():
         "The text is processed locally and never saved.",
     )
     
-    # Clear button
+    # Clear button - set flag instead of modifying session_state directly
     col_clear, col_analyze = st.columns([1, 3])
     with col_clear:
         if st.button("Clear", use_container_width=True):
-            st.session_state.chat_input = ""
+            st.session_state.clear_requested = True
             st.rerun()
     
     with col_analyze:
