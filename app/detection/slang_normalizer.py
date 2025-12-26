@@ -1,6 +1,7 @@
 """Slang and abbreviation normalizer for youth/online language."""
 
 import re
+import unicodedata
 from dataclasses import dataclass, field
 from typing import Dict, List
 
@@ -88,6 +89,102 @@ class SlangNormalizer:
         self.joking_emojis = ["😂", "🤣", "😅", "😆", "😊", "😄"]
         self.annoyed_emojis = ["😒", "😑", "🙄", "💢", "😤", "😠"]
 
+    def _normalize_obfuscation(self, text: str) -> str:
+        """
+        Normalize obfuscated words (e.g., "stf*u" -> "stfu").
+
+        Args:
+            text: Input text
+
+        Returns:
+            Text with obfuscation removed
+        """
+        # Remove asterisks and other common obfuscation chars within words
+        # Pattern: word char, obfuscation char(s), word char
+        text = re.sub(r"(\w)[*_\-\.]+(\w)", r"\1\2", text)
+        return text
+
+    def _normalize_letter_repeats(self, text: str, max_repeats: int = 2) -> str:
+        """
+        Normalize excessive letter repeats (e.g., "righttt" -> "right").
+
+        Args:
+            text: Input text
+            max_repeats: Maximum allowed consecutive repeats (default: 2)
+
+        Returns:
+            Text with letter repeats normalized
+        """
+        # Pattern: capture a letter, then find 3+ repeats of same letter
+        # Replace with max_repeats copies
+        def replace_repeats(match):
+            char = match.group(1)
+            return char * max_repeats
+
+        # Match 3+ consecutive identical letters (case-insensitive)
+        pattern = r"([a-zA-Z])\1{2,}"
+        text = re.sub(pattern, replace_repeats, text, flags=re.IGNORECASE)
+        return text
+
+    def _normalize_spacing_variants(self, text: str) -> str:
+        """
+        Normalize spacing/punctuation variants (e.g., "r n" -> "rn", "r.n." -> "rn").
+
+        Args:
+            text: Input text
+
+        Returns:
+            Text with spacing variants normalized
+        """
+        # Common spacing variants for abbreviations
+        # "r n" -> "rn", "r.n." -> "rn", "r-n" -> "rn"
+        spacing_variants = [
+            (r"\br\s+\.?\s*n\b", "rn"),  # "r n" or "r.n" -> "rn"
+            (r"\br\s*\.\s*n\b", "rn"),   # "r.n" -> "rn"
+            (r"\br\s*-\s*n\b", "rn"),    # "r-n" -> "rn"
+        ]
+
+        for pattern, replacement in spacing_variants:
+            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+        return text
+
+    def _normalize_typos(self, text: str) -> str:
+        """
+        Normalize common typos (e.g., "rite now" -> "right now").
+
+        Args:
+            text: Input text
+
+        Returns:
+            Text with typos corrected
+        """
+        # Common typo corrections
+        typo_map = {
+            r"\brite\s+now\b": "right now",
+            r"\brightt\s+now\b": "right now",
+            r"\bnoww+\b": "now",
+        }
+
+        for pattern, replacement in typo_map.items():
+            text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+        return text
+
+    def _remove_zero_width_chars(self, text: str) -> str:
+        """
+        Remove zero-width characters and normalize Unicode.
+
+        Args:
+            text: Input text
+
+        Returns:
+            Text with zero-width chars removed
+        """
+        # Remove zero-width spaces, joiners, etc.
+        text = "".join(char for char in text if unicodedata.category(char) != "Cf" or char in ["\n", "\r", "\t"])
+        return text
+
     def normalize_message(self, text: str) -> NormalizedMessage:
         """
         Normalize slang and abbreviations in text.
@@ -99,25 +196,43 @@ class SlangNormalizer:
             NormalizedMessage with normalized text and metadata
         """
         raw_text = text
-        normalized = text
+        
+        # Step 1: Remove zero-width characters
+        normalized = self._remove_zero_width_chars(text)
+        
+        # Step 2: Casefold (lowercase) for consistent matching
+        normalized_lower = normalized.casefold()
+        
+        # Step 3: Normalize obfuscation (e.g., "stf*u" -> "stfu")
+        normalized = self._normalize_obfuscation(normalized)
+        
+        # Step 4: Normalize spacing variants (e.g., "r n" -> "rn")
+        normalized = self._normalize_spacing_variants(normalized)
+        
+        # Step 5: Normalize letter repeats (e.g., "righttt" -> "right")
+        normalized = self._normalize_letter_repeats(normalized)
+        
+        # Step 6: Normalize typos (e.g., "rite now" -> "right now")
+        normalized = self._normalize_typos(normalized)
+        
         replacements = []
         has_emoji = False
         tone_markers = {"joking": False, "annoyed": False}
 
         # Detect emojis (light detection only)
         for emoji in self.joking_emojis:
-            if emoji in text:
+            if emoji in normalized:
                 has_emoji = True
                 tone_markers["joking"] = True
                 break
 
         for emoji in self.annoyed_emojis:
-            if emoji in text:
+            if emoji in normalized:
                 has_emoji = True
                 tone_markers["annoyed"] = True
                 break
 
-        # Normalize abbreviations (case-insensitive, word boundaries)
+        # Step 7: Normalize abbreviations (case-insensitive, word boundaries)
         # Use word boundaries to avoid partial matches
         for abbrev, replacement in self.sorted_abbrevs:
             # Case-insensitive pattern with word boundaries

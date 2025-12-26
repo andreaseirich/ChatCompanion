@@ -8,7 +8,7 @@ import yaml
 
 from app.rules.patterns import Pattern, PatternMatch, PatternRegistry
 from app.utils.constants import RiskCategory
-from app.utils.text_processing import get_sentence_context
+from app.utils.text_processing import get_sentence_context, segment_sentences
 
 
 class RuleEngine:
@@ -51,6 +51,7 @@ class RuleEngine:
     def _check_pressure_context(self, text: str, match_position: int, matched_text: str) -> bool:
         """
         Check if "right now"/"now" appears in a demand context (not self-report).
+        Includes cross-sentence coercion detection.
 
         Args:
             text: Full text
@@ -65,7 +66,7 @@ class RuleEngine:
         if not re.search(r"(?i)\b(right now|now)\b", matched_text):
             return True  # Not a time phrase pattern, always count
         
-        # Get sentence context (±1 sentence window)
+        # Get sentence context (±1 sentence window for cross-sentence coercion)
         context = get_sentence_context(text, match_position, window=1)
         context_lower = context.lower()
         
@@ -83,8 +84,9 @@ class RuleEngine:
                 return False
         
         # Demand indicators (IS pressure)
+        # Includes cross-sentence coercion: demand verb in one sentence, time urgency in another
         demand_indicators = [
-            # Imperative verbs
+            # Imperative verbs (can be in previous/next sentence)
             r"\b(answer|reply|call|do it|send|prove|decide|respond|tell me|show me)\b",
             # Coercive phrasing
             r"\b(you (have to|must|need to|should))\b",
@@ -93,10 +95,34 @@ class RuleEngine:
             r"\b(or else|if you don'?t|we'?re done|don'?t expect)\b",
         ]
         
-        # Check if any demand indicator is present in context
+        # Check if any demand indicator is present in context (including cross-sentence)
         for indicator in demand_indicators:
             if re.search(indicator, context_lower):
                 return True  # Demand context - count as pressure
+        
+        # Cross-sentence coercion check:
+        # If time urgency token is in sentence N and demand verb in sentence N-1 or N+1
+        sentences = segment_sentences(text)
+        current_sentence_idx = -1
+        
+        # Find which sentence contains the match
+        current_pos = 0
+        for i, sentence in enumerate(sentences):
+            sentence_end = current_pos + len(sentence)
+            if current_pos <= match_position < sentence_end:
+                current_sentence_idx = i
+                break
+            current_pos = sentence_end + 1
+        
+        if current_sentence_idx >= 0:
+            # Check adjacent sentences for demand verbs
+            for offset in [-1, 1]:
+                check_idx = current_sentence_idx + offset
+                if 0 <= check_idx < len(sentences):
+                    adjacent_sentence = sentences[check_idx].lower()
+                    # Check for demand verbs in adjacent sentence
+                    if re.search(r"\b(answer|reply|call|do it|send|prove|decide|respond|tell me|show me|you (have to|must|need to))\b", adjacent_sentence):
+                        return True  # Cross-sentence coercion detected
         
         # Default: if no clear demand context, be conservative and count it
         # (better to have false positive than miss real pressure)
