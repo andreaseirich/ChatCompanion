@@ -176,27 +176,4 @@ def inject_theme_css():
     st.markdown(css, unsafe_allow_html=True)
 
 
-def render_card(content: str, card_class: str = "card") -> None:
-    """
-    Render content in a styled card.
-    
-    Args:
-        content: HTML content to render in card
-        card_class: CSS class for card styling (card, input-card, result-card)
-    """
-    html = f'<div class="{card_class}">{content}</div>'
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def render_badge(text: str) -> str:
-    """
-    Generate HTML for a badge.
-    
-    Args:
-        text: Badge text
-        
-    Returns:
-        HTML string for badge
-    """
-    return f'<span class="badge">{text}</span>'
 

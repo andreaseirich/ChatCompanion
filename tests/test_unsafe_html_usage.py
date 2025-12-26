@@ -228,3 +228,47 @@ def test_advice_rendering_is_safe():
                 "This is unsafe - user content must not use unsafe_allow_html."
             )
 
+
+def test_negative_case_f_string():
+    """Negative test: f-string with variable should FAIL."""
+    # Simulate unsafe usage: f-string with variable
+    unsafe_code = 'st.markdown(f"<div>{user_input}</div>", unsafe_allow_html=True)'
+    context = 'user_input = "test"'
+    
+    assert not is_safe_usage(unsafe_code, context), (
+        "f-string with variable should be detected as unsafe"
+    )
+
+
+def test_negative_case_format():
+    """Negative test: .format() with variable should FAIL."""
+    # Simulate unsafe usage: .format() with variable
+    unsafe_code = 'st.markdown("<div>{}</div>".format(user_input), unsafe_allow_html=True)'
+    context = 'user_input = "test"'
+    
+    assert not is_safe_usage(unsafe_code, context), (
+        ".format() with variable should be detected as unsafe"
+    )
+
+
+def test_negative_case_concatenation():
+    """Negative test: String concatenation with variable should FAIL."""
+    # Simulate unsafe usage: string concatenation
+    unsafe_code = 'st.markdown("<div>" + user_input + "</div>", unsafe_allow_html=True)'
+    context = 'user_input = "test"'
+    
+    assert not is_safe_usage(unsafe_code, context), (
+        "String concatenation with variable should be detected as unsafe"
+    )
+
+
+def test_negative_case_direct_variable():
+    """Negative test: Direct variable in st.markdown should FAIL."""
+    # Simulate unsafe usage: direct variable
+    unsafe_code = 'st.markdown(user_content, unsafe_allow_html=True)'
+    context = 'user_content = "<div>test</div>"'
+    
+    assert not is_safe_usage(unsafe_code, context), (
+        "Direct variable in st.markdown should be detected as unsafe"
+    )
+
