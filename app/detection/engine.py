@@ -177,6 +177,20 @@ class DetectionEngine:
             category_scores = rules_scores
             logger.debug(f"Rules-only scoring: {len(rules_scores)} categories")
 
+        # Apply context-based reductions to final category scores if detected
+        # This ensures the reduction applies even after ML aggregation
+        if is_friendly_teasing:
+            for category in list(category_scores.keys()):
+                if category_scores[category] > 0:
+                    category_scores[category] = category_scores[category] * 0.3
+                    logger.debug(f"Friendly teasing: final reduction for {category} to {category_scores[category]:.2f}")
+        
+        if is_professional_context:
+            for category in ["pressure", "manipulation"]:
+                if category in category_scores and category_scores[category] > 0:
+                    category_scores[category] = category_scores[category] * 0.4
+                    logger.debug(f"Professional context: final reduction for {category} to {category_scores[category]:.2f}")
+
         # Calculate overall risk score
         overall_score = self.aggregator.get_overall_risk_score(category_scores)
 
