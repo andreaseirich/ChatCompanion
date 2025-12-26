@@ -68,6 +68,14 @@ class ScoreAggregator:
 
         scores = list(category_scores.values())
         max_score = max(scores)
+        num_categories = len(scores)
+        
+        # Special case: guilt_shifting alone should be capped to YELLOW (0.74)
+        # This must be checked BEFORE the >=0.8 early return
+        # Guilt-shifting alone should not trigger RED, even if score is high
+        if num_categories == 1 and "guilt_shifting" in category_scores:
+            # Guilt-shifting alone should max out at YELLOW level (0.74)
+            return min(max_score, 0.74)
         
         # If there's a clearly severe pattern (>=0.8), use it directly
         if max_score >= 0.8:
@@ -75,8 +83,7 @@ class ScoreAggregator:
         
         # For moderate scores, multiple patterns indicate higher risk
         # This ensures conversations with multiple manipulative patterns are properly flagged
-        num_categories = len(scores)
-        avg_score = sum(scores) / num_categories
+        avg_score = sum(scores) / num_categories if num_categories > 0 else 0.0
         
         # Check for high-confidence patterns (>=0.75) - these should boost the score more
         high_confidence_count = sum(1 for s in scores if s >= 0.75)
@@ -111,6 +118,23 @@ class ScoreAggregator:
             combined = (max_score * 0.5) + (avg_score * 0.4) + pattern_boost
             return min(combined, 1.0)
         elif num_categories >= 2:
+            # Special case: guilt_shifting + manipulation combination
+            # If guilt_shifting is the primary category, cap to prevent RED classification
+            has_guilt_shifting = "guilt_shifting" in category_scores
+            has_manipulation = "manipulation" in category_scores
+            guilt_score = category_scores.get("guilt_shifting", 0.0)
+            manip_score = category_scores.get("manipulation", 0.0)
+            
+            # If guilt_shifting is dominant and manipulation is moderate, cap to YELLOW
+            # This prevents guilt-shifting conversations from being classified as RED
+            if has_guilt_shifting and has_manipulation and num_categories == 2:
+                # Check if guilt_shifting is the primary concern
+                if guilt_score >= manip_score and guilt_score >= 0.6:
+                    # Guilt-shifting is primary - cap to YELLOW unless manipulation is also very high
+                    if manip_score < 0.7:
+                        # Cap to YELLOW level (0.74) - guilt-shifting should not trigger RED
+                        return min(max_score, 0.74)
+            
             # Two patterns: moderate boost
             # If both are high-confidence, boost more
             if high_confidence_count >= 2:
@@ -118,13 +142,6 @@ class ScoreAggregator:
             else:
                 combined = (max_score * 0.65) + (avg_score * 0.25) + 0.1  # Small boost
             return min(combined, 1.0)
-        
-        # Single category: use the score directly
-        # But if it's guilt_shifting alone, cap it to prevent RED classification
-        # Guilt-shifting alone should be YELLOW, not RED (RED requires more severe patterns)
-        if num_categories == 1 and "guilt_shifting" in category_scores:
-            # Guilt-shifting alone should max out at YELLOW level (0.74)
-            return min(max_score, 0.74)
         
         return max_score
 

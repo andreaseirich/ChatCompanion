@@ -5,6 +5,7 @@ from typing import Dict, Optional
 
 from app.detection.aggregator import ScoreAggregator
 from app.detection.explainer import ExplanationGenerator
+from app.detection.slang_normalizer import SlangNormalizer
 from app.models_local.classifier import RiskClassifier
 from app.models_local.embeddings import EmbeddingModel
 from app.rules.rule_engine import RuleEngine
@@ -98,18 +99,25 @@ class DetectionEngine:
         Returns:
             DetectionResult with risk level, scores, and explanations
         """
-        # Normalize and preprocess text
-        normalized_text = normalize_text(text)
+        # Normalize slang and abbreviations first
+        slang_normalizer = SlangNormalizer()
+        normalized_message = slang_normalizer.normalize_message(text)
+        
+        # Then apply standard text normalization
+        normalized_text = normalize_text(normalized_message.normalized_text)
         sentences = segment_sentences(normalized_text)
 
-        # Run rules engine
+        # Run rules engine on normalized text (with slang normalized)
         rules_result = self.rule_engine.analyze(normalized_text)
         rules_scores = rules_result["category_scores"]
         matches = rules_result["matches"]
         
         # Check for friendly teasing context and down-weight scores if detected
         # This reduces false positives for mutual teasing between friends
-        is_friendly_teasing = self._check_friendly_teasing_context(text, normalized_text)
+        # Pass normalized message to use emoji and tone markers
+        is_friendly_teasing = self._check_friendly_teasing_context(
+            normalized_message, normalized_text
+        )
         is_professional_context = self._check_professional_context(normalized_text)
         
         if is_friendly_teasing:
@@ -232,7 +240,9 @@ class DetectionEngine:
             ml_available=self.ml_available,
         )
 
-    def _check_friendly_teasing_context(self, original_text: str, normalized_text: str) -> bool:
+    def _check_friendly_teasing_context(
+        self, normalized_message, normalized_text: str
+    ) -> bool:
         """
         Check if text shows signs of friendly teasing rather than bullying.
         
@@ -243,18 +253,25 @@ class DetectionEngine:
         - No direct slurs or severe insults
         
         Args:
-            original_text: Original text (for emoji detection)
+            normalized_message: NormalizedMessage object with raw text and tone markers
             normalized_text: Normalized text (for pattern matching)
             
         Returns:
             True if friendly teasing context is detected, False otherwise
         """
+        from app.detection.slang_normalizer import NormalizedMessage
         import re
         
-        # Check for joking markers
+        # Extract raw text and tone markers from normalized message
+        original_text = normalized_message.raw_text
+        has_emojis = normalized_message.has_emoji
+        tone_markers = normalized_message.tone_markers
+        
+        # Check for joking markers in normalized text
+        # After normalization: "lol" -> "laughing", "jk" -> "just kidding"
         joking_patterns = [
-            r"\b(jk|just kidding|just joking|kidding|joking)\b",
-            r"\b(lol|haha|hehe|hahaha)\b",
+            r"\b(just kidding|just joking|kidding|joking)\b",  # Normalized from "jk"
+            r"\b(laughing|haha|hehe|hahaha)\b",  # Normalized from "lol", "lmao"
             r"\b(all good|no worries|no problem|it's fine|it's okay)\b",
             r"\b(just joking|just kidding|only joking)\b",
         ]
@@ -263,13 +280,11 @@ class DetectionEngine:
             for pattern in joking_patterns
         )
         
-        # Check for emojis (common in friendly teasing)
-        # Use explicit emoji ranges to avoid CodeQL warnings about overly large ranges
-        # Match common emoji ranges: Emoticons, Miscellaneous Symbols, Dingbats, etc.
-        emoji_pattern = r"[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U00002600-\U000026FF\U00002700-\U000027BF]"
-        has_emojis = bool(re.search(emoji_pattern, original_text))
+        # Use emoji tone markers from normalized message
+        has_joking_emoji = tone_markers.get("joking", False)
+        has_annoyed_emoji = tone_markers.get("annoyed", False)
         
-        # Check for positive endings
+        # Check for positive endings (including normalized slang like "np" -> "no problem")
         positive_endings = [
             r"\b(all good|no worries|it's fine|it's okay|just joking|no problem)\b",
         ]
@@ -279,9 +294,11 @@ class DetectionEngine:
         )
         
         # Check for severe insults (if present, it's not friendly teasing)
+        # Note: hostile slang like "stfu" -> "shut up" is still hostile
         severe_insult_patterns = [
             r"\b(kill yourself|kys|go die|worthless|pathetic|dead weight)\b",
-            r"\b(you're (so|really|such a) (ugly|stupid|idiot|pathetic))\b",
+            r"\b(you're|you are) (so|really|such a) (ugly|stupid|idiot|pathetic)\b",
+            r"\b(shut up)\b",  # Normalized from "stfu"
         ]
         has_severe_insults = any(
             re.search(pattern, normalized_text, re.IGNORECASE)
@@ -308,9 +325,11 @@ class DetectionEngine:
         # Friendly teasing if:
         # - Has joking markers OR emojis OR positive ending
         # - AND (mutual teasing OR no severe insults)
+        # - AND not annoyed emoji (annoyed emoji suggests negative tone)
         is_friendly = (
-            (has_joking_markers or has_emojis or has_positive_ending) and
-            (has_mutual_teasing or not has_severe_insults)
+            (has_joking_markers or has_joking_emoji or has_positive_ending) and
+            (has_mutual_teasing or not has_severe_insults) and
+            not has_annoyed_emoji  # Annoyed emoji suggests negative tone, not friendly
         )
         
         return is_friendly
