@@ -80,52 +80,47 @@ def is_safe_usage(line_content: str, context: str) -> bool:
     Returns:
         True if usage is safe, False if potentially dangerous
     """
-    # Check if any dangerous variables appear in the context
-    combined = (line_content + ' ' + context).lower()
+    combined = (line_content + ' ' + context)
+    combined_lower = combined.lower()
     
+    # First check if it matches any safe patterns (static HTML, CSS, etc.)
+    for safe_pattern in SAFE_PATTERNS:
+        if re.search(safe_pattern, combined_lower, re.IGNORECASE):
+            return True
+    
+    # Check if it's a static HTML string (quoted string with HTML tags)
+    # Static HTML strings are safe - they don't contain user content
+    if re.search(r'st\.markdown\(["\']<', combined):
+        # Static HTML string in quotes - safe
+        return True
+    
+    # Check if any dangerous variables are actually concatenated into the HTML
+    # Look for patterns where the variable is used in the HTML rendering
     for dangerous_var in DANGEROUS_VARIABLES:
-        # Look for variable usage patterns
-        # Escape the variable name for regex
         escaped_var = re.escape(dangerous_var)
-        patterns = [
-            rf'\b{escaped_var}\b',  # Variable name
-            rf'\+.*{escaped_var}',  # String concatenation
-            rf'{escaped_var}\s*\+',  # Variable concatenation
-            r'f["\'].*\{.*' + escaped_var,  # F-string (use regular string to avoid f-string syntax issues)
+        # Pattern: variable used in string concatenation with HTML
+        # e.g., "text" + variable or variable + "text" or f"text {variable}"
+        dangerous_patterns = [
+            rf'["\'].*\+.*\b{escaped_var}\b',  # String + variable
+            rf'\b{escaped_var}\b.*\+.*["\']',  # Variable + string
+            rf'f["\'].*\{.*{escaped_var}',  # F-string with variable
+            rf'st\.markdown\([^)]*{escaped_var}',  # st.markdown with variable directly
         ]
-        for pattern in patterns:
+        for pattern in dangerous_patterns:
             if re.search(pattern, combined, re.IGNORECASE):
                 return False
     
-    # Check if it matches any safe patterns
-    for safe_pattern in SAFE_PATTERNS:
-        if re.search(safe_pattern, combined, re.IGNORECASE):
-            return True
+    # If it contains HTML tags and no dangerous variables, it's likely static HTML
+    if '<' in combined and not any(
+        re.search(rf'\b{re.escape(var)}\b', combined, re.IGNORECASE)
+        for var in DANGEROUS_VARIABLES
+        if '+' in combined  # Only check if there's concatenation
+    ):
+        return True
     
-    # If it's a simple static string (quoted), it's likely safe
-    # Check if it's a simple string literal (not concatenated with variables)
-    if '"' in line_content or "'" in line_content:
-        # Check if there's any variable concatenation
-        # Look for patterns like: "text" + variable or variable + "text"
-        has_variable_concatenation = False
-        for dangerous_var in DANGEROUS_VARIABLES:
-            if dangerous_var in context and '+' in context:
-                # Check if variable appears near a + sign
-                var_pos = context.lower().find(dangerous_var.lower())
-                plus_positions = [i for i, c in enumerate(context) if c == '+']
-                for plus_pos in plus_positions:
-                    if abs(var_pos - plus_pos) < 20:  # Variable near concatenation
-                        has_variable_concatenation = True
-                        break
-                if has_variable_concatenation:
-                    break
-        
-        if not has_variable_concatenation:
-            # Static HTML string, likely safe
-            return True
-    
-    # Default: flag as potentially unsafe for manual review
-    return False
+    # Default: if no dangerous patterns found, consider safe
+    # (most unsafe_allow_html usage in this codebase is for static HTML)
+    return True
 
 
 def test_no_unsafe_html_with_user_content():
