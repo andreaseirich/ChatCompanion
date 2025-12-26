@@ -234,10 +234,10 @@ class ExplanationGenerator:
                         )
 
         # Check for guilt-shifting even if it's not the top category
-        # Mention it if score > 0.20 OR patterns detected
+        # Mention it if score >= 0.18 OR patterns detected
         guilt_shifting_score = category_scores.get("guilt_shifting", 0.0)
         guilt_matches = matches.get("guilt_shifting", [])
-        has_guilt_shifting = guilt_shifting_score > 0.20 or len(guilt_matches) > 0
+        has_guilt_shifting = guilt_shifting_score >= 0.18 or len(guilt_matches) > 0
         
         # Add behavioral context explanation (focus on conversation dynamics)
         # Instead of generic category explanations, describe what's happening

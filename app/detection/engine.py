@@ -1,7 +1,7 @@
 """Main detection engine orchestrator."""
 
 import logging
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 from app.detection.aggregator import ScoreAggregator
 from app.detection.explainer import ExplanationGenerator
@@ -114,21 +114,33 @@ class DetectionEngine:
         
         # Check for friendly teasing context and down-weight scores if detected
         # This reduces false positives for mutual teasing between friends
-        # Pass normalized message to use emoji and tone markers
+        # Pass normalized message and matches to use emoji, tone markers, and check hard blockers
         is_friendly_teasing = self._check_friendly_teasing_context(
-            normalized_message, normalized_text
+            normalized_message, normalized_text, matches
         )
         is_professional_context = self._check_professional_context(normalized_text)
         
         if is_friendly_teasing:
-            # Down-weight all risk categories when friendly teasing is detected
-            # This ensures friendly banter doesn't trigger warnings
-            for category in list(rules_scores.keys()):
-                original_score = rules_scores[category]
-                rules_scores[category] = original_score * 0.3  # More aggressive reduction
+            # Down-weight bullying score only (×0.3-0.4)
+            # NEVER down-weight secrecy/manipulation/pressure when coercive control is present
+            # Check for coercive control patterns before applying banter suppression
+            has_coercive_control = any(
+                category in matches and len(matches[category]) > 0
+                for category in ["secrecy", "manipulation"]
+            )
+            
+            if not has_coercive_control:
+                # Only down-weight bullying, not other categories
+                if "bullying" in rules_scores and rules_scores["bullying"] > 0:
+                    original_score = rules_scores["bullying"]
+                    rules_scores["bullying"] = original_score * 0.35  # ×0.3-0.4 range
+                    logger.debug(
+                        f"Friendly banter detected: down-weighted bullying from {original_score:.2f} "
+                        f"to {rules_scores['bullying']:.2f}"
+                    )
+            else:
                 logger.debug(
-                    f"Friendly teasing detected: down-weighted {category} from {original_score:.2f} "
-                    f"to {rules_scores[category]:.2f}"
+                    "Friendly banter detected but coercive control present - NOT down-weighting"
                 )
         
         if is_professional_context:
@@ -240,99 +252,221 @@ class DetectionEngine:
             ml_available=self.ml_available,
         )
 
+    def _extract_message_turns(self, text: str) -> List[tuple]:
+        """
+        Extract message turns from conversation text.
+        
+        Args:
+            text: Conversation text (may have speaker labels or be plain text)
+            
+        Returns:
+            List of (speaker, message) tuples, or [(None, text)] if no structure
+        """
+        from app.utils.text_processing import extract_message_pairs
+        
+        # Try to extract structured message pairs
+        message_pairs = extract_message_pairs(text)
+        
+        if len(message_pairs) > 1:
+            # Structured conversation with speaker labels
+            return message_pairs
+        else:
+            # Plain text - split by lines and assign sequential speakers
+            lines = [line.strip() for line in text.split('\n') if line.strip()]
+            if len(lines) <= 1:
+                return [(None, text)]
+            
+            # Assign alternating speakers (A, B, A, B, ...)
+            turns = []
+            for i, line in enumerate(lines):
+                speaker = "A" if i % 2 == 0 else "B"
+                turns.append((speaker, line))
+            return turns
+
+    def _check_mutuality(self, turns: List[tuple], normalized_text: str) -> bool:
+        """
+        Check if both sides use joking markers within last N turns (N=6).
+        
+        Args:
+            turns: List of (speaker, message) tuples
+            normalized_text: Normalized text for pattern matching
+            
+        Returns:
+            True if mutuality detected (both sides have joking markers)
+        """
+        import re
+        
+        if len(turns) < 2:
+            return False
+        
+        # Get last 6 turns
+        recent_turns = turns[-6:] if len(turns) > 6 else turns
+        
+        # Joking markers (normalized)
+        joking_patterns = [
+            r"\b(just kidding|just joking|kidding|joking)\b",
+            r"\b(laughing|haha|hehe)\b",
+        ]
+        
+        # Track which speakers have joking markers
+        speakers_with_joking = set()
+        
+        for speaker, message in recent_turns:
+            if not speaker:
+                continue
+            # Check if this message has joking markers
+            has_joking = any(
+                re.search(pattern, message, re.IGNORECASE)
+                for pattern in joking_patterns
+            )
+            if has_joking:
+                speakers_with_joking.add(speaker)
+        
+        # Mutuality: at least 2 different speakers have joking markers
+        return len(speakers_with_joking) >= 2
+
+    def _check_repair_markers(self, turns: List[tuple], normalized_text: str) -> bool:
+        """
+        Check if repair/closure markers exist near the end (last 2-3 messages).
+        
+        Args:
+            turns: List of (speaker, message) tuples
+            normalized_text: Normalized text for pattern matching
+            
+        Returns:
+            True if repair markers found near the end
+        """
+        import re
+        
+        if len(turns) == 0:
+            return False
+        
+        # Check last 2-3 messages
+        last_messages = turns[-3:] if len(turns) >= 3 else turns
+        
+        # Repair/closure markers
+        repair_patterns = [
+            r"\b(jk|just kidding|just joking|kidding)\b",
+            r"\b(all good|no worries|my bad|didn'?t mean it)\b",
+            r"\b(lol jk|haha jk)\b",
+        ]
+        
+        # Check if any of the last messages contain repair markers
+        for speaker, message in last_messages:
+            if any(re.search(pattern, message, re.IGNORECASE) for pattern in repair_patterns):
+                return True
+        
+        return False
+
+    def _check_hard_blockers(self, normalized_text: str, matches: Dict[str, List]) -> bool:
+        """
+        Check for hard blockers that prevent banter suppression.
+        
+        Hard blockers:
+        - Coercive control / secrecy / isolation / proof-of-compliance patterns
+        - Threats/ultimatums
+        - Severe insults
+        - One-sided repeated insults without repair markers
+        
+        Args:
+            normalized_text: Normalized text for pattern matching
+            matches: Pattern matches by category
+            
+        Returns:
+            True if hard blockers detected (banter suppression should NOT apply)
+        """
+        import re
+        
+        # Check for coercive control / secrecy / isolation / proof-of-compliance
+        coercive_categories = ["secrecy", "manipulation"]
+        for category in coercive_categories:
+            if category in matches and len(matches[category]) > 0:
+                # Check if matches indicate coercive control
+                coercive_patterns = [
+                    "coercive control", "secrecy", "isolation", "proof", "delete", "screenshot"
+                ]
+                for match in matches[category]:
+                    if any(pattern in match.pattern.description.lower() for pattern in coercive_patterns):
+                        return True
+        
+        # Check for threats/ultimatums
+        threat_patterns = [
+            r"\b(or else|we'?re done if|you'?ll regret it|don'?t expect)\b",
+            r"\b(if you don'?t|unless you)\b",
+        ]
+        if any(re.search(pattern, normalized_text, re.IGNORECASE) for pattern in threat_patterns):
+            return True
+        
+        # Check for severe insults (high confidence, short list)
+        severe_insult_patterns = [
+            r"\b(worthless|kill yourself|kys|go die|stfu|shut up|nobody likes you|pathetic)\b",
+        ]
+        if any(re.search(pattern, normalized_text, re.IGNORECASE) for pattern in severe_insult_patterns):
+            return True
+        
+        # Check for one-sided repeated insults (same speaker) without repair markers
+        # This is handled by checking if bullying matches exist without repair markers
+        if "bullying" in matches and len(matches["bullying"]) > 0:
+            # If multiple bullying matches and no repair markers, it's one-sided
+            if len(matches["bullying"]) >= 2:
+                # Check for repair markers
+                repair_patterns = [
+                    r"\b(jk|just kidding|all good|no worries|my bad)\b",
+                ]
+                has_repair = any(
+                    re.search(pattern, normalized_text, re.IGNORECASE)
+                    for pattern in repair_patterns
+                )
+                if not has_repair:
+                    return True  # One-sided repeated insults without repair
+        
+        return False
+
     def _check_friendly_teasing_context(
-        self, normalized_message, normalized_text: str
+        self, normalized_message, normalized_text: str, matches: Dict[str, List] = None
     ) -> bool:
         """
         Check if text shows signs of friendly teasing rather than bullying.
         
-        Friendly teasing indicators:
-        - Mutual teasing (both sides tease)
-        - Joking markers ("jk", "lol", "haha", emojis)
-        - Positive endings ("all good", "just joking", "no worries")
-        - No direct slurs or severe insults
+        Stricter model: Banter is TRUE only if ALL are met:
+        1. Mutuality: Both sides tease OR both sides use joking markers within last N turns (N=6)
+        2. Repair/closure: At least one repair marker exists near the end
+        3. No severe insult/threat/control present (hard blockers)
         
         Args:
             normalized_message: NormalizedMessage object with raw text and tone markers
             normalized_text: Normalized text (for pattern matching)
+            matches: Pattern matches by category (for hard blocker detection)
             
         Returns:
             True if friendly teasing context is detected, False otherwise
         """
-        from app.detection.slang_normalizer import NormalizedMessage
         import re
         
-        # Extract raw text and tone markers from normalized message
+        if matches is None:
+            matches = {}
+        
+        # Extract raw text and tone markers
         original_text = normalized_message.raw_text
-        has_emojis = normalized_message.has_emoji
         tone_markers = normalized_message.tone_markers
         
-        # Check for joking markers in normalized text
-        # After normalization: "lol" -> "laughing", "jk" -> "just kidding"
-        joking_patterns = [
-            r"\b(just kidding|just joking|kidding|joking)\b",  # Normalized from "jk"
-            r"\b(laughing|haha|hehe|hahaha)\b",  # Normalized from "lol", "lmao"
-            r"\b(all good|no worries|no problem|it's fine|it's okay)\b",
-            r"\b(just joking|just kidding|only joking)\b",
-        ]
-        has_joking_markers = any(
-            re.search(pattern, normalized_text, re.IGNORECASE) 
-            for pattern in joking_patterns
-        )
-        
-        # Use emoji tone markers from normalized message
-        has_joking_emoji = tone_markers.get("joking", False)
-        has_annoyed_emoji = tone_markers.get("annoyed", False)
-        
-        # Check for positive endings (including normalized slang like "np" -> "no problem")
-        positive_endings = [
-            r"\b(all good|no worries|it's fine|it's okay|just joking|no problem)\b",
-        ]
-        has_positive_ending = any(
-            re.search(pattern, normalized_text, re.IGNORECASE)
-            for pattern in positive_endings
-        )
-        
-        # Check for severe insults (if present, it's not friendly teasing)
-        # Note: hostile slang like "stfu" -> "shut up" is still hostile
-        severe_insult_patterns = [
-            r"\b(kill yourself|kys|go die|worthless|pathetic|dead weight)\b",
-            r"\b(you're|you are) (so|really|such a) (ugly|stupid|idiot|pathetic)\b",
-            r"\b(shut up)\b",  # Normalized from "stfu"
-        ]
-        has_severe_insults = any(
-            re.search(pattern, normalized_text, re.IGNORECASE)
-            for pattern in severe_insult_patterns
-        )
-        
-        # If severe insults are present, it's not friendly teasing
-        if has_severe_insults:
+        # Hard blockers check FIRST - if present, banter suppression should NOT apply
+        if self._check_hard_blockers(normalized_text, matches):
             return False
         
-        # Check for mutual teasing (both sides have some form of teasing)
-        # Simple heuristic: look for multiple speakers and teasing patterns
-        lines = original_text.split('\n')
-        teasing_indicators = [
-            r"\b(you're|you are) (so|really|such a) (slow|bad|terrible|annoying|ridiculous)\b",
-            r"\b(being|acting) (so|really|such a) (baby|ridiculous|silly|dumb)\b",
-        ]
-        teasing_count = sum(
-            1 for line in lines
-            if any(re.search(pattern, line, re.IGNORECASE) for pattern in teasing_indicators)
-        )
-        has_mutual_teasing = teasing_count >= 2  # At least 2 instances suggests mutual teasing
+        # Extract message turns
+        turns = self._extract_message_turns(original_text)
         
-        # Friendly teasing if:
-        # - Has joking markers OR emojis OR positive ending
-        # - AND (mutual teasing OR no severe insults)
-        # - AND not annoyed emoji (annoyed emoji suggests negative tone)
-        is_friendly = (
-            (has_joking_markers or has_joking_emoji or has_positive_ending) and
-            (has_mutual_teasing or not has_severe_insults) and
-            not has_annoyed_emoji  # Annoyed emoji suggests negative tone, not friendly
-        )
+        # Requirement 1: Mutuality
+        has_mutuality = self._check_mutuality(turns, normalized_text)
         
-        return is_friendly
+        # Requirement 2: Repair/closure markers
+        has_repair = self._check_repair_markers(turns, normalized_text)
+        
+        # Banter is TRUE only if ALL requirements met
+        is_banter = has_mutuality and has_repair
+        
+        return is_banter
 
     def _check_professional_context(self, normalized_text: str) -> bool:
         """

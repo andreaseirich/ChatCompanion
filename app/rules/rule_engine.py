@@ -71,11 +71,13 @@ class RuleEngine:
         context_lower = context.lower()
         
         # Self-report exclusion patterns (NOT pressure)
+        # Include normalized forms: "I'm busy rn", "not rn", "can't rn", "brb rn" (be right back right now)
         self_report_patterns = [
-            r"\b(i'?m|i am|i'm) (busy|not available|unavailable) (right now|now)\b",
-            r"\b(not|can'?t|cannot) (right now|now)\b",
+            r"\b(i'?m|i am|i'm) (busy|not available|unavailable) (right now|now|rn)\b",
+            r"\b(not|can'?t|cannot) (right now|now|rn)\b",
             r"\b(can we|can you) (talk|chat) (later|after|tomorrow)\b",
             r"\b(no pressure|take your time|whenever)\b",
+            r"\b(be right back|brb) (right now|now|rn)\b",  # "brb rn" -> "be right back right now"
         ]
         
         # If self-report pattern found, it's NOT pressure
@@ -87,7 +89,7 @@ class RuleEngine:
         # Includes cross-sentence coercion: demand verb in one sentence, time urgency in another
         demand_indicators = [
             # Imperative verbs (can be in previous/next sentence)
-            r"\b(answer|reply|call|do it|send|prove|decide|respond|tell me|show me)\b",
+            r"\b(answer|reply|call|do it|send|prove|decide|respond|tell me|show me|delete|share)\b",
             # Coercive phrasing
             r"\b(you (have to|must|need to|should))\b",
             r"\b(no excuses|don'?t get time|no more time)\b",

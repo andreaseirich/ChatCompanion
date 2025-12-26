@@ -65,8 +65,10 @@ ChatCompanion explicitly does NOT:
 
 - **Slang and irony are ambiguous**: The system includes slang normalization for common English youth/online abbreviations, but slang and irony can be context-dependent and may lead to false positives or negatives
 - **Heuristic-based normalization**: Slang normalization is heuristic-based, not perfect—some slang may not be recognized, and some normalizations may not capture the full nuance
+- **Banter detection is heuristic**: The banter detection system uses mutuality and repair marker heuristics, which may not perfectly capture all friendly banter contexts
+- **False positives/negatives possible**: Friendly banter with slang or irony may occasionally be flagged, or hostile slang may be missed—the tool is a helper, not a definitive judge
 - **System stays careful and non-judgmental**: The system is designed to be supportive rather than decisive, recognizing that language interpretation requires human judgment
-- **False positives possible**: Friendly banter with slang or irony may occasionally be flagged, or hostile slang may be missed—the tool is a helper, not a definitive judge
+- **RED signals protected**: Coercive control, secrecy/isolation, and proof-of-compliance patterns are never weakened by banter suppression
 
 ## User Responsibility
 

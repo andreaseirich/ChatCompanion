@@ -77,6 +77,9 @@ The system includes a slang normalization layer to handle common English youth/o
 - Pronouns: `u` → `you`, `ur` → `your`
 - Common phrases: `idk` → `I don't know`, `brb` → `be right back`, `ttyl` → `talk to you later`
 - Expressions: `lol`/`lmao` → `laughing`, `jk` → `just kidding`, `np` → `no problem`
+- Extended slang: `frfr` → `for real`, `istg` → `i swear to god`, `ong` → `on god`, `wtv` → `whatever`, `bc`/`cuz` → `because`, `k`/`kk` → `okay`
+- Neutral address: `bruh`/`bro` → kept as-is, tagged as friendly/neutral (not insults)
+- Intensity markers: `lowkey`/`highkey` → kept as-is, tagged as intensity markers
 - Hostile slang: `stfu` → `shut up` (preserves hostility)
 
 **Masked slang and obfuscation handling:**

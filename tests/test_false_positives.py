@@ -235,3 +235,21 @@ def test_youth_friendly_banter_slang():
         f"got {result.category_scores.get('bullying', 0.0)}"
     )
 
+
+def test_slang_banter_with_mutuality_and_repair():
+    """Test that slang banter with mutuality and repair markers is GREEN."""
+    engine = DetectionEngine(use_ml=False)
+    
+    text = """
+    A: bruh ur wild frfr 😂
+    B: lol u too
+    A: jk all good np
+    B: haha my bad
+    """
+    
+    result = engine.analyze(text)
+    
+    assert result.risk_level == RiskLevel.GREEN, (
+        f"Expected GREEN for banter with mutuality and repair, got {result.risk_level}"
+    )
+

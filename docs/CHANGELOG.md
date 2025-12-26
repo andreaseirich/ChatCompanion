@@ -84,6 +84,10 @@ Dates are in ISO format (YYYY-MM-DD) with Europe/Berlin timezone.
 - Enhanced slang normalization to handle masked slang, typos, and obfuscation
 - Added cross-sentence coercion detection for split demands
 - Improved pattern counting accuracy (instance-based counting verified)
+- Extended English youth slang normalization (frfr, istg, ong, wtv, bc, cuz, k/kk)
+- Enhanced tone markers (joking, friendly, annoyed, intense) with punctuation/caps detection
+- Strengthened banter detection with mutuality + repair marker requirements and hard blockers
+- Banter suppression only down-weights bullying, never weakens RED signals (coercive control)
 - Fixed "right now" pressure false positives with context gating (self-reports excluded)
 - Cleaned up GREEN messaging - removed "mild patterns" phrasing
 - Calibrated YELLOW explanations - only mention threats when actually present

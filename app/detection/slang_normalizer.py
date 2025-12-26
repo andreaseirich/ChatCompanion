@@ -14,7 +14,7 @@ class NormalizedMessage:
     normalized_text: str
     replacements: List[Dict[str, str]] = field(default_factory=list)
     has_emoji: bool = False
-    tone_markers: Dict[str, bool] = field(default_factory=dict)
+    tone_markers: Dict[str, bool] = field(default_factory=dict)  # joking, friendly, annoyed, intense
 
 
 class SlangNormalizer:
@@ -41,6 +41,15 @@ class SlangNormalizer:
             "omg": "oh my god",
             "jk": "just kidding",
             "fr": "for real",
+            "frfr": "for real",  # Extended form
+            "istg": "i swear to god",
+            "ong": "on god",
+            "wtv": "whatever",
+            "sm": "so much",  # Word-boundary aware, safe token only
+            "bc": "because",
+            "cuz": "because",
+            "k": "okay",  # Neutral, not pressure marker
+            "kk": "okay",  # Neutral, not pressure marker
             "ngl": "not going to lie",
             "wyd": "what are you doing",
             "smh": "shaking my head",
@@ -78,6 +87,12 @@ class SlangNormalizer:
             "rofl": "laughing",
             "haha": "haha",  # Keep as is
             "hehe": "hehe",  # Keep as is
+            # Neutral address (do NOT treat as insult - keep as-is but tag)
+            "bruh": "bruh",  # Keep as-is, tag as friendly/neutral
+            "bro": "bro",  # Keep as-is, tag as friendly/neutral
+            # Intensity markers (keep token, tag)
+            "lowkey": "lowkey",  # Keep as-is, tag in tone_markers
+            "highkey": "highkey",  # Keep as-is, tag in tone_markers
         }
 
         # Sort by length (longest first) to avoid partial matches
@@ -88,6 +103,17 @@ class SlangNormalizer:
         # Emoji patterns for tone detection
         self.joking_emojis = ["😂", "🤣", "😅", "😆", "😊", "😄"]
         self.annoyed_emojis = ["😒", "😑", "🙄", "💢", "😤", "😠"]
+        
+        # Softening markers (reduce pressure)
+        self.softening_markers = [
+            "pls", "please", "no rush", "take your time", "no problem", "no worries",
+            "whenever", "it's fine", "it's okay", "all good"
+        ]
+        
+        # Annoyance markers
+        self.annoyance_markers = [
+            "bruh", "u serious", "are you serious", "seriously"
+        ]
 
     def _normalize_obfuscation(self, text: str) -> str:
         """
@@ -185,6 +211,39 @@ class SlangNormalizer:
         text = "".join(char for char in text if unicodedata.category(char) != "Cf" or char in ["\n", "\r", "\t"])
         return text
 
+    def _detect_punctuation_intensity(self, text: str) -> bool:
+        """
+        Detect punctuation intensity markers.
+
+        Args:
+            text: Input text
+
+        Returns:
+            True if intensity markers detected
+        """
+        # Repeated "!" (cap at 3): "!!!" → intensity marker
+        if re.search(r"!{2,3}", text):
+            return True
+        # "??" → intensity marker
+        if re.search(r"\?\?+", text):
+            return True
+        return False
+
+    def _detect_caps_intensity(self, text: str) -> bool:
+        """
+        Detect ALL CAPS intensity (3+ consecutive uppercase letters).
+
+        Args:
+            text: Input text
+
+        Returns:
+            True if caps intensity detected
+        """
+        # Match 3+ consecutive uppercase letters (word boundary aware)
+        if re.search(r"\b[A-Z]{3,}\b", text):
+            return True
+        return False
+
     def normalize_message(self, text: str) -> NormalizedMessage:
         """
         Normalize slang and abbreviations in text.
@@ -217,7 +276,12 @@ class SlangNormalizer:
         
         replacements = []
         has_emoji = False
-        tone_markers = {"joking": False, "annoyed": False}
+        tone_markers = {
+            "joking": False,
+            "friendly": False,
+            "annoyed": False,
+            "intense": False
+        }
 
         # Detect emojis (light detection only)
         for emoji in self.joking_emojis:
@@ -231,6 +295,36 @@ class SlangNormalizer:
                 has_emoji = True
                 tone_markers["annoyed"] = True
                 break
+
+        # Detect joking markers (normalized text)
+        normalized_lower = normalized.lower()
+        joking_text_markers = [
+            "laughing",  # Normalized from "lol", "lmao", "rofl"
+            "just kidding",  # Normalized from "jk"
+            "haha", "hehe"
+        ]
+        if any(marker in normalized_lower for marker in joking_text_markers):
+            tone_markers["joking"] = True
+
+        # Detect softening markers
+        if any(marker in normalized_lower for marker in self.softening_markers):
+            tone_markers["friendly"] = True
+
+        # Detect annoyance markers
+        if any(marker in normalized_lower for marker in self.annoyance_markers):
+            tone_markers["annoyed"] = True
+
+        # Detect intensity markers
+        if self._detect_punctuation_intensity(normalized) or self._detect_caps_intensity(normalized):
+            tone_markers["intense"] = True
+
+        # Tag "bruh"/"bro" as friendly/neutral
+        if re.search(r"\b(bruh|bro)\b", normalized_lower):
+            tone_markers["friendly"] = True
+
+        # Tag "lowkey"/"highkey" as intensity markers
+        if re.search(r"\b(lowkey|highkey)\b", normalized_lower):
+            tone_markers["intense"] = True
 
         # Step 7: Normalize abbreviations (case-insensitive, word boundaries)
         # Use word boundaries to avoid partial matches

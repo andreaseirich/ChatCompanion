@@ -44,6 +44,13 @@ This file tracks project progress, phases, and tasks.
   - Verified pattern counts are instance-based
   - Created youth-language test fixtures
   - Updated documentation for masked slang normalization
+- [x] EN Youth Slang + Banter/Irony Robustness (2025-12-26)
+  - Extended slang abbreviations (frfr, istg, ong, wtv, bc, cuz, k/kk)
+  - Enhanced tone markers (joking, friendly, annoyed, intense)
+  - Strengthened banter detection with mutuality + repair requirements
+  - Added hard blockers to prevent banter suppression for coercive control
+  - Comprehensive test suite for youth slang and banter detection
+  - Documentation updates (README, ARCHITECTURE, ETHICS, CHANGELOG, CHECKPOINTS)
 
 ### In Progress 🔄
 

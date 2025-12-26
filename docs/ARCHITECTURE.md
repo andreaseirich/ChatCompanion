@@ -129,6 +129,7 @@ ChatCompanion follows a modular, layered architecture with strict separation of 
    - Slang normalization (`app/detection/slang_normalizer.py`)
    - Text normalization, sentence segmentation (`app/utils/text_processing.py`)
 3. **Context Gating**: Time-phrase patterns (e.g., "right now") are context-gated to reduce false positives—only matches in demand context are counted as pressure. Includes cross-sentence coercion detection (demand verb in one sentence, time urgency in adjacent sentence)
+4. **Banter Detection**: Stricter banter heuristics require mutuality (both sides use joking markers) AND repair markers (closure phrases) to suppress bullying scores. Hard blockers (coercive control, threats, severe insults) prevent banter suppression
 4. **Parallel Analysis**:
    - Rules engine scans for patterns (`app/rules/rule_engine.py`)
    - Model inference generates embeddings and classifications (`app/models_local/`)
