@@ -105,24 +105,24 @@ Use clear, descriptive commit messages:
 
 ## Repository Hygiene
 
-### Internal Files Must Stay Local
+### Internal Files Must Be Excluded
 
-**CRITICAL**: Internal development artifacts must NEVER be committed to the public repository.
+**CRITICAL**: Internal development artifacts must NEVER be committed to the repository.
 
-**Files that must remain in `.local/`**:
+**Files that must be excluded**:
 - Internal prompts (Master Prompt, Cursor prompts, debug prompts, evaluation prompts)
 - Internal planning documents (checkpoints, benchmarks, quality gates)
 - Private notes or scratch files
 - Internal audit documents
 
 **Rules**:
-1. All internal prompts, notes, and planning documents must be placed in `.local/` directory
-2. The `.local/` directory is gitignored and will not be committed
+1. All internal prompts, notes, and planning documents must be excluded from commits
+2. Use `.gitignore` to exclude internal directories and files
 3. Before committing, run the repository hygiene checker:
    ```bash
    python3 scripts/repo_hygiene_check.py
    ```
-4. If violations are found, move files to `.local/` before committing
+4. If violations are found, exclude files before committing
 
 **Repository Hygiene Checker**:
 - Script: `scripts/repo_hygiene_check.py`
@@ -130,12 +130,12 @@ Use clear, descriptive commit messages:
 - Can be integrated into CI/CD pipelines
 - Exit code 1 if violations found, 0 if clean
 
-See [`docs/REPO_PUBLIC_AUDIT.md`](docs/REPO_PUBLIC_AUDIT.md) for complete public repository definition.
+See [`docs/AUDIT.md`](docs/AUDIT.md) for complete repository scope definition.
 
 ## Important Notes
 
 ### What NOT to Include
-- ❌ Internal development prompts or heuristics (must be in `.local/`)
+- ❌ Internal development prompts or heuristics (must be excluded)
 - ❌ Internal planning documents (checkpoints, benchmarks, quality gates)
 - ❌ Hardcoded secrets or API keys
 - ❌ Telemetry or tracking code

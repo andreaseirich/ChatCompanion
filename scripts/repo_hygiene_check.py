@@ -3,7 +3,7 @@
 Repository Hygiene Checker
 
 Scans the repository for disallowed patterns that should not be committed
-to the public repository. This includes internal prompts, debug prompts,
+to the repository. This includes internal prompts, debug prompts,
 private notes, and other internal development artifacts.
 
 Usage:
@@ -31,7 +31,6 @@ DISALLOWED_PATTERNS = [
 
 # Allowed directories (excluded from scanning)
 ALLOWED_DIRS = [
-    ".local",  # Local-only directory is allowed
     ".git",
     "venv",
     "__pycache__",
@@ -80,9 +79,6 @@ def check_filename(filename: str) -> List[str]:
     
     for pattern in DISALLOWED_PATTERNS:
         if pattern in filename_lower:
-            # Special case: .local/ directory is allowed
-            if pattern == "local" and ".local" in filename_lower:
-                continue
             violations.append(f"Filename contains disallowed pattern: '{pattern}'")
     
     return violations
@@ -155,8 +151,8 @@ def main():
         print("=" * 70)
         print()
         print("💡 RECOMMENDATIONS:")
-        print("   - Move internal files to .local/ directory")
-        print("   - Ensure .local/ is in .gitignore")
+        print("   - Exclude internal files from commits")
+        print("   - Ensure internal directories are in .gitignore")
         print("   - Review files before committing")
         print()
         print("❌ Repository hygiene check FAILED")
