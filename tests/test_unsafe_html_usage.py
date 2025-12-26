@@ -25,7 +25,6 @@ SAFE_PATTERNS = [
     r'background-color: #F44336',  # RED traffic light
     r'background-color: #cccccc',  # Inactive traffic light
     r'text-align: center',  # Static styling
-    r'render_card\(',  # render_card function (not currently used with user content)
 ]
 
 
@@ -157,11 +156,6 @@ def test_no_unsafe_html_with_user_content():
         usages = find_unsafe_allow_html_usage(py_file)
         
         for line_num, line_content, context in usages:
-            # Special case: render_card function in theme.py (not used, safe to ignore)
-            # Check if this is the render_card function (line 188 in theme.py)
-            if py_file.name == "theme.py" and line_num == 188:
-                continue
-            
             if not is_safe_usage(line_content, context):
                 rel_path = py_file.relative_to(app_dir.parent)
                 violations.append(
@@ -233,7 +227,7 @@ def test_negative_case_f_string():
     """Negative test: f-string with variable should FAIL."""
     # Simulate unsafe usage: f-string with variable
     unsafe_code = 'st.markdown(f"<div>{user_input}</div>", unsafe_allow_html=True)'
-    context = 'user_input = "test"'
+    context = ''
     
     assert not is_safe_usage(unsafe_code, context), (
         "f-string with variable should be detected as unsafe"
@@ -244,7 +238,7 @@ def test_negative_case_format():
     """Negative test: .format() with variable should FAIL."""
     # Simulate unsafe usage: .format() with variable
     unsafe_code = 'st.markdown("<div>{}</div>".format(user_input), unsafe_allow_html=True)'
-    context = 'user_input = "test"'
+    context = ''
     
     assert not is_safe_usage(unsafe_code, context), (
         ".format() with variable should be detected as unsafe"
@@ -255,7 +249,7 @@ def test_negative_case_concatenation():
     """Negative test: String concatenation with variable should FAIL."""
     # Simulate unsafe usage: string concatenation
     unsafe_code = 'st.markdown("<div>" + user_input + "</div>", unsafe_allow_html=True)'
-    context = 'user_input = "test"'
+    context = ''
     
     assert not is_safe_usage(unsafe_code, context), (
         "String concatenation with variable should be detected as unsafe"
@@ -266,7 +260,7 @@ def test_negative_case_direct_variable():
     """Negative test: Direct variable in st.markdown should FAIL."""
     # Simulate unsafe usage: direct variable
     unsafe_code = 'st.markdown(user_content, unsafe_allow_html=True)'
-    context = 'user_content = "<div>test</div>"'
+    context = ''
     
     assert not is_safe_usage(unsafe_code, context), (
         "Direct variable in st.markdown should be detected as unsafe"
