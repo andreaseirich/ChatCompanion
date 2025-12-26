@@ -2,9 +2,8 @@
 """
 Repository Hygiene Checker
 
-Scans the repository for disallowed patterns that should not be committed
-to the repository. This includes internal prompts, debug prompts,
-private notes, and other internal development artifacts.
+Scans the repository for disallowed patterns that should not be committed.
+Focuses on real leaks: sensitive file paths, secret patterns, and internal artifacts.
 
 Usage:
     python scripts/repo_hygiene_check.py
@@ -15,18 +14,49 @@ Exit codes:
 """
 
 import os
+import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
-# Disallowed filename patterns (case-insensitive)
-DISALLOWED_PATTERNS = [
-    "prompt",
-    "debug_prompt",
-    "private",
-    "notes",
-    "scratch",
-    "local",
+# Disallowed file paths/patterns (case-insensitive, must match full path or filename)
+DISALLOWED_PATHS = [
+    r"\.env",
+    r"\.env\.",
+    r"\.pem$",
+    r"id_rsa",
+    r"id_dsa",
+    r"\.local/",
+    r"scratch",
+    r"notes\.txt$",
+    r"notes\.md$",
+    r"debug_prompt",
+    r"master_prompt",
+]
+
+# Disallowed filename patterns (only for suspicious filenames, not content)
+DISALLOWED_FILENAMES = [
+    r"^\.env",
+    r"\.pem$",
+    r"^id_rsa",
+    r"^id_dsa",
+    r"scratch",
+    r"debug_prompt",
+    r"master_prompt",
+]
+
+# Secret-like content patterns (regex)
+SECRET_PATTERNS = [
+    (r"BEGIN\s+(RSA\s+)?PRIVATE\s+KEY", "Private key detected"),
+    (r"-----BEGIN", "Encoded key/certificate detected"),
+    (r"api[_-]?key\s*=\s*['\"]?[a-zA-Z0-9]{20,}", "API key pattern detected"),
+    (r"token\s*=\s*['\"]?[a-zA-Z0-9]{20,}", "Token pattern detected"),
+    (r"secret\s*=\s*['\"]?[a-zA-Z0-9]{20,}", "Secret pattern detected"),
+    (r"password\s*=\s*['\"]?[^'\"]{8,}", "Password pattern detected"),
+    (r"AWS_ACCESS_KEY_ID\s*=", "AWS access key detected"),
+    (r"AWS_SECRET_ACCESS_KEY\s*=", "AWS secret key detected"),
+    (r"GITHUB_TOKEN\s*=", "GitHub token detected"),
+    (r"SLACK_TOKEN\s*=", "Slack token detected"),
 ]
 
 # Allowed directories (excluded from scanning)
@@ -41,20 +71,19 @@ ALLOWED_DIRS = [
     "models",  # Model files are large and gitignored
 ]
 
-# Allowed file extensions (these are typically safe)
-ALLOWED_EXTENSIONS = [
-    ".py",
-    ".md",
-    ".txt",
-    ".yaml",
-    ".yml",
-    ".json",
-    ".sh",
-    ".spec",
-    ".gitignore",
-    ".gitkeep",
-    ".LICENSE",
-]
+# Allowlist: files that may contain false positives
+ALLOWLIST = {
+    # File path -> allowed patterns in filename or content
+    "docs/ARCHITECTURE.md": ["prompt"],  # May discuss "prompt engineering"
+    "docs/ETHICS.md": ["private"],  # May discuss "privacy"
+    "docs/SECURITY.md": ["private", "secret"],  # Security documentation
+    "CONTRIBUTING.md": ["private", "secret"],  # Contributing guidelines
+    ".gitignore": ["local", "private"],  # Gitignore patterns
+    "README.md": ["private"],  # Privacy discussion
+}
+
+# Maximum file size to scan for content (1MB)
+MAX_FILE_SIZE = 1024 * 1024
 
 
 def is_allowed_path(file_path: Path) -> bool:
@@ -63,29 +92,75 @@ def is_allowed_path(file_path: Path) -> bool:
     for allowed_dir in ALLOWED_DIRS:
         if allowed_dir in file_path.parts:
             return True
-    
-    # Check if file has allowed extension
-    if file_path.suffix.lower() in ALLOWED_EXTENSIONS:
-        # But still check filename for disallowed patterns
-        return False
-    
     return False
 
 
-def check_filename(filename: str) -> List[str]:
-    """Check if filename contains disallowed patterns."""
+def check_path_patterns(file_path: Path) -> List[str]:
+    """Check if file path matches disallowed patterns."""
     violations = []
-    filename_lower = filename.lower()
+    path_str = str(file_path).lower()
     
-    for pattern in DISALLOWED_PATTERNS:
-        if pattern in filename_lower:
-            violations.append(f"Filename contains disallowed pattern: '{pattern}'")
+    for pattern in DISALLOWED_PATHS:
+        if re.search(pattern, path_str, re.IGNORECASE):
+            violations.append(f"Path matches disallowed pattern: '{pattern}'")
     
     return violations
 
 
-def scan_repository(repo_root: Path) -> List[Tuple[Path, List[str]]]:
-    """Scan repository for violations."""
+def check_filename_patterns(filename: str) -> List[str]:
+    """Check if filename matches disallowed patterns."""
+    violations = []
+    filename_lower = filename.lower()
+    
+    for pattern in DISALLOWED_FILENAMES:
+        if re.search(pattern, filename_lower):
+            violations.append(f"Filename matches disallowed pattern: '{pattern}'")
+    
+    return violations
+
+
+def check_file_content(file_path: Path) -> List[Tuple[int, str]]:
+    """Check file content for secret patterns. Returns list of (line_number, violation)."""
+    violations = []
+    
+    # Skip code files - they may contain patterns as strings/regex
+    if file_path.suffix in ['.py', '.js', '.ts', '.java', '.cpp', '.c', '.go', '.rs']:
+        return violations
+    
+    # Check if file is too large
+    try:
+        if file_path.stat().st_size > MAX_FILE_SIZE:
+            return violations  # Skip large files
+    except OSError:
+        return violations  # Skip if can't read
+    
+    # Check allowlist
+    rel_path = str(file_path)
+    allowed_patterns = []
+    for allowed_path, patterns in ALLOWLIST.items():
+        if allowed_path in rel_path:
+            allowed_patterns.extend(patterns)
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for line_num, line in enumerate(f, 1):
+                for pattern, message in SECRET_PATTERNS:
+                    # Skip if pattern is in allowlist
+                    pattern_key = pattern.split()[0].lower() if pattern.split() else ""
+                    if any(allowed in pattern_key for allowed in allowed_patterns):
+                        continue
+                    
+                    if re.search(pattern, line, re.IGNORECASE):
+                        violations.append((line_num, f"{message}: {line.strip()[:60]}"))
+    except (UnicodeDecodeError, PermissionError, OSError):
+        # Skip binary files or files we can't read
+        pass
+    
+    return violations
+
+
+def scan_repository(repo_root: Path) -> List[Tuple[Path, List[str], List[Tuple[int, str]]]]:
+    """Scan repository for violations. Returns list of (file_path, path_violations, content_violations)."""
     violations = []
     
     # Get all tracked files from git
@@ -121,10 +196,18 @@ def scan_repository(repo_root: Path) -> List[Tuple[Path, List[str]]]:
         if is_allowed_path(file_path):
             continue
         
-        # Check filename
-        filename_violations = check_filename(file_path.name)
-        if filename_violations:
-            violations.append((file_path, filename_violations))
+        # Check path patterns
+        path_violations = check_path_patterns(file_path)
+        
+        # Check filename patterns
+        filename_violations = check_filename_patterns(file_path.name)
+        path_violations.extend(filename_violations)
+        
+        # Check file content for secrets
+        content_violations = check_file_content(file_path)
+        
+        if path_violations or content_violations:
+            violations.append((file_path, path_violations, content_violations))
     
     return violations
 
@@ -142,17 +225,24 @@ def main():
     if violations:
         print("❌ VIOLATIONS FOUND:")
         print("=" * 70)
-        for file_path, file_violations in violations:
+        for file_path, path_violations, content_violations in violations:
             rel_path = file_path.relative_to(repo_root)
             print(f"\n📄 {rel_path}")
-            for violation in file_violations:
-                print(f"   ⚠️  {violation}")
+            
+            if path_violations:
+                for violation in path_violations:
+                    print(f"   ⚠️  {violation}")
+            
+            if content_violations:
+                for line_num, violation in content_violations:
+                    print(f"   ⚠️  Line {line_num}: {violation}")
+        
         print()
         print("=" * 70)
         print()
         print("💡 RECOMMENDATIONS:")
-        print("   - Exclude internal files from commits")
-        print("   - Ensure internal directories are in .gitignore")
+        print("   - Remove or exclude files with violations")
+        print("   - Ensure sensitive files are in .gitignore")
         print("   - Review files before committing")
         print()
         print("❌ Repository hygiene check FAILED")
@@ -165,4 +255,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-
