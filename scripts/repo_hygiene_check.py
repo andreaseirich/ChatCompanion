@@ -177,9 +177,9 @@ def check_file_content(file_path: Path) -> List[Tuple[int, str]]:
                         continue
                     
                     if re.search(pattern, line, re.IGNORECASE):
-                        # Show context but truncate long lines
-                        context = line.strip()[:80]
-                        violations.append((line_num, f"{message}: {context}"))
+                        # Do NOT include context with secrets - only show the warning message
+                        # This prevents logging sensitive data in violation output
+                        violations.append((line_num, message))
     except (UnicodeDecodeError, PermissionError, OSError):
         # Skip binary files or files we can't read
         pass
@@ -263,6 +263,8 @@ def main():
             
             if content_violations:
                 for line_num, violation in content_violations:
+                    # Only print warning message, not the actual secret content
+                    # This prevents sensitive data from being logged
                     print(f"   ⚠️  Line {line_num}: {violation}")
         
         print()
