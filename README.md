@@ -62,19 +62,30 @@ ChatCompanion provides:
 - Guidance on talking to trusted adults
 - Reminders about healthy boundaries
 
-## Screenshots
+## Design & UI
 
-> **Note**: Screenshots will be added before submission. Placeholder for visual demonstration of the traffic light system and UI.
+ChatCompanion features a clean, kid-friendly interface designed for ages 10-16:
+
+- **Clear Visual Hierarchy**: Three-zone layout (Header, Input, Results) with card-based design
+- **Traffic Light System**: Intuitive green/yellow/red indicators for quick understanding
+- **Consistent Styling**: Calm colors, readable fonts, and supportive visual design
+- **Example Chats**: Quick access to GREEN, YELLOW, and RED examples for testing
+- **Offline Badge**: Clear indication that processing happens locally
 
 ### Traffic Light Indicator
-- 🟢 **GREEN**: Safe conversation - "No warning signs detected"
-- 🟡 **YELLOW**: Some concerning patterns - "Something feels a bit off"
-- 🔴 **RED**: High-risk situation - "Need Immediate Help?" section appears
+- 🟢 **GREEN**: Safe conversation - "Everything looks okay." + no pattern callouts
+- 🟡 **YELLOW**: Some concerning patterns - "Something feels a bit off." + mentions pressure/guilt (no "Need Immediate Help?")
+- 🔴 **RED**: High-risk situation - "This is serious." + includes "Need Immediate Help?" section (appears only once)
 
 ### Example Analysis
 - Risk level explanation with evidence
 - Child-friendly language
 - Help resources and advice
+- "What this tool can and cannot do" section for transparency
+
+## Screenshots
+
+> **Note**: Screenshots will be added before submission. Placeholder for visual demonstration of the traffic light system and UI.
 
 ## Demo Video
 
@@ -177,7 +188,50 @@ For detailed installation instructions, see [INSTALL.md](docs/INSTALL.md).
 
 The application will open in your default web browser at `http://localhost:8501`.
 
+### Example Chats for Quick Testing
+
+Try these example conversations to see how ChatCompanion works:
+
+**🟢 GREEN Example** (Safe Chat):
+```
+Alex: Hey! How was your day at school?
+Sam: It was good! We had a science test today.
+Alex: Oh cool! How do you think you did?
+Sam: I think I did okay. The questions were a bit tricky though.
+Alex: I'm sure you did great! Want to study together for the next one?
+Sam: Yeah, that would be helpful. Thanks!
+```
+
+**🟡 YELLOW Example** (Pressure/Guilt):
+```
+Taylor: Hey, I really need you to respond to my messages faster
+Jordan: I'm sorry, I've been busy with work
+Taylor: If you really cared about me, you would make time. Everyone else responds quickly.
+Jordan: I do care, but I can't always respond immediately
+Taylor: You're being selfish. After everything I've done for you, this is how you treat me?
+```
+
+**🔴 RED Example** (High-Risk):
+```
+Adult: Hey there! You're so mature for your age
+Teen: Thanks, I guess
+Adult: You're really special. Different from other kids your age.
+Teen: What do you mean?
+Adult: Adults don't understand you like I do. We're the same, you and me.
+Adult: Don't tell your parents. They won't understand. This is just between us.
+```
+
 **Note:** For non-technical users, we're working on a standalone executable installer. See [INSTALL.md](docs/INSTALL.md) for details.
+
+### Optional: Static Landing Page
+
+A static landing page is available in the `site/` directory for GitHub Pages hosting (optional):
+
+1. Enable GitHub Pages in repository settings
+2. Set source to `/site` directory
+3. The landing page will be available at `https://yourusername.github.io/ChatCompanion/`
+
+The landing page provides a design shell around the Streamlit prototype for improved first impressions.
 
 ## Setup vs. Runtime
 
