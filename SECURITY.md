@@ -72,6 +72,18 @@ ChatCompanion is designed with privacy and security in mind:
 
 We encourage security researchers and users to review the code and report any concerns.
 
+## Important Limitations
+
+**ChatCompanion is not a medical, psychological, or legal tool.** It is a privacy-first assistant designed to help children and teenagers recognize risky chat patterns. It does not:
+
+- Provide medical or psychological diagnosis or treatment
+- Replace professional counseling or therapy
+- Make legal claims or provide legal advice
+- Guarantee perfect detection accuracy
+- Replace trusted adult guidance or professional support
+
+For more information about limitations and ethical considerations, see [ETHICS.md](docs/ETHICS.md).
+
 ## Acknowledgments
 
 We appreciate the security research community and will acknowledge security researchers who responsibly disclose vulnerabilities (with their permission).

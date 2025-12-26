@@ -51,7 +51,8 @@ ChatCompanion provides:
 - 🔴 Red: High-risk situation—talk to a trusted adult
 
 ✅ **Child-Friendly Explanations**
-- Simple language explaining detected patterns
+- Simple language suitable for ages 10-16
+- Clear, calm titles and messages for each risk level
 - Evidence snippets showing what was flagged
 - Supportive, non-shaming tone
 
@@ -78,16 +79,13 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed technical documentation
 
 ## Setup
 
-### Prerequisites
+For detailed installation instructions, see [INSTALL.md](docs/INSTALL.md).
 
-- Python 3.10 or higher
-- pip (Python package manager)
-
-### Installation
+### Quick Start
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/andreaseirich/ChatCompanion.git
    cd ChatCompanion
    ```
 
@@ -104,20 +102,17 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed technical documentation
 
 4. **Download ML models** (optional, for enhanced detection)
    ```bash
-   # Download models for hybrid detection (requires internet during setup only)
    python scripts/download_models.py
-   
-   # After download, the app runs completely offline
-   # If models are not downloaded, the app works in rules-only mode
    ```
 
-### Running the Application
-
-```bash
-streamlit run app/main.py
-```
+5. **Run the application**
+   ```bash
+   streamlit run app/main.py
+   ```
 
 The application will open in your default web browser at `http://localhost:8501`.
+
+**Note:** For non-technical users, we're working on a standalone executable installer. See [INSTALL.md](docs/INSTALL.md) for details.
 
 ## Setup vs. Runtime
 
