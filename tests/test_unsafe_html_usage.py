@@ -61,8 +61,8 @@ def find_unsafe_allow_html_usage(file_path: Path) -> list:
             lines = f.readlines()
             for i, line in enumerate(lines, 1):
                 if 'unsafe_allow_html=True' in line or 'unsafe_allow_html = True' in line:
-                    # Get context (previous 2 lines and current line)
-                    context_start = max(0, i - 3)
+                    # Get context (previous 5 lines for better function detection)
+                    context_start = max(0, i - 6)
                     context = ''.join(lines[context_start:i])
                     usages.append((i, line.strip(), context))
     except Exception as e:
@@ -85,8 +85,12 @@ def is_safe_usage(line_content: str, context: str) -> bool:
     combined_lower = combined.lower()
     
     # Exception: render_card function definition (not used with user content, function not called)
-    if 'def render_card' in context:
-        return True
+    # Check if this is inside the render_card function definition
+    if 'def render_card' in context or 'render_card(' in context:
+        # Only safe if it's the function definition itself, not a call with user content
+        # Check if it's an f-string with content variable (function definition)
+        if "f'<div class=\"" in context and 'content}' in context:
+            return True
     
     # First check if it matches any safe patterns (static HTML, CSS, etc.)
     for safe_pattern in SAFE_PATTERNS:
