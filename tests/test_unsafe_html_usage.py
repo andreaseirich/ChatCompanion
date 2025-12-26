@@ -103,7 +103,7 @@ def is_safe_usage(line_content: str, context: str) -> bool:
         dangerous_patterns = [
             rf'["\'].*\+.*\b{escaped_var}\b',  # String + variable
             rf'\b{escaped_var}\b.*\+.*["\']',  # Variable + string
-            rf'f["\'].*\{.*{escaped_var}',  # F-string with variable
+            r'f["\'].*\{.*' + escaped_var,  # F-string with variable (use regular string)
             rf'st\.markdown\([^)]*{escaped_var}',  # st.markdown with variable directly
         ]
         for pattern in dangerous_patterns:
