@@ -25,6 +25,7 @@ from app.ui.components import (
 )
 from app.ui.input_handler import load_demo_chats
 from app.ui.theme import inject_theme_css, render_badge
+from app.utils.dev_mode import is_dev_mode
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -56,7 +57,8 @@ def main():
     st.title("🛡️ ChatCompanion")
     st.markdown(
         "**Privacy-first assistant to help recognize risky chat patterns** "
-        + render_badge("Offline / on-device")
+        + render_badge("Offline / on-device"),
+        unsafe_allow_html=True
     )
     st.markdown(
         "Paste a chat conversation below, and we'll help you understand if there are "
@@ -186,21 +188,22 @@ def main():
                                 total_instances = len(category_matches)
                                 st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
 
-                # Developer Debug Info (clearly separate, collapsed by default)
-                with st.expander("🔧 Developer Debug Info", expanded=False):
-                    st.write(f"**Risk Level:** {result.risk_level.value}")
-                    st.write(f"**Overall Score:** {result.overall_score:.2f}")
-                    st.write(f"**ML Available:** {result.ml_available}")
-                    st.write("**Category Scores:**")
-                    for category, score in result.category_scores.items():
-                        st.write(f"  - {category}: {score:.2f}")
-                    if result.matches:
-                        st.write("**Pattern Matches:**")
-                        for category, category_matches in result.matches.items():
-                            if category_matches:
-                                unique_patterns = len(set(m.pattern.pattern for m in category_matches))
-                                total_instances = len(category_matches)
-                                st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
+                # Developer Debug Info (only shown in dev mode)
+                if is_dev_mode():
+                    with st.expander("🔧 Developer Debug Info", expanded=False):
+                        st.write(f"**Risk Level:** {result.risk_level.value}")
+                        st.write(f"**Overall Score:** {result.overall_score:.2f}")
+                        st.write(f"**ML Available:** {result.ml_available}")
+                        st.write("**Category Scores:**")
+                        for category, score in result.category_scores.items():
+                            st.write(f"  - {category}: {score:.2f}")
+                        if result.matches:
+                            st.write("**Pattern Matches:**")
+                            for category, category_matches in result.matches.items():
+                                if category_matches:
+                                    unique_patterns = len(set(m.pattern.pattern for m in category_matches))
+                                    total_instances = len(category_matches)
+                                    st.write(f"  - {category}: {total_instances} instance(s) across {unique_patterns} pattern(s)")
 
             except Exception as e:
                 logger.error(f"Error during analysis: {e}", exc_info=True)

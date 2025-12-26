@@ -70,6 +70,22 @@ We're working on a PyInstaller-based standalone executable that will allow non-t
 
 **Status:** PyInstaller structure is prepared, but a full cross-platform installer is not yet complete.
 
+## Developer Mode (Optional)
+
+By default, ChatCompanion hides developer debug information to keep the UI clean and focused. If you need to see technical details (risk scores, pattern matches, etc.), you can enable developer mode:
+
+```bash
+CHATCOMPANION_DEV_MODE=1 streamlit run app/main.py
+```
+
+Developer mode enables a "Developer Debug Info" section in the analysis results, showing:
+- Risk level and overall score
+- ML model availability
+- Category scores
+- Pattern match details
+
+**Note:** Developer mode is disabled by default. The debug information is only shown when explicitly enabled via the environment variable.
+
 ## Troubleshooting
 
 ### Python Version Issues
