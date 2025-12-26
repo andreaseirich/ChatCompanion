@@ -59,6 +59,11 @@ master_prompt.txt
 # Local development files (internal prompts, notes, etc.)
 .local/
 
+# Build outputs
+dist/
+build/
+*.spec
+
 # GitHub (ignore everything except workflows)
 .github/*
 !.github/workflows/
