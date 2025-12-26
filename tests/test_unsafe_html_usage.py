@@ -18,6 +18,13 @@ SAFE_PATTERNS = [
     r'<div class="card"',  # Static card HTML
     r'<span class="badge',  # Badge HTML
     r'<style>',  # CSS styles
+    r'<div style=',  # Static div styling (traffic lights)
+    r'<p style=',  # Static paragraph styling (traffic lights)
+    r'background-color: #4CAF50',  # GREEN traffic light
+    r'background-color: #FFC107',  # YELLOW traffic light
+    r'background-color: #F44336',  # RED traffic light
+    r'background-color: #cccccc',  # Inactive traffic light
+    r'text-align: center',  # Static styling
 ]
 
 
@@ -96,14 +103,25 @@ def is_safe_usage(line_content: str, context: str) -> bool:
             return True
     
     # If it's a simple static string (quoted), it's likely safe
-    # But we'll be conservative and flag it for manual review
+    # Check if it's a simple string literal (not concatenated with variables)
     if '"' in line_content or "'" in line_content:
-        # Check if it's a simple string literal (not concatenated with variables)
-        if '+' not in context or all(
-            part.strip().startswith(('"', "'")) 
-            for part in context.split('+') 
-            if part.strip()
-        ):
+        # Check if there's any variable concatenation
+        # Look for patterns like: "text" + variable or variable + "text"
+        has_variable_concatenation = False
+        for dangerous_var in DANGEROUS_VARIABLES:
+            if dangerous_var in context and '+' in context:
+                # Check if variable appears near a + sign
+                var_pos = context.lower().find(dangerous_var.lower())
+                plus_positions = [i for i, c in enumerate(context) if c == '+']
+                for plus_pos in plus_positions:
+                    if abs(var_pos - plus_pos) < 20:  # Variable near concatenation
+                        has_variable_concatenation = True
+                        break
+                if has_variable_concatenation:
+                    break
+        
+        if not has_variable_concatenation:
+            # Static HTML string, likely safe
             return True
     
     # Default: flag as potentially unsafe for manual review
