@@ -15,6 +15,12 @@ Online grooming crimes have increased **89%** over six years (Source: NSPCC, 202
 
 Existing solutions often require cloud uploads (someone else sees the conversations) or are designed for surveillance rather than empowerment. The gap: young people need tools to recognize patterns themselves.
 
+### 📊 Stats at a Glance
+
+| 📈 Issue | 🧠 Impact | 🛡️ Response |
+|----------|-----------|-------------|
+| **89%** increase in grooming (Source: NSPCC, 2024) | **55%** of teens cyberbullied (Source: Cyberbullying Research Center, 2023) | **55.8%** don't tell adults (Source: NCES, 2022) |
+
 <details>
 <summary>📖 Real Scenarios: Why Pattern Recognition Matters</summary>
 
@@ -95,11 +101,11 @@ This is exactly why ChatCompanion exists: to help young people recognize concern
 
 ### Why Surveillance Isn't the Answer
 
-Most existing solutions are designed for surveillance: parents monitoring children's conversations, cloud-based analysis that requires uploading private chats, or automated reporting systems. These approaches can:
-- Erode trust between children and adults
-- Create a false sense of security
-- Miss the patterns that matter most
-- Violate privacy and autonomy
+Surveillance-based approaches have specific limitations:
+- **Trust erosion**: Constant monitoring can damage parent-child relationships and reduce children's willingness to seek help
+- **False security**: Automated systems may miss nuanced patterns that require context understanding
+- **Privacy violations**: Uploading private conversations to cloud services exposes sensitive data
+- **Reactive vs. proactive**: Surveillance detects after harm occurs; empowerment helps prevent harm
 
 </details>
 
@@ -107,34 +113,15 @@ Most existing solutions are designed for surveillance: parents monitoring childr
 
 ## The Solution: Privacy-First Pattern Recognition
 
-ChatCompanion is a **local, fully offline tool** that helps children and teenagers (ages 10-16) recognize risky chat patterns through:
+ChatCompanion is a **local, fully offline tool** that helps children and teenagers (ages 10-16) recognize risky chat patterns:
 
-### Traffic Light System
+- 🟢 **GREEN**: Safe — "No warning signs detected"  
+- 🟡 **YELLOW**: Concerning patterns — "Something feels a bit off" (mentions specific patterns)  
+- 🔴 **RED**: High-risk — "This is serious" + **"Need Immediate Help?"** appears (only for RED, once)
 
-- 🟢 **GREEN**: Safe conversation — "No warning signs detected"
-- 🟡 **YELLOW**: Some concerning patterns — "Something feels a bit off" (mentions specific patterns detected)
-- 🔴 **RED**: High-risk situation — "This is serious" + **"Need Immediate Help?"** section appears (only for RED, appears once)
+**Evidence-based explanations**: Observed behaviors only when patterns match; threat language only when threat patterns detected (strict threat-gating). Child-friendly language (ages 10-16), supportive tone.
 
-### Evidence-Based Explanations
-
-- **Observed behaviors are listed only when supported by matched patterns** — no false accusations
-- **Threat language appears only when threat patterns are actually detected** (strict threat-gating)
-- Clear, child-friendly explanations of what was detected and why
-- Supportive, non-shaming tone suitable for ages 10-16
-
-### Privacy-First Architecture
-
-- **Fully offline**: All processing happens on your device—nothing is uploaded
-- **No cloud uploads**: Your conversations never leave your device
-- **No telemetry**: No tracking or analytics
-- **No persistence**: Chat text is not saved by default
-
-### Child-Friendly Language
-
-- Simple, calm explanations that don't shame or scare
-- Age-appropriate vocabulary (10-16)
-- Supportive guidance on talking to trusted adults
-- Encourages healthy boundaries and seeking help
+**Privacy-first**: Fully offline processing—no uploads, no telemetry, no persistence. All analysis happens on your device.
 
 ### Why ChatCompanion?
 
@@ -157,8 +144,6 @@ ChatCompanion is a **local, fully offline tool** that helps children and teenage
 ❌ **Promise perfect detection** — not 100% accurate  
 ❌ **Make medical/psychological/legal claims** — supportive tool only  
 ❌ **Replace trusted adults or professional help** — encourages seeking help  
-
-**Important:** ChatCompanion is a **supportive tool, not decisive**. It helps identify patterns but doesn't replace human judgment. Always trust your instincts and seek help when something feels wrong.
 
 <details>
 <summary>📋 Full Feature List & Limitations</summary>
@@ -186,9 +171,9 @@ ChatCompanion is a **local, fully offline tool** that helps children and teenage
 
 ❌ **Promise perfect detection** — The system is not 100% accurate. Some risky conversations may not be detected, and some safe conversations may be flagged incorrectly.
 
-❌ **Make medical, psychological, or legal claims** — ChatCompanion is a supportive tool, not a medical, psychological, or legal instrument.
+❌ **Make medical, psychological, or legal claims** — ChatCompanion is a supportive tool, not a medical, psychological, or legal instrument. See 'Safety note' above.
 
-❌ **Replace trusted adults or professional help** — This tool helps awareness and encourages seeking help. It is not a replacement for talking to trusted adults, counselors, or professional support services.
+❌ **Replace trusted adults or professional help** — This tool helps awareness and encourages seeking help. It is not a replacement for talking to trusted adults, counselors, or professional support services. See 'Safety note' above.
 
 ❌ **Guarantee safety** — ChatCompanion is a tool to help awareness, not a definitive safety guarantee.
 
@@ -205,6 +190,43 @@ ChatCompanion is a **local, fully offline tool** that helps children and teenage
 Hybrid Detection: Rules (≈60%) + ML (≈40%) with offline fallback.  
 Smart Processing: Normalization → Pattern Matching → ML Analysis → Context Gating → Threat-Gating → Explanation → UI Display  
 Privacy-first: Runs locally; no chat uploads.
+
+### Architecture
+
+```mermaid
+graph TD
+    A[Chat Input<br/>Streamlit UI] --> B[Slang Normalizer<br/>u → you, r n → right now]
+    B --> C[Rules Engine<br/>Pattern Matching]
+    B --> D[ML Analysis<br/>Semantic Detection]
+    C --> E[Score Aggregator<br/>Combine Rules + ML]
+    D --> E
+    E --> F[Threat-Gating<br/>Only show threats if detected]
+    F --> G[Explanation Generator<br/>Evidence-based, Child-friendly]
+    G --> H[Result Display<br/>Traffic Light + Next Steps]
+    
+    style A fill:#e1f5ff
+    style H fill:#e8f5e9
+    A -.->|"No network calls<br/>No uploads"| H
+```
+
+### Detection Flow
+
+```mermaid
+flowchart LR
+    A[Chat Text] --> B[Normalize<br/>Slang/Obfuscation]
+    B --> C[Context Gating<br/>Self-report vs Demand]
+    C --> D[Pattern Analysis<br/>Rules + ML]
+    D --> E{Evidence<br/>Found?}
+    E -->|Yes| F[Risk Level<br/>GREEN/YELLOW/RED]
+    E -->|No| G[GREEN<br/>No warnings]
+    F -->|RED| H[Need Immediate Help?<br/>ONLY for RED]
+    F -->|YELLOW/GREEN| I[Next Steps<br/>Guidance]
+    H --> I
+    
+    style F fill:#fff3cd
+    style H fill:#f8d7da
+    style G fill:#d4edda
+```
 
 → Full technical details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
