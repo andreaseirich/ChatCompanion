@@ -226,6 +226,21 @@ flowchart LR
 
 ---
 
+## Accuracy (Synthetic Fixtures)
+
+ChatCompanion's detection accuracy is evaluated on a set of synthetic test fixtures. **Synthetic test data; real-world accuracy may vary.**
+
+<details>
+<summary>📊 Detailed Metrics</summary>
+
+Run `python3 scripts/compute_fixture_metrics.py` to compute current metrics from test fixtures.
+
+**Note:** These metrics reflect performance on synthetic test data designed to validate specific patterns. Real-world conversations may have different characteristics, and accuracy may vary based on context, language variations, and edge cases not covered in the test set.
+
+</details>
+
+---
+
 ## Quickstart
 
 ### Prerequisites

@@ -4,6 +4,37 @@
 
 ChatCompanion follows a modular, layered architecture with strict separation of concerns between UI, detection engine, rules, and models. The system is designed to run fully offline with no cloud dependencies.
 
+### Architecture Flow
+
+```mermaid
+flowchart LR
+    A[Input] --> B[Normalize]
+    B --> C[Detect Patterns<br/>Rules + ML]
+    C --> D[Explain<br/>Evidence-based + Threat-gated]
+    D --> E[Display + Next Steps]
+    
+    A -.->|"No network calls<br/>No uploads"| E
+```
+
+### Detection Flow
+
+```mermaid
+flowchart LR
+    A[Chat Text] --> B[Normalize<br/>Slang/Obfuscation]
+    B --> C[Context Gating<br/>Self-report vs Demand]
+    C --> D[Pattern Analysis<br/>Rules + ML]
+    D --> E{Evidence<br/>Found?}
+    E -->|Yes| F[Risk Level<br/>GREEN/YELLOW/RED]
+    E -->|No| G[GREEN<br/>No warnings]
+    F -->|RED| H[Need Immediate Help?<br/>ONLY for RED]
+    F -->|YELLOW/GREEN| I[Next Steps<br/>Guidance]
+    H --> I
+    
+    style F fill:#fff3cd
+    style H fill:#f8d7da
+    style G fill:#d4edda
+```
+
 ## System Architecture
 
 ```
