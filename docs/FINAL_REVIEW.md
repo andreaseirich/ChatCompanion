@@ -18,9 +18,7 @@
 ✅ **Verified**:
 - Runs on `push` and `pull_request` to `main` and `develop` branches
 - Fails on errors (`continue-on-error: false` explicitly set)
-- Installs dependencies in correct order:
-  1. `pip install -r requirements.txt` (runtime dependencies)
-  2. `pip install -r requirements-dev.txt` (test dependencies)
+- Installs dependencies: `pip install -r requirements.txt`
 - Runs `pytest -q` correctly
 - Uses Python 3.10
 
@@ -31,9 +29,8 @@
 ## Dependency Consistency
 
 ✅ **Verified**:
-- `requirements.txt` contains all runtime dependencies including Streamlit
-- `requirements-dev.txt` is minimal (pytest only) - appropriate since `requirements.txt` already includes pytest
-- CI test workflow installs runtime deps first, then test deps - correct order
+- `requirements.txt` contains all runtime and test dependencies including Streamlit and pytest
+- CI test workflow installs dependencies: `pip install -r requirements.txt`
 - Streamlit app entry point: `streamlit run app/main.py` - consistent across all docs
 
 ---
