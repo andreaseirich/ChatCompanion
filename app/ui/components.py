@@ -23,7 +23,7 @@ def render_traffic_light(risk_level: RiskLevel) -> None:
         label_color = "#4CAF50" if is_active else "#999999"
         label_weight = "bold" if is_active else "normal"
         
-            st.markdown(
+        st.markdown(
             f'<div class="status-dot-container">'
             f'<div class="{dot_class}" style="background-color: {dot_color};"></div>'
             f'<div class="status-dot-label" style="color: {label_color}; font-weight: {label_weight};">GREEN</div>'
@@ -39,7 +39,7 @@ def render_traffic_light(risk_level: RiskLevel) -> None:
         label_color = "#FFC107" if is_active else "#999999"
         label_weight = "bold" if is_active else "normal"
         
-            st.markdown(
+        st.markdown(
             f'<div class="status-dot-container">'
             f'<div class="{dot_class}" style="background-color: {dot_color};"></div>'
             f'<div class="status-dot-label" style="color: {label_color}; font-weight: {label_weight};">YELLOW</div>'
@@ -55,7 +55,7 @@ def render_traffic_light(risk_level: RiskLevel) -> None:
         label_color = "#F44336" if is_active else "#999999"
         label_weight = "bold" if is_active else "normal"
         
-            st.markdown(
+        st.markdown(
             f'<div class="status-dot-container">'
             f'<div class="{dot_class}" style="background-color: {dot_color};"></div>'
             f'<div class="status-dot-label" style="color: {label_color}; font-weight: {label_weight};">RED</div>'
