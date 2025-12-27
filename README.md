@@ -130,7 +130,7 @@ ChatCompanion is a **local, fully offline tool** that helps children and teenage
 | Privacy | ✅ Offline/on-device | ❌ Cloud uploads | ❌ Surveillance |
 | Explainability | ✅ Evidence-based | ❌ Black box | ❌ Opaque |
 | User control | ✅ Empowerment | ❌ Passive | ❌ Monitored |
-| Cost | ✅ Free | 💰 Subscription | 💰 Subscription |
+| Cost | ✅ Free / open-source | 💰 Subscription | 💰 Subscription |
 
 ---
 
@@ -187,7 +187,7 @@ ChatCompanion is a **local, fully offline tool** that helps children and teenage
 
 ## How It Works
 
-Hybrid Detection: Rules (≈60%) + ML (≈40%) with offline fallback.  
+Hybrid Detection: Rules-first detection + ML-assisted signals (offline fallback).  
 Smart Processing: Normalization → Pattern Matching → ML Analysis → Context Gating → Threat-Gating → Explanation → UI Display  
 Privacy-first: Runs locally; no chat uploads.
 
@@ -281,10 +281,8 @@ For detailed installation instructions, see [`docs/INSTALL.md`](docs/INSTALL.md)
 
 ---
 
-## Demo & Submission Assets
+## Documentation
 
-- **[Demo Script](docs/DEMO_SCRIPT.md)**: 3-minute demo video script showing ChatCompanion in action
-- **[Devpost Submission](docs/DEVPOST_SUBMISSION.md)**: Content for CodeSpring Devpost submission
 - **[Architecture](docs/ARCHITECTURE.md)**: Detailed technical architecture and design
 - **[Ethics](docs/ETHICS.md)**: Ethics statement and privacy principles
 - **[Installation Guide](docs/INSTALL.md)**: Detailed installation instructions
