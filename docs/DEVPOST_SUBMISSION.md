@@ -213,7 +213,6 @@ Test coverage includes:
 - **[ETHICS.md](ETHICS.md)**: Ethics statement and privacy principles
 - **[SECURITY.md](../SECURITY.md)**: Security policy
 - **[INSTALL.md](INSTALL.md)**: Detailed installation guide
-- **[CHANGELOG.md](CHANGELOG.md)**: Version history
 
 ---
 
