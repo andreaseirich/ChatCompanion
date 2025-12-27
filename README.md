@@ -6,6 +6,8 @@
 [![Privacy](https://img.shields.io/badge/Privacy-First%20Offline-green.svg)](docs/ETHICS.md)
 [![Built for Code Spring](https://img.shields.io/badge/Built%20for-Code%20Spring-6d28d9?style=flat)](https://code-spring.devpost.com/)
 
+🎥 Demo video: https://youtu.be/5ZxlkHXds_0
+
 **Privacy-first, offline assistant that empowers children and teenagers (ages 10-16) to recognize risky chat patterns themselves**
 
 ---
