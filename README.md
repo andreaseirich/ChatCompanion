@@ -226,18 +226,38 @@ flowchart LR
 
 ---
 
-## Accuracy (Synthetic Fixtures)
+## Validation & Metrics
 
-ChatCompanion's detection accuracy is evaluated on a set of synthetic test fixtures. **Synthetic test data; real-world accuracy may vary.**
+ChatCompanion's detection accuracy is evaluated on a set of synthetic test fixtures (12 test chats). **Synthetic test data; real-world accuracy may vary.**
+
+**Fixture Corpus Results:**
+- **Overall accuracy:** 25.0% (3/12 correct)
+- **Per-level:** GREEN 75.0% (3/4), YELLOW 0.0% (0/4), RED 0.0% (0/4)
+- **Test suite:** 128 tests passed in ~6 seconds
 
 <details>
-<summary>📊 Detailed Metrics</summary>
+<summary>📊 Full Metrics & Confusion Matrix</summary>
 
-Run `python3 scripts/compute_fixture_metrics.py` to compute current metrics from test fixtures.
+Run `python3 scripts/compute_fixture_metrics.py` to regenerate metrics from test fixtures.
 
-**Note:** These metrics reflect performance on synthetic test data designed to validate specific patterns. Real-world conversations may have different characteristics, and accuracy may vary based on context, language variations, and edge cases not covered in the test set.
+**Confusion Matrix:**
+| Expected → Actual | GREEN | YELLOW | RED |
+|-------------------|-------|--------|-----|
+| GREEN | 3 | 1 | 0 |
+| YELLOW | 4 | 0 | 0 |
+| RED | 0 | 4 | 0 |
+
+**Validation Checks:**
+- ✅ "Need Immediate Help?" appears only for RED (0 violations)
+- ✅ Evidence-based behaviors: 0 approximate violations
+
+→ Full metrics with timestamps and commit hashes: [`docs/METRICS.md`](docs/METRICS.md)
 
 </details>
+
+**Important Notes:**
+- Synthetic fixtures; real-world accuracy may vary.
+- Patterns/labels are for demo/testing, not clinical evaluation.
 
 ---
 

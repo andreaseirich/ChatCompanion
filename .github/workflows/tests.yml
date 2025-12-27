@@ -31,4 +31,21 @@ jobs:
         run: |
           pytest -q
         continue-on-error: false
+      
+      - name: Generate metrics
+        run: |
+          python3 scripts/compute_fixture_metrics.py --md metrics.md
+          python3 scripts/collect_ci_test_stats.py --md metrics_tests.md
+          cat metrics.md metrics_tests.md > metrics_combined.md
+      
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: metrics
+          path: metrics_combined.md
+      
+      - name: Print metrics summary
+        run: |
+          echo "=== Metrics Summary ==="
+          head -25 metrics_combined.md || echo "Metrics file not found"
 
