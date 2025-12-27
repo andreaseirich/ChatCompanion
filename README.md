@@ -5,320 +5,253 @@
 [![CodeQL](https://github.com/andreaseirich/ChatCompanion/workflows/CodeQL%20Analysis/badge.svg)](https://github.com/andreaseirich/ChatCompanion/actions/workflows/codeql-analysis.yml)
 [![Privacy](https://img.shields.io/badge/Privacy-First%20Offline-green.svg)](docs/ETHICS.md)
 
-**Privacy-first assistant to help children and teenagers recognize risky chat patterns**
+**Privacy-first, offline assistant that empowers children and teenagers (ages 10-16) to recognize risky chat patterns themselves**
 
-ChatCompanion is a local, fully offline tool that helps identify concerning patterns in chat conversations such as bullying, manipulation, emotional pressure, secrecy demands, guilt-shifting, and grooming indicators. It explains situations in simple, child-friendly language and encourages healthy boundaries and seeking help—without surveillance and without uploading any chat data.
+---
 
-## Problem
+## The Challenge: When Silence Becomes Dangerous
 
-Children and teenagers face increasing risks in online communication:
-- **Bullying**: Mean comments, insults, and social exclusion
-- **Manipulation**: Pressure to do things they don't want to do
-- **Grooming**: Inappropriate behavior from adults or peers
-- **Secrecy Demands**: Requests to keep conversations hidden from trusted adults
-- **Guilt Shifting**: Being blamed for someone else's actions
+Online grooming crimes have increased **89%** over six years (Source: NSPCC, 2024). **55%** of teens ages 13-17 have experienced cyberbullying in their lifetime (Source: Cyberbullying Research Center, 2023). Most young people don't tell an adult when something feels wrong online—**over half stay silent** (Source: NCES, 2022).
 
-Many existing solutions require cloud uploads, lack explainability, or are designed for surveillance rather than empowerment. ChatCompanion puts the child in control with a privacy-first, offline approach.
+Existing solutions often require cloud uploads (someone else sees the conversations) or are designed for surveillance rather than empowerment. Children need a tool that helps them recognize risky patterns while maintaining their privacy and autonomy.
 
-## Solution
+### Real Scenarios: Why Pattern Recognition Matters
 
-ChatCompanion provides:
-- **Local Processing**: All analysis happens on your device—nothing is uploaded
-- **Explainable Detection**: Clear explanations of what patterns were detected and why
-- **Child-Friendly Language**: Simple, supportive explanations that don't shame or scare
-- **Traffic Light System**: Visual green/yellow/red indicators for quick understanding
-- **Help Resources**: Guidance on talking to trusted adults and setting boundaries
+**Scenario A: The Manipulated Trust**
 
-## Features
+In gaming environments, high-risk grooming can occur in as little as **45 minutes** from first contact (Source: WeProtect Global Alliance, 2023). A 15-year-old who feels isolated at school is approached online by someone who seems understanding and supportive. Over several days, this "friend" builds trust through kind words and empathy. Then the requests begin: first for personal photos, then with increasing pressure and secrecy demands ("don't tell anyone", "delete our messages"). When the teen hesitates, guilt-shifting kicks in ("if you really trusted me...").
 
-### MVP Features
+**What ChatCompanion flags early:**
+- Rapid trust-building from a stranger
+- Secrecy demands ("don't tell anyone")
+- Isolation tactics ("adults won't understand us")
+- Pressure escalation ("you have to", "right now")
+- Guilt-shifting ("if you cared about me...")
 
-✅ **Chat Text Analysis**
-- Paste any chat conversation for analysis
-- Demo chat examples included for testing
+**Key insight:** These manipulation patterns often follow a predictable playbook. Recognizing them early—before a harmful decision is made—gives young people the chance to pause and reach out to someone they trust.
 
-✅ **Risk Detection**
-- Bullying patterns
-- Manipulation tactics
-- Emotional pressure
-- Secrecy demands
-- Guilt shifting
-- Grooming indicators
+---
 
-✅ **Traffic Light Indicator**
-- 🟢 Green: Conversation looks safe - "No warning signs detected" (clean messaging, no pattern callouts)
-- 🟡 Yellow: Some concerning patterns detected - mentions "pressure or guilt-making language" by default; threats only when threat patterns match
-- 🔴 Red: High-risk situation—talk to a trusted adult - "Need Immediate Help?" appears only in RED
+**Scenario B: The Relentless Campaign**
 
-✅ **Child-Friendly Explanations**
-- Simple language suitable for ages 10-16
-- Clear, calm titles and messages for each risk level
-- **Evidence-based**: Observed behaviors are listed only when supported by matched patterns
-- Supportive, non-shaming tone
-- No false accusations: explanations match evidence (no "threats" wording unless threat patterns actually match)
+**55%** of teens ages 13-17 have experienced cyberbullying, with **26.5%** experiencing it in the past 30 days alone (Source: Cyberbullying Research Center, 2023). A 12-year-old receives cruel messages across multiple apps over many months. The messages are one-sided, escalating, and persistent: insults, social exclusion threats, and worse. The victim feels trapped because the harassment follows them everywhere online.
 
-✅ **Help & Advice**
-- "This makes me uneasy" button for immediate support
-- Guidance on talking to trusted adults
-- Reminders about healthy boundaries
+**What ChatCompanion flags:**
+- One-sided hostility without repair markers (no "jk", no mutual teasing)
+- Escalating severity of insults
+- Pattern of repeated attacks (not isolated incidents)
+- No joking context or friendship indicators
 
-## Design & UI
+**Key insight:** Bullying campaigns often hide in the spaces adults don't see. A tool that helps the young person *recognize* the pattern—and see that this is NOT normal friendship conflict—can encourage them to seek help and set boundaries.
 
-ChatCompanion features a clean, kid-friendly interface designed for ages 10-16:
+---
 
-- **Clear Visual Hierarchy**: Three-zone layout (Header, Input, Results) with card-based design
-- **Traffic Light System**: Intuitive green/yellow/red indicators for quick understanding
-- **Consistent Styling**: Calm colors, readable fonts, and supportive visual design
-- **Example Chats**: Quick access to GREEN, YELLOW, and RED examples for testing
-- **Offline Badge**: Clear indication that processing happens locally
+**Scenario C: The Rapid Trap**
 
-### Traffic Light Indicator
-- 🟢 **GREEN**: Safe conversation - "Everything looks okay." + no pattern callouts
-- 🟡 **YELLOW**: Some concerning patterns - "Something feels a bit off." + mentions pressure/guilt (no "Need Immediate Help?")
-- 🔴 **RED**: High-risk situation - "This is serious." + includes "Need Immediate Help?" section (appears only once)
+Sextortion can progress from first contact to threats in **as little as 5 minutes** (Source: FBI, 2024). **1 in 5 teens (20%)** have experienced sextortion (Source: Thorn, 2025). A 16-year-old playing online games is contacted by someone claiming to be their age. After friendly conversation, they move to private messaging. Within minutes, the conversation escalates: first casual chat, then requests for photos, then—after compliance—immediate threats and demands. The teen feels trapped, ashamed, and afraid to tell anyone.
 
-### Example Analysis
-- Risk level explanation with evidence
-- Child-friendly language
-- Help resources and advice
-- "What this tool can and cannot do" section for transparency
+**What ChatCompanion flags:**
+- Rapid escalation from friendly to demanding
+- Pressure with time urgency ("right now", "immediately")
+- Proof-of-compliance requests ("send a screenshot", "delete and prove it")
+- Secrecy demands combined with threats
+- Coercive control patterns ("you have to", "don't you dare tell")
 
-## Screenshots
+**Key insight:** These situations can escalate in minutes. Pattern recognition during the conversation—before a point of no return—gives young people a chance to recognize what's happening as a known tactic, not a personal failing.
 
-> **Note**: Screenshots will be added before submission. Placeholder for visual demonstration of the traffic light system and UI.
+---
 
-## Demo Video
+## The Problem: Why Existing Tools Fall Short
 
-Watch a 3-minute demo showing ChatCompanion in action:
+### What Risky Patterns Look Like
 
-> **Note**: Demo video will be recorded and linked before submission.  
-> **Script**: See [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) for the planned demo flow.
+All three scenarios share common manipulation tactics that ChatCompanion is designed to detect:
 
-[Demo Video Link - To be added]
+1. **Secrecy Demands** — "Don't tell anyone", "This is just between us"
+2. **Isolation Tactics** — "Adults don't understand", "I'm the only one who gets you"
+3. **Pressure & Urgency** — "Right now", "You have to", time ultimatums
+4. **Guilt-Shifting** — "If you cared about me", "This is your fault"
+5. **Coercive Control** — Demanding proof, threatening consequences, removing autonomy
 
-## Language Support
+These patterns are NOT always obvious in the moment, especially to young people who may be experiencing them for the first time.
 
-ChatCompanion is designed for **English** as the primary language.
+### The Reporting Gap: Why Empowerment Matters
 
-### Slang Normalization
+**Over half of young people who experience online harm don't tell an adult:**
+- **55.8%** of bullied students did NOT tell a trusted adult (Source: NCES, 2022)
+- **63%** of 12-14 year-olds did not tell a parent when bothered by harmful content (Source: CyberSafeKids, 2024)
+- **20%** of minors who experienced online sexual interactions told no one (Source: Thorn, 2024)
+- Likelihood of turning to a trusted adult **dropped 10 percentage points since 2022** (Source: Thorn, 2024)
 
-The system includes a slang normalization layer to handle common English youth/online slang and abbreviations. This helps ensure that:
+This is exactly why ChatCompanion exists: to help young people recognize concerning patterns *themselves*—so they can make informed decisions about seeking help.
 
-- **Common abbreviations are understood**: "u" → "you", "ur" → "your", "idk" → "I don't know", "lol" → "laughing", "jk" → "just kidding"
-- **Friendly teasing in youth style is not falsely flagged**: Mutual banter with slang and emojis is recognized as friendly
-- **Hostile slang remains recognized**: Abbreviations like "stfu" → "shut up" are still detected as hostile
+### Why Surveillance Isn't the Answer
 
-**Examples of normalized slang:**
-- Pronouns: `u` → `you`, `ur` → `your`
-- Common phrases: `idk` → `I don't know`, `brb` → `be right back`, `ttyl` → `talk to you later`
-- Expressions: `lol`/`lmao` → `laughing`, `jk` → `just kidding`, `np` → `no problem`
-- Extended slang: `frfr` → `for real`, `istg` → `i swear to god`, `ong` → `on god`, `wtv` → `whatever`, `bc`/`cuz` → `because`, `k`/`kk` → `okay`
-- Neutral address: `bruh`/`bro` → kept as-is, tagged as friendly/neutral (not insults)
-- Intensity markers: `lowkey`/`highkey` → kept as-is, tagged as intensity markers
-- Hostile slang: `stfu` → `shut up` (preserves hostility)
+Most existing solutions are designed for surveillance: parents monitoring children's conversations, cloud-based analysis that requires uploading private chats, or automated reporting systems. These approaches can:
+- Erode trust between children and adults
+- Create a false sense of security
+- Miss the patterns that matter most
+- Violate privacy and autonomy
 
-**Masked slang and obfuscation handling:**
-- Spacing variants: `r n` → `rn` → `right now`, `r.n.` → `rn` → `right now`
-- Letter repeats: `righttt` → `right`, `nowww` → `now` (normalized to max 2 repeats)
-- Common typos: `rite now` → `right now`
-- Obfuscation: `stf*u` → `stfu` → `shut up` (preserves hostility)
-- Zero-width characters are removed for consistent matching
+ChatCompanion takes a different approach: **privacy-first empowerment**. It gives children the tools to recognize risky patterns themselves, without anyone watching over their shoulder.
 
-**Important Notes:**
-- Slang normalization is **heuristic-based, not perfect**
-- **Context-Aware Detection**: Neutral scheduling words like "right now" alone do not trigger warnings—the system analyzes context to distinguish between self-reports ("I'm busy right now") and demands ("Answer right now")
-- **Cross-Sentence Coercion**: The system detects coercion split across sentences (e.g., "Answer me. Right now.")
-- The tool is **supportive, not decisive**—it helps identify patterns but doesn't replace human judgment
-- Some slang or irony may be ambiguous and could lead to false positives or negatives
-- The system stays careful and non-judgmental in its approach
+---
 
-## Technology Stack
+## The Solution: Privacy-First Pattern Recognition
 
-### Core Technologies
-- **Python 3.10+**: Backend language
-- **Streamlit**: Web-based UI framework
-- **sentence-transformers**: Local NLP embeddings
-- **scikit-learn**: Machine learning utilities
-- **YAML**: Rule configuration
+ChatCompanion is a **local, fully offline tool** that helps children and teenagers (ages 10-16) recognize risky chat patterns through:
 
-### Detection Approach
-- **Hybrid Detection**: Combines rule-based pattern matching (60%) with ML semantic analysis (40%)
-- **Rules-Only Fallback**: Works fully offline even if ML models aren't available
-- **Explainable Results**: Every detection includes evidence and reasoning
-- **Evidence-Based Explanations**: Observed behaviors are listed only when supported by matched patterns
-- **Strict Threat-Gating**: Threat language appears only when threat/ultimatum patterns match (including cross-sentence detection)
+### Traffic Light System
 
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed technical documentation.
+- 🟢 **GREEN**: Safe conversation — "No warning signs detected"
+- 🟡 **YELLOW**: Some concerning patterns — "Something feels a bit off" (mentions specific patterns detected)
+- 🔴 **RED**: High-risk situation — "This is serious" + **"Need Immediate Help?"** section appears (only for RED, appears once)
 
-## Setup
+### Evidence-Based Explanations
 
-For detailed installation instructions, see [INSTALL.md](docs/INSTALL.md).
+- **Observed behaviors are listed only when supported by matched patterns** — no false accusations
+- **Threat language appears only when threat patterns are actually detected** (strict threat-gating)
+- Clear, child-friendly explanations of what was detected and why
+- Supportive, non-shaming tone suitable for ages 10-16
 
-### Quick Start
+### Privacy-First Architecture
 
-**Option 1: Standard Setup (Recommended)**
+- **Fully offline**: All processing happens on your device—nothing is uploaded
+- **No cloud uploads**: Your conversations never leave your device
+- **No telemetry**: No tracking or analytics
+- **No persistence**: Chat text is not saved by default
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/andreaseirich/ChatCompanion.git
-   cd ChatCompanion
-   ```
+### Child-Friendly Language
 
-2. **Create a virtual environment** (recommended)
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+- Simple, calm explanations that don't shame or scare
+- Age-appropriate vocabulary (10-16)
+- Supportive guidance on talking to trusted adults
+- Encourages healthy boundaries and seeking help
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+---
 
-4. **Download ML models** (optional, for enhanced detection)
-   ```bash
-   python scripts/download_models.py
-   ```
-   > **Note**: ML models are optional. The system works in rules-only mode if models are not downloaded.
+## What ChatCompanion Can Do
 
-5. **Run the application**
-   ```bash
-   streamlit run app/main.py
-   ```
+✅ **Detect risky patterns** in chat conversations:
+- Bullying patterns (one-sided hostility, escalating insults)
+- Manipulation tactics (pressure, guilt-shifting, isolation)
+- Secrecy demands ("don't tell anyone")
+- Grooming indicators (rapid trust-building, inappropriate requests)
+- Coercive control (proof-of-compliance demands, threats)
+
+✅ **Explain what was detected** in simple, child-friendly language
+
+✅ **Provide evidence-based results** — only shows observed behaviors when patterns actually match
+
+✅ **Work completely offline** after initial setup — no internet required during analysis
+
+✅ **Handle youth slang and obfuscation** — normalizes common abbreviations and detects masked attempts to hide hostile language
+
+✅ **Respect privacy** — no data uploads, no cloud processing, no telemetry
+
+---
+
+## What ChatCompanion Cannot Do
+
+❌ **Promise perfect detection** — The system is not 100% accurate. Some risky conversations may not be detected, and some safe conversations may be flagged incorrectly.
+
+❌ **Make medical, psychological, or legal claims** — ChatCompanion is a supportive tool, not a medical, psychological, or legal instrument.
+
+❌ **Replace trusted adults or professional help** — This tool helps awareness and encourages seeking help. It is not a replacement for talking to trusted adults, counselors, or professional support services.
+
+❌ **Guarantee safety** — ChatCompanion is a tool to help awareness, not a definitive safety guarantee.
+
+❌ **Monitor conversations automatically** — The tool requires the user to paste and analyze conversations manually.
+
+❌ **Store chat data without consent** — Chat text is not saved by default. Any future storage features will require explicit opt-in.
+
+**Important:** ChatCompanion is a **supportive tool, not decisive**. It helps identify patterns but doesn't replace human judgment. Always trust your instincts and seek help when something feels wrong.
+
+---
+
+## How It Works
+
+ChatCompanion uses a hybrid detection approach that combines rule-based pattern matching (60%) with ML semantic analysis (40%), with a rules-only fallback for fully offline operation.
+
+### High-Level Pipeline
+
+1. **Normalization**: Handles slang, abbreviations, and obfuscation (e.g., "u" → "you", "r n" → "right now")
+2. **Pattern Matching**: Rule-based detection of risky patterns (secrecy, pressure, threats, etc.)
+3. **ML Analysis**: Semantic analysis using local NLP models (optional, ~80MB download)
+4. **Context Gating**: Reduces false positives by analyzing context (e.g., "right now" in self-reports vs. demands)
+5. **Threat-Gating**: Threat language appears only when threat patterns are actually detected
+6. **Explanation Generation**: Creates child-friendly explanations with evidence from matched patterns
+7. **UI Display**: Shows traffic light indicator, explanation, and help resources
+
+For detailed technical documentation, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+---
+
+## Quickstart
+
+### Prerequisites
+
+- Python 3.10 or higher
+- pip (Python package manager)
+
+### Installation & Run
+
+```bash
+# Clone the repository
+git clone https://github.com/andreaseirich/ChatCompanion.git
+cd ChatCompanion
+
+# Create virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+streamlit run app/main.py
+```
 
 The application will open in your default web browser at `http://localhost:8501`.
 
-### Example Chats for Quick Testing
+### Optional: Download ML Models
 
-Try these example conversations to see how ChatCompanion works:
-
-**🟢 GREEN Example** (Safe Chat):
-```
-Alex: Hey! How was your day at school?
-Sam: It was good! We had a science test today.
-Alex: Oh cool! How do you think you did?
-Sam: I think I did okay. The questions were a bit tricky though.
-Alex: I'm sure you did great! Want to study together for the next one?
-Sam: Yeah, that would be helpful. Thanks!
-```
-
-**🟡 YELLOW Example** (Pressure/Guilt):
-```
-Taylor: Hey, I really need you to respond to my messages faster
-Jordan: I'm sorry, I've been busy with work
-Taylor: If you really cared about me, you would make time. Everyone else responds quickly.
-Jordan: I do care, but I can't always respond immediately
-Taylor: You're being selfish. After everything I've done for you, this is how you treat me?
-```
-
-**🔴 RED Example** (High-Risk):
-```
-Adult: Hey there! You're so mature for your age
-Teen: Thanks, I guess
-Adult: You're really special. Different from other kids your age.
-Teen: What do you mean?
-Adult: Adults don't understand you like I do. We're the same, you and me.
-Adult: Don't tell your parents. They won't understand. This is just between us.
-```
-
-**Note:** For non-technical users, we're working on a standalone executable installer. See [INSTALL.md](docs/INSTALL.md) for details.
-
-### Optional: Static Landing Page
-
-A static landing page is available in the `site/` directory for GitHub Pages hosting (optional):
-
-1. Enable GitHub Pages in repository settings
-2. Set source to `/site` directory
-3. The landing page will be available at `https://yourusername.github.io/ChatCompanion/`
-
-The landing page provides a design shell around the Streamlit prototype for improved first impressions.
-
-## Setup vs. Runtime
-
-### Setup Phase (One-Time, Requires Internet)
-
-- Installing Python dependencies
-- Downloading ML models (optional, ~80MB)
-- Models stored locally in `models/` directory
-
-### Runtime Phase (Fully Offline)
-
-- Launching the application
-- Analyzing chat conversations
-- All processing happens locally
-- **No network calls** during analysis
-- **No data uploads**
-- **No telemetry**
-
-The application is designed to run completely offline after initial setup. If ML models aren't available, the system automatically uses rules-only detection mode.
-
-## Usage
-
-1. **Launch the application** (see Setup above)
-
-2. **Enter chat text**:
-   - Paste a chat conversation in the text area, OR
-   - Select a demo chat from the sidebar
-
-3. **Click "Analyze Chat"**
-
-4. **Review results**:
-   - Check the traffic light indicator
-   - Read the explanation
-   - Review the advice section
-   - Use "This makes me uneasy" button if needed
-
-5. **Get help**:
-   - Talk to a trusted adult
-   - Use the help resources in the app
-
-## Testing
-
-Run the test suite to verify functionality:
+For enhanced detection (optional, ~80MB download):
 
 ```bash
-# Run all tests
-pytest tests/
-
-# Run with verbose output
-pytest tests/ -v
-
-# Run with coverage report
-pytest tests/ --cov=app --cov-report=html
+python scripts/download_models.py
 ```
 
-The test suite includes:
-- Detection engine tests (`test_detection.py`)
-- Rules engine tests (`test_rules.py`)
-- Model tests (`test_models.py`)
-- Explanation accuracy tests (`test_explanation_accuracy.py`)
-- False positive handling (`test_false_positives.py`)
-- Youth slang and banter detection (`test_youth_slang_and_banter.py`)
-- And more specialized tests
+> **Note**: ML models are optional. The system works in rules-only mode if models are not downloaded.
 
-See [`tests/`](tests/) for complete test coverage.
+### Optional: Developer Mode
 
-**Note**: Tests run automatically in CI on every push and pull request.
+For debug information:
 
-## Privacy & Data Handling
+```bash
+CHATCOMPANION_DEV_MODE=1 streamlit run app/main.py
+```
 
-### Privacy Guarantees
+### Run Tests
 
-- ✅ **Fully Offline**: No cloud uploads, no network calls during analysis
-- ✅ **No Persistence**: Chat text is NOT saved by default
-- ✅ **No Telemetry**: No tracking or analytics
-- ✅ **Memory-Only**: Data exists only during analysis session
-- ✅ **Explicit Consent**: Any future storage features will require opt-in
+```bash
+pytest -q
+```
 
-### Data Flow
+For detailed installation instructions, see [`docs/INSTALL.md`](docs/INSTALL.md).
 
-1. User pastes chat text → stored in memory
-2. Text analyzed locally → no network calls
-3. Results displayed → data remains in memory
-4. Session ends → data cleared
+---
 
-See [ETHICS.md](docs/ETHICS.md) for detailed privacy and ethics information.
+## Demo & Submission Assets
 
+- **[Demo Script](docs/DEMO_SCRIPT.md)**: 3-minute demo video script showing ChatCompanion in action
+- **[Devpost Submission](docs/DEVPOST_SUBMISSION.md)**: Content for CodeSpring Devpost submission
+- **[Architecture](docs/ARCHITECTURE.md)**: Detailed technical architecture and design
+- **[Ethics](docs/ETHICS.md)**: Ethics statement and privacy principles
+- **[Installation Guide](docs/INSTALL.md)**: Detailed installation instructions
+- **[Security Policy](SECURITY.md)**: Security reporting and best practices
+
+---
 
 ## Limitations
 
@@ -327,8 +260,8 @@ See [ETHICS.md](docs/ETHICS.md) for detailed privacy and ethics information.
 - The system is not 100% accurate
 - Some risky conversations may not be detected
 - Some safe conversations may be flagged incorrectly
+- Slang and irony may be ambiguous and could lead to false positives or negatives
 - The system is a **tool to help awareness**, not a definitive safety guarantee
-- **Evidence-Based**: Explanations are derived from matched patterns only—no false accusations
 
 ### Scope
 
@@ -336,120 +269,73 @@ See [ETHICS.md](docs/ETHICS.md) for detailed privacy and ethics information.
 - Not designed for live monitoring or OS-level integration
 - Not a replacement for parental supervision or professional help
 - Not a therapy or legal tool
+- Currently designed for English as the primary language
 
-### What ChatCompanion Does NOT Do
+### What This Means
 
-- ❌ Promise perfect detection
-- ❌ Make medical, psychological, or legal claims
-- ❌ Automatically notify parents or authorities
-- ❌ Replace professional help or counseling
-- ❌ Monitor conversations automatically
-- ❌ Store chat data without explicit consent
+ChatCompanion is a **supportive tool, not decisive**. It helps identify patterns but doesn't replace human judgment, trusted adult guidance, or professional support. Always trust your instincts and seek help when something feels wrong.
 
-## CodeSpring Hackathon Alignment
+For detailed limitations and ethical considerations, see [`docs/ETHICS.md`](docs/ETHICS.md).
 
-This project is designed for the **CodeSpring Devpost Hackathon** and aligns with the judging criteria:
+---
 
-### Creativity / Innovation (9/10)
-- **Privacy-first offline approach**: Unlike surveillance-based solutions, ChatCompanion empowers children with local, explainable detection
-- **Hybrid detection system**: Combines rule-based patterns (60%) with ML semantic analysis (40%) with graceful fallback
-- **Explainable AI**: Every detection includes evidence and reasoning, not just a score
+## Sources & References
 
-### Impact (9/10)
-- **Addresses critical child safety issue**: Online grooming, bullying, manipulation, and coercion
-- **Targets vulnerable population**: Ages 10-16, who face increasing online risks
-- **Privacy-first empowerment**: Puts children in control rather than surveilling them
-- **Offline accessibility**: Works without internet, ensuring accessibility
+All statistics cited in this README are from authoritative sources. Full citations and URLs are provided below for verification.
 
-### Technical Execution (8/10)
-- **Modular architecture**: Clean separation of concerns (UI, detection, rules, models)
-- **Comprehensive testing**: 9+ test files covering detection, rules, models, false positives
-- **CodeQL security scanning**: Automated security analysis
-- **Rules-only fallback**: Works even without ML models
+### Online Grooming
 
-### Design / Usability (8/10)
-- **Child-friendly UI**: Designed specifically for ages 10-16
-- **Traffic light system**: Intuitive green/yellow/red indicators
-- **Calm, supportive tone**: No shaming, no scaring, just helpful guidance
-- **Simple language**: All explanations use age-appropriate vocabulary
+- **89% increase in online grooming crimes over six years (UK)**: NSPCC (National Society for the Prevention of Cruelty to Children), November 2024. [https://www.nspcc.org.uk/about-us/news-opinion/2024/online-grooming-crimes-increase/](https://www.nspcc.org.uk/about-us/news-opinion/2024/online-grooming-crimes-increase/)
+- **7,062 grooming offences recorded in 2023/24 (UK)**: NSPCC, 2024. [https://www.nspcc.org.uk/about-us/news-opinion/2024/online-grooming-crimes-increase/](https://www.nspcc.org.uk/about-us/news-opinion/2024/online-grooming-crimes-increase/)
+- **45 minutes average time to high-risk grooming in gaming environments**: WeProtect Global Alliance, Global Threat Assessment, 2023. [https://www.weprotect.org/global-threat-assessment-23/](https://www.weprotect.org/global-threat-assessment-23/)
+- **546,000+ online enticement reports in 2024 (194% increase from 2023)**: NCMEC CyberTipline, 2024. [https://www.missingkids.org/gethelpnow/cybertipline/cybertiplinedata](https://www.missingkids.org/gethelpnow/cybertipline/cybertiplinedata)
+- **89% of groomers introduced sexual content in the first conversation**: Winters, Kaylor & Jeglic (academic research), 2017. Referenced in WeProtect Global Threat Assessment.
 
-### Presentation / Storytelling (8/10)
-- **Clear problem statement**: Immediately understandable
-- **Professional documentation**: Comprehensive README, ARCHITECTURE, ETHICS, SECURITY
-- **Honest limitations**: Transparent about what the system can and cannot do
-- **Demo-ready**: Working prototype with demo chats included
+### Sextortion
 
-## What's Next
+- **1 in 5 teens (20%) reported experiencing sextortion**: Thorn, "Sexual Extortion & Young People", June 2025. [https://www.thorn.org/blog/the-state-of-sextortion-in-2025/](https://www.thorn.org/blog/the-state-of-sextortion-in-2025/)
+- **Sextortion can progress from first contact to threats in as little as 5 minutes**: FBI, 2024. [https://www.fbi.gov/how-we-can-help-you/scams-and-safety/common-frauds-and-scams/sextortion](https://www.fbi.gov/how-we-can-help-you/scams-and-safety/common-frauds-and-scams/sextortion)
+- **30% of victims experienced demands within 24 hours of first contact**: Thorn, 2025. [https://www.thorn.org/blog/the-state-of-sextortion-in-2025/](https://www.thorn.org/blog/the-state-of-sextortion-in-2025/)
+- **~100 financial sextortion reports per day to NCMEC**: NCMEC CyberTipline, 2024. [https://www.missingkids.org/blog/2024/ncmec-releases-new-sextortion-data](https://www.missingkids.org/blog/2024/ncmec-releases-new-sextortion-data)
+- **149% increase in sextortion reports (2022 to 2023)**: NCMEC, 2024. [https://www.missingkids.org/blog/2024/ncmec-releases-new-sextortion-data](https://www.missingkids.org/blog/2024/ncmec-releases-new-sextortion-data)
+- **90% of financial sextortion victims are males aged 14-17**: NCMEC, 2024. [https://www.missingkids.org/blog/2024/ncmec-releases-new-sextortion-data](https://www.missingkids.org/blog/2024/ncmec-releases-new-sextortion-data)
+- **36+ suicides linked to sextortion since 2021**: FBI/HSI, 2023. [https://www.fbi.gov/contact-us/field-offices/nashville/news/sextortion-a-growing-threat-targeting-minors](https://www.fbi.gov/contact-us/field-offices/nashville/news/sextortion-a-growing-threat-targeting-minors)
 
-Future enhancements planned beyond the MVP:
+### Cyberbullying
 
-- **Multi-language support**: Extend beyond English to help more children worldwide
-- **Standalone executable**: One-click installer for non-technical parents
-- **Browser extension**: Direct integration with messaging platforms
-- **Mobile app**: Native iOS/Android apps for on-the-go safety
-- **Advanced ML models**: Fine-tuned models for better accuracy
-- **Custom risk categories**: User-configurable detection patterns
+- **55% of teens (13-17) have experienced cyberbullying in their lifetime**: Cyberbullying Research Center (Dr. Hinduja & Dr. Patchin), 2023. [https://cyberbullying.org/2023-cyberbullying-data](https://cyberbullying.org/2023-cyberbullying-data)
+- **26.5% experienced cyberbullying in the past 30 days (up from 17.2% in 2019)**: Cyberbullying Research Center, 2023. [https://cyberbullying.org/2023-cyberbullying-data](https://cyberbullying.org/2023-cyberbullying-data)
+- **46% of teens experienced at least one cyberbullying behavior**: Pew Research Center, 2022. [https://www.pewresearch.org/](https://www.pewresearch.org/)
+- **~2 million German students have been cyberbullying victims**: Cyberlife V Study (Germany), 2024. Referenced in JIM-Studie reporting.
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for technical roadmap details.
+### Reporting Gaps
 
-## Project Structure
+- **55.8% of bullied students did NOT tell a trusted adult**: National Center for Education Statistics (NCES), 2022. [https://nces.ed.gov/](https://nces.ed.gov/)
+- **63% of 12-14 year-olds did not tell a parent when bothered by harmful content**: CyberSafeKids Ireland, 2023-24. [https://www.cybersafekids.ie/](https://www.cybersafekids.ie/)
+- **20% of minors who experienced online sexual interactions told no one**: Thorn, Youth Perspectives Report, 2024. [https://www.thorn.org/blog/2024-youth-perspectives/](https://www.thorn.org/blog/2024-youth-perspectives/)
+- **Likelihood of turning to a trusted adult dropped 10 percentage points since 2022**: Thorn, 2024. [https://www.thorn.org/blog/2024-youth-perspectives/](https://www.thorn.org/blog/2024-youth-perspectives/)
+- **74% of boys didn't fully understand what sextortion was**: UK National Crime Agency CEOP Command, 2024. [https://www.nationalcrimeagency.gov.uk/](https://www.nationalcrimeagency.gov.uk/)
+- **65% of children aged 8-12 were contacted by a stranger during online gaming**: CyberSafeKids Ireland, 2023-24. [https://www.cybersafekids.ie/](https://www.cybersafekids.ie/)
 
-```
-ChatCompanion/
-├── app/
-│   ├── main.py              # Streamlit entry point
-│   ├── ui/                  # UI components
-│   ├── detection/           # Detection engine
-│   ├── rules/               # Rules engine
-│   ├── models_local/        # ML model inference
-│   └── utils/               # Utilities
-├── demo_data/               # Demo chat examples
-├── docs/                    # Documentation
-├── tests/                   # Unit tests
-├── models/                  # Local model storage (gitignored)
-├── requirements.txt         # Python dependencies
-└── README.md               # This file
-```
+---
 
-## Documentation
+## Safety Note
 
-- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)**: Technical architecture and design
-- **[ETHICS.md](docs/ETHICS.md)**: Ethics statement and privacy principles
-- **[CHANGELOG.md](docs/CHANGELOG.md)**: Version history and changes
+ChatCompanion is designed to help young people recognize risky patterns and encourage seeking help. If you see a **RED** indicator, the "Need Immediate Help?" section will appear with resources for immediate support.
 
-## Setup
+**Important:** ChatCompanion is a supportive tool, not a replacement for trusted adults or professional help. Always trust your instincts and seek help when something feels wrong. Talk to a trusted adult, counselor, or professional support service if you need help.
 
-For setup instructions, see [`docs/INSTALL.md`](docs/INSTALL.md).
-- Code style and conventions
-- Testing requirements
-- Commit message format
-- Areas for contribution
+For immediate help resources, see the "Need Immediate Help?" section that appears for RED risk levels, or contact:
+- A trusted adult (parent, teacher, counselor)
+- A professional support service (see resources in-app for RED)
+- Emergency services if you are in immediate danger
 
-For questions or suggestions:
-- Review the documentation
-- Check existing issues
-- Follow ethical guidelines in [`docs/ETHICS.md`](docs/ETHICS.md)
+---
 
 ## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
-
-Built for the "Code Spring – Where Ideas Bloom into Innovation" hackathon.
-
-Special thanks to:
-- The open-source community for excellent tools (sentence-transformers, Streamlit, etc.)
-- Ethical AI researchers who prioritize explainability and privacy
-
-## Contact
-
-For questions about ChatCompanion:
-- Review the documentation in [`docs/`](docs/)
-- Check existing GitHub issues
-- See [`SECURITY.md`](SECURITY.md) for security reporting
-
 ---
 
 **Remember**: ChatCompanion is a tool to help awareness and encourage seeking help. It is not a replacement for talking to trusted adults or professional support. Always trust your instincts and seek help when something feels wrong.
-
