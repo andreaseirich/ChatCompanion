@@ -12,6 +12,7 @@ if project_root_str not in sys.path:
     sys.path.insert(0, project_root_str)
 
 import hashlib
+import json
 import logging
 import time
 
@@ -55,8 +56,26 @@ def get_detection_engine():
 
 def main():
     """Main application function."""
+    # #region agent log
+    try:
+        with open("/Users/eirichandreas/Documents/ChatCompanion/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"id":"log_main_start","timestamp":int(time.time()*1000),"location":"main.py:56","message":"main() function started","data":{},"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}) + "\n")
+    except: pass
+    # #endregion
     # Inject theme CSS
+    # #region agent log
+    try:
+        with open("/Users/eirichandreas/Documents/ChatCompanion/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"id":"log_main_before_theme","timestamp":int(time.time()*1000),"location":"main.py:59","message":"Before inject_theme_css","data":{},"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}) + "\n")
+    except: pass
+    # #endregion
     inject_theme_css()
+    # #region agent log
+    try:
+        with open("/Users/eirichandreas/Documents/ChatCompanion/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"id":"log_main_after_theme","timestamp":int(time.time()*1000),"location":"main.py:60","message":"After inject_theme_css","data":{},"sessionId":"debug-session","runId":"run1","hypothesisId":"B"}) + "\n")
+    except: pass
+    # #endregion
     
     # ============================================================
     # ZONE 1: Header
@@ -80,8 +99,8 @@ def main():
     engine = get_detection_engine()
 
     # Load demo chats
-    demo_dir = Path(__file__).parent.parent / "demo_data"
-    demo_chats = load_demo_chats(demo_dir)
+        demo_dir = Path(__file__).parent.parent / "demo_data"
+        demo_chats = load_demo_chats(demo_dir)
 
     # Load specific example chats for buttons
     chats_dir = demo_dir / "chats"
@@ -104,6 +123,12 @@ def main():
     # ============================================================
     # ZONE 2: Input Area
     # ============================================================
+    # #region agent log
+    try:
+        with open("/Users/eirichandreas/Documents/ChatCompanion/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"id":"log_main_zone2_start","timestamp":int(time.time()*1000),"location":"main.py:107","message":"ZONE 2 Input Area reached","data":{"session_state_keys":list(st.session_state.keys())},"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}) + "\n")
+    except: pass
+    # #endregion
     st.header("Chat Input")
 
     # Example buttons
@@ -136,6 +161,12 @@ def main():
         st.session_state.clear_requested = False
     
     # Handle example button clicks - use rerun to avoid widget conflict
+    # #region agent log
+    try:
+        with open("/Users/eirichandreas/Documents/ChatCompanion/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"id":"log_main_before_rerun","timestamp":int(time.time()*1000),"location":"main.py:138","message":"Before rerun checks","data":{"example_selected":example_selected,"has_green":bool(example_green),"has_yellow":bool(example_yellow),"has_red":bool(example_red)},"sessionId":"debug-session","runId":"run1","hypothesisId":"E"}) + "\n")
+    except: pass
+    # #endregion
     if example_selected == "green" and example_green:
         st.session_state.chat_input = example_green
         st.rerun()
@@ -149,13 +180,29 @@ def main():
     # Text area for chat input
     # Don't set value parameter - Streamlit will automatically use session_state[key] if it exists
     # This avoids the warning about default value + Session State API conflict
-        chat_text = st.text_area(
-            "Paste a chat conversation here:",
-            height=200,
+    # #region agent log
+    try:
+        with open("/Users/eirichandreas/Documents/ChatCompanion/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"id":"log_main_before_textarea","timestamp":int(time.time()*1000),"location":"main.py:149","message":"Before st.text_area call","data":{"chat_input_in_state":"chat_input" in st.session_state,"chat_input_value":st.session_state.get("chat_input","")[:50] if "chat_input" in st.session_state else "N/A"},"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}) + "\n")
+    except Exception as e:
+        try:
+            with open("/Users/eirichandreas/Documents/ChatCompanion/.cursor/debug.log", "a", encoding="utf-8") as f:
+                f.write(json.dumps({"id":"log_main_before_textarea_error","timestamp":int(time.time()*1000),"location":"main.py:149","message":"Error before textarea","data":{"error":str(e)},"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}) + "\n")
+        except: pass
+    # #endregion
+    chat_text = st.text_area(
+        "Paste a chat conversation here:",
+        height=200,
         key="chat_input",
-            help="You can paste a conversation from any messaging app. "
-            "The text is processed locally and never saved.",
-        )
+        help="You can paste a conversation from any messaging app. "
+        "The text is processed locally and never saved.",
+    )
+    # #region agent log
+    try:
+        with open("/Users/eirichandreas/Documents/ChatCompanion/.cursor/debug.log", "a", encoding="utf-8") as f:
+            f.write(json.dumps({"id":"log_main_after_textarea","timestamp":int(time.time()*1000),"location":"main.py:160","message":"After st.text_area call","data":{"chat_text_received":bool(chat_text),"chat_text_length":len(chat_text) if chat_text else 0},"sessionId":"debug-session","runId":"run1","hypothesisId":"A"}) + "\n")
+    except: pass
+    # #endregion
 
     # Clear button - set flag instead of modifying session_state directly
     col_clear, col_analyze = st.columns([1, 3])
@@ -170,7 +217,7 @@ def main():
             st.rerun()
     
     with col_analyze:
-        analyze_button = st.button("🔍 Analyze Chat", type="primary", use_container_width=True)
+    analyze_button = st.button("🔍 Analyze Chat", type="primary", use_container_width=True)
 
     # Process analysis
     if analyze_button and chat_text.strip():
