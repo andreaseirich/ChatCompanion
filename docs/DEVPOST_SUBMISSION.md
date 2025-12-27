@@ -3,7 +3,7 @@
 This document contains the content for the CodeSpring Devpost submission form.
 
 **Hackathon**: CodeSpring - Where Ideas Bloom into Innovation  
-**Submission Date**: [To be filled]  
+**Submission Date**: 2025-12-27  
 **Repository**: https://github.com/andreaseirich/ChatCompanion
 
 ---
