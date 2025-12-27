@@ -50,6 +50,46 @@ ChatCompanion is a **local, fully offline tool** that:
 
 ---
 
+## Visual Demo
+
+### Main Interface
+
+![ChatCompanion main interface](screenshots/main-interface.png)
+
+*Privacy-first interface with offline badge, example buttons, and local processing guarantee.*
+
+### Traffic Light System
+
+ChatCompanion uses a clear visual indicator system to communicate risk levels:
+
+**GREEN** - Safe conversation:
+![GREEN result](screenshots/result-green.png)
+
+**YELLOW** - Moderate concern:
+![YELLOW result](screenshots/result-yellow.png)
+
+**RED** - Serious risk (with immediate help resources):
+![RED result](screenshots/result-red.png)
+
+### Key Features Demonstrated
+
+**Evidence-Based Explanations:**
+- Pattern counts table shows exactly what was detected
+- Observed behaviors are listed only when patterns match
+- Clear, child-friendly language explains what was found
+
+**Empowerment & Support:**
+- "Ways to say NO" provides boundary-setting phrases
+- Professional help resources (klicksafe.de) for RED cases
+- Clear disclaimers about tool limitations
+
+**Privacy-First Design:**
+- "Offline / on-device" badge prominently displayed
+- No cloud uploads, no data persistence
+- User controls when to analyze
+
+---
+
 ## Tech Stack
 
 ### Core Technologies

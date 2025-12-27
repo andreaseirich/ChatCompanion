@@ -316,6 +316,62 @@ For detailed installation instructions, see [`docs/INSTALL.md`](docs/INSTALL.md)
 
 ---
 
+## User Interface
+
+ChatCompanion provides a simple, privacy-first interface that helps users understand risky chat patterns.
+
+### Main Interface
+
+![ChatCompanion main interface](docs/screenshots/main-interface.png)
+
+*Main interface showing chat input area, example buttons (GREEN/YELLOW/RED), and privacy-first offline badge.*
+
+### Analysis Results
+
+ChatCompanion uses a traffic light system to clearly communicate risk levels:
+
+**GREEN** - No warning signs detected:
+![GREEN analysis result](docs/screenshots/result-green.png)
+
+*Analysis result showing GREEN status with "Everything looks okay" message and no warning signs detected.*
+
+**YELLOW** - Moderate concern detected:
+![YELLOW analysis result](docs/screenshots/result-yellow.png)
+
+*Analysis result showing YELLOW status with "Something feels a bit off" message and pressure/guilt patterns detected.*
+
+**RED** - Serious risk detected:
+![RED analysis result](docs/screenshots/result-red.png)
+
+*Analysis result showing RED status with "This is serious" message, grooming indicators, and immediate help resources (klicksafe.de link).*
+
+<details>
+<summary>📸 Additional Screenshots</summary>
+
+**Pattern Details:**
+![Pattern counts table](docs/screenshots/details-pattern-counts.png)
+
+*Pattern counts table showing detected categories (manipulation, secrecy, grooming) with instance and pattern counts.*
+
+**Next Steps - Setting Boundaries:**
+![Ways to say NO](docs/screenshots/next-steps-say-no.png)
+
+*Recommended next steps section with "Ways to say NO" providing boundary-setting phrases.*
+
+**Professional Help Resources:**
+![Professional help](docs/screenshots/next-steps-professional-help.png)
+
+*Professional support resources section with klicksafe.de link and guidance for seeking help.*
+
+**Tool Capabilities:**
+![What this tool can and cannot do](docs/screenshots/tool-capabilities.png)
+
+*Clear explanation of what ChatCompanion can and cannot do, including limitations and disclaimers.*
+
+</details>
+
+---
+
 ## Documentation
 
 - **[Architecture](docs/ARCHITECTURE.md)**: Detailed technical architecture and design
