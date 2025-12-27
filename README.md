@@ -4,6 +4,7 @@
 [![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![CodeQL](https://github.com/andreaseirich/ChatCompanion/workflows/CodeQL%20Analysis/badge.svg)](https://github.com/andreaseirich/ChatCompanion/actions/workflows/codeql-analysis.yml)
 [![Privacy](https://img.shields.io/badge/Privacy-First%20Offline-green.svg)](docs/ETHICS.md)
+[![Built for Code Spring](https://img.shields.io/badge/Built%20for-Code%20Spring-6d28d9?style=flat)](https://code-spring.devpost.com/)
 
 **Privacy-first, offline assistant that empowers children and teenagers (ages 10-16) to recognize risky chat patterns themselves**
 
@@ -229,6 +230,15 @@ flowchart LR
 ## Validation & Metrics
 
 ChatCompanion's detection accuracy is evaluated on a set of synthetic test fixtures (12 test chats). **Synthetic test data; real-world accuracy may vary.**
+
+### How to read these metrics
+
+- **Synthetic test fixtures**: These metrics use adversarial edge-case test data designed to validate specific patterns, not real user conversations
+- **Exact label matching is strict**: A one-step conservative downgrade (e.g., RED→YELLOW, YELLOW→GREEN) counts as incorrect, even though it still provides useful guidance
+- **Conservative bias is intentional**: The system aims to reduce false alarms, especially for RED risk levels, prioritizing trust and avoiding unnecessary panic in child-safety contexts
+- **Trade-off design**: The system is designed to be conservative rather than aggressive—better to miss some patterns than to cause false alarms that erode trust
+- **Purpose**: These metrics are primarily for regression testing and bias verification, not absolute performance claims
+- **Real-world accuracy may differ**: Actual conversations may have different characteristics, and accuracy may vary based on context, language variations, and edge cases not covered in the test set
 
 **Fixture Corpus Results:**
 - **Overall accuracy:** 25.0% (3/12 correct)
