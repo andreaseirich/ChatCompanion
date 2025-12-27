@@ -194,19 +194,13 @@ Privacy-first: Runs locally; no chat uploads.
 ### Architecture
 
 ```mermaid
-graph TD
-    A[Chat Input<br/>Streamlit UI] --> B[Slang Normalizer<br/>u → you, r n → right now]
-    B --> C[Rules Engine<br/>Pattern Matching]
-    B --> D[ML Analysis<br/>Semantic Detection]
-    C --> E[Score Aggregator<br/>Combine Rules + ML]
-    D --> E
-    E --> F[Threat-Gating<br/>Only show threats if detected]
-    F --> G[Explanation Generator<br/>Evidence-based, Child-friendly]
-    G --> H[Result Display<br/>Traffic Light + Next Steps]
+flowchart LR
+    A[Input] --> B[Normalize]
+    B --> C[Detect Patterns<br/>Rules + ML]
+    C --> D[Result<br/>Evidence-based]
+    D --> E[Help/Next Steps]
     
-    style A fill:#e1f5ff
-    style H fill:#e8f5e9
-    A -.->|"No network calls<br/>No uploads"| H
+    A -.->|"No network calls<br/>No uploads"| E
 ```
 
 ### Detection Flow
@@ -319,14 +313,11 @@ For detailed installation instructions, see [`docs/INSTALL.md`](docs/INSTALL.md)
 
 ## Safety Note
 
-ChatCompanion is designed to help young people recognize risky patterns and encourage seeking help. If you see a **RED** indicator, the "Need Immediate Help?" section will appear with resources for immediate support.
+A **RED** indicator means higher risk and requires attention. The "Need Immediate Help?" section appears only for RED risk levels.
 
-**Important:** ChatCompanion is a supportive tool, not a replacement for trusted adults or professional help. Always trust your instincts and seek help when something feels wrong. Talk to a trusted adult, counselor, or professional support service if you need help.
+**Important:** ChatCompanion is a supportive tool, not a replacement for trusted adults or professional help.
 
-For immediate help resources, see the "Need Immediate Help?" section that appears for RED risk levels, or contact:
-- A trusted adult (parent, teacher, counselor)
-- A professional support service (see resources in-app for RED)
-- Emergency services if you are in immediate danger
+→ Full safety & ethics guidelines: [`docs/ETHICS.md`](docs/ETHICS.md)
 
 ---
 
@@ -376,7 +367,3 @@ All statistics cited in this README are from authoritative sources. Full citatio
 ## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
-
----
-
-**Remember**: ChatCompanion is a tool to help awareness and encourage seeking help. It is not a replacement for talking to trusted adults or professional support. Always trust your instincts and seek help when something feels wrong.
