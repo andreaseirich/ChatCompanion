@@ -9,7 +9,7 @@
 This repository contains:
 
 1. **Source Code**: Application code (`app/`) and tests (`tests/`)
-2. **Documentation**: README, ARCHITECTURE, ETHICS, INSTALL, CHANGELOG, SECURITY, DEMO_SCRIPT
+2. **Documentation**: README, ARCHITECTURE, ETHICS, INSTALL, CHANGELOG, SECURITY
 3. **Demo Data**: Synthetic example chats for reproducibility (`demo_data/`)
 4. **Setup Files**: Requirements, setup scripts, run scripts
 5. **Scripts**: Model download and build scripts

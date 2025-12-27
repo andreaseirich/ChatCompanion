@@ -50,11 +50,6 @@
 - Evidence-based explanations: "Observed behaviors are listed only when supported by matched patterns" ✅
 - Threat-gating: "YELLOW mentions threats only when threat patterns match" ✅
 
-### docs/DEMO_SCRIPT.md
-✅ **Verified**:
-- Correctly states "Need Immediate Help?" only appears for RED ✅
-- Demo flow is clear and reproducible ✅
-
 ### docs/ARCHITECTURE.md
 ✅ **Verified**:
 - Pipeline accurately described: normalization → rules/ML → threat-gating → explainer → UI ✅
@@ -109,7 +104,6 @@
 
 ✅ **Verified**:
 - App imports successfully (no import errors)
-- Demo path in README/DEMO_SCRIPT is reproducible
 - Demo chats in `demo_data/chats/` are clearly synthetic and safe
 - Entry point command works: `streamlit run app/main.py`
 
