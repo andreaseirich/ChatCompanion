@@ -10,7 +10,7 @@ Please add the following screenshot files:
 - `result-green.png` - GREEN analysis result ("Everything looks okay")
 - `result-yellow.png` - YELLOW analysis result ("Something feels a bit off")
 - `result-red.png` - RED analysis result ("This is serious")
-- `details-pattern-counts.png` - Pattern counts table
+- `need-immediate-help.png` - "Need Immediate Help?" section (expanded, RED only)
 - `next-steps-say-no.png` - "Ways to say NO" section
 - `next-steps-professional-help.png` - Professional help section with klicksafe.de
 - `tool-capabilities.png` - "What this tool can and cannot do" section

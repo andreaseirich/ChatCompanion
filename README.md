@@ -348,10 +348,10 @@ ChatCompanion uses a traffic light system to clearly communicate risk levels:
 <details>
 <summary>📸 Additional Screenshots</summary>
 
-**Pattern Details:**
-![Pattern counts table](docs/screenshots/details-pattern-counts.png)
+**Need Immediate Help (RED only):**
+![Need Immediate Help section](docs/screenshots/need-immediate-help.png)
 
-*Pattern counts table showing detected categories (manipulation, secrecy, grooming) with instance and pattern counts.*
+*"Need Immediate Help?" expandable section that appears only for RED risk level, providing immediate support resources and guidance.*
 
 **Next Steps - Setting Boundaries:**
 ![Ways to say NO](docs/screenshots/next-steps-say-no.png)

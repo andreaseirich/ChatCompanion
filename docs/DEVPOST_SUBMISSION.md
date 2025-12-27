@@ -80,7 +80,8 @@ ChatCompanion uses a clear visual indicator system to communicate risk levels:
 
 **Empowerment & Support:**
 - "Ways to say NO" provides boundary-setting phrases
-- Professional help resources (klicksafe.de) for RED cases
+- "Need Immediate Help?" section appears only for RED cases (with klicksafe.de link)
+- Professional help resources for serious situations
 - Clear disclaimers about tool limitations
 
 **Privacy-First Design:**
