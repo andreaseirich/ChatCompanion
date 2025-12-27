@@ -13,9 +13,10 @@
 
 Online grooming crimes have increased **89%** over six years (Source: NSPCC, 2024). **55%** of teens ages 13-17 have experienced cyberbullying in their lifetime (Source: Cyberbullying Research Center, 2023). Most young people don't tell an adult when something feels wrong online—**over half stay silent** (Source: NCES, 2022).
 
-Existing solutions often require cloud uploads (someone else sees the conversations) or are designed for surveillance rather than empowerment. Children need a tool that helps them recognize risky patterns while maintaining their privacy and autonomy.
+Existing solutions often require cloud uploads (someone else sees the conversations) or are designed for surveillance rather than empowerment. The gap: young people need tools to recognize patterns themselves.
 
-### Real Scenarios: Why Pattern Recognition Matters
+<details>
+<summary>📖 Real Scenarios: Why Pattern Recognition Matters</summary>
 
 **Scenario A: The Manipulated Trust**
 
@@ -59,9 +60,16 @@ Sextortion can progress from first contact to threats in **as little as 5 minute
 
 **Key insight:** These situations can escalate in minutes. Pattern recognition during the conversation—before a point of no return—gives young people a chance to recognize what's happening as a known tactic, not a personal failing.
 
+</details>
+
 ---
 
 ## The Problem: Why Existing Tools Fall Short
+
+Most existing solutions are designed for surveillance: parents monitoring children's conversations, cloud-based analysis that requires uploading private chats, or automated reporting systems. ChatCompanion takes a different approach: **privacy-first empowerment**. It gives children the tools to recognize risky patterns themselves, without anyone watching over their shoulder.
+
+<details>
+<summary>🔍 Deep Dive: Risky Patterns & Reporting Gaps</summary>
 
 ### What Risky Patterns Look Like
 
@@ -93,7 +101,7 @@ Most existing solutions are designed for surveillance: parents monitoring childr
 - Miss the patterns that matter most
 - Violate privacy and autonomy
 
-ChatCompanion takes a different approach: **privacy-first empowerment**. It gives children the tools to recognize risky patterns themselves, without anyone watching over their shoulder.
+</details>
 
 ---
 
@@ -128,9 +136,34 @@ ChatCompanion is a **local, fully offline tool** that helps children and teenage
 - Supportive guidance on talking to trusted adults
 - Encourages healthy boundaries and seeking help
 
+### Why ChatCompanion?
+
+| Feature | ChatCompanion | Cloud Tools | Parental Monitoring |
+|---------|---------------|-------------|---------------------|
+| Privacy | ✅ Offline/on-device | ❌ Cloud uploads | ❌ Surveillance |
+| Explainability | ✅ Evidence-based | ❌ Black box | ❌ Opaque |
+| User control | ✅ Empowerment | ❌ Passive | ❌ Monitored |
+| Cost | ✅ Free | 💰 Subscription | 💰 Subscription |
+
 ---
 
-## What ChatCompanion Can Do
+## What ChatCompanion Does (and Doesn't)
+
+✅ **Detect risky patterns** (bullying, manipulation, grooming, coercion)  
+✅ **Explain what was detected** in simple, child-friendly language  
+✅ **Provide evidence-based results** — only shows behaviors when patterns match  
+✅ **Work completely offline** — no internet required during analysis  
+
+❌ **Promise perfect detection** — not 100% accurate  
+❌ **Make medical/psychological/legal claims** — supportive tool only  
+❌ **Replace trusted adults or professional help** — encourages seeking help  
+
+**Important:** ChatCompanion is a **supportive tool, not decisive**. It helps identify patterns but doesn't replace human judgment. Always trust your instincts and seek help when something feels wrong.
+
+<details>
+<summary>📋 Full Feature List & Limitations</summary>
+
+### What ChatCompanion Can Do
 
 ✅ **Detect risky patterns** in chat conversations:
 - Bullying patterns (one-sided hostility, escalating insults)
@@ -149,9 +182,7 @@ ChatCompanion is a **local, fully offline tool** that helps children and teenage
 
 ✅ **Respect privacy** — no data uploads, no cloud processing, no telemetry
 
----
-
-## What ChatCompanion Cannot Do
+### What ChatCompanion Cannot Do
 
 ❌ **Promise perfect detection** — The system is not 100% accurate. Some risky conversations may not be detected, and some safe conversations may be flagged incorrectly.
 
@@ -165,25 +196,17 @@ ChatCompanion is a **local, fully offline tool** that helps children and teenage
 
 ❌ **Store chat data without consent** — Chat text is not saved by default. Any future storage features will require explicit opt-in.
 
-**Important:** ChatCompanion is a **supportive tool, not decisive**. It helps identify patterns but doesn't replace human judgment. Always trust your instincts and seek help when something feels wrong.
+</details>
 
 ---
 
 ## How It Works
 
-ChatCompanion uses a hybrid detection approach that combines rule-based pattern matching (60%) with ML semantic analysis (40%), with a rules-only fallback for fully offline operation.
+Hybrid Detection: Rules (≈60%) + ML (≈40%) with offline fallback.  
+Smart Processing: Normalization → Pattern Matching → ML Analysis → Context Gating → Threat-Gating → Explanation → UI Display  
+Privacy-first: Runs locally; no chat uploads.
 
-### High-Level Pipeline
-
-1. **Normalization**: Handles slang, abbreviations, and obfuscation (e.g., "u" → "you", "r n" → "right now")
-2. **Pattern Matching**: Rule-based detection of risky patterns (secrecy, pressure, threats, etc.)
-3. **ML Analysis**: Semantic analysis using local NLP models (optional, ~80MB download)
-4. **Context Gating**: Reduces false positives by analyzing context (e.g., "right now" in self-reports vs. demands)
-5. **Threat-Gating**: Threat language appears only when threat patterns are actually detected
-6. **Explanation Generation**: Creates child-friendly explanations with evidence from matched patterns
-7. **UI Display**: Shows traffic light indicator, explanation, and help resources
-
-For detailed technical documentation, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+→ Full technical details: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 ---
 
@@ -258,28 +281,35 @@ For detailed installation instructions, see [`docs/INSTALL.md`](docs/INSTALL.md)
 ### Detection Accuracy
 
 - The system is not 100% accurate
-- Some risky conversations may not be detected
-- Some safe conversations may be flagged incorrectly
+- Some risky conversations may not be detected; some safe conversations may be flagged incorrectly
 - Slang and irony may be ambiguous and could lead to false positives or negatives
-- The system is a **tool to help awareness**, not a definitive safety guarantee
 
 ### Scope
 
 - Designed for text-based chat conversations
 - Not designed for live monitoring or OS-level integration
 - Not a replacement for parental supervision or professional help
-- Not a therapy or legal tool
 - Currently designed for English as the primary language
 
-### What This Means
-
-ChatCompanion is a **supportive tool, not decisive**. It helps identify patterns but doesn't replace human judgment, trusted adult guidance, or professional support. Always trust your instincts and seek help when something feels wrong.
-
-For detailed limitations and ethical considerations, see [`docs/ETHICS.md`](docs/ETHICS.md).
+→ Full limitations & ethics: [`docs/ETHICS.md`](docs/ETHICS.md)
 
 ---
 
-## Sources & References
+## Safety Note
+
+ChatCompanion is designed to help young people recognize risky patterns and encourage seeking help. If you see a **RED** indicator, the "Need Immediate Help?" section will appear with resources for immediate support.
+
+**Important:** ChatCompanion is a supportive tool, not a replacement for trusted adults or professional help. Always trust your instincts and seek help when something feels wrong. Talk to a trusted adult, counselor, or professional support service if you need help.
+
+For immediate help resources, see the "Need Immediate Help?" section that appears for RED risk levels, or contact:
+- A trusted adult (parent, teacher, counselor)
+- A professional support service (see resources in-app for RED)
+- Emergency services if you are in immediate danger
+
+---
+
+<details>
+<summary>📚 Sources & References (all citations)</summary>
 
 All statistics cited in this README are from authoritative sources. Full citations and URLs are provided below for verification.
 
@@ -317,18 +347,7 @@ All statistics cited in this README are from authoritative sources. Full citatio
 - **74% of boys didn't fully understand what sextortion was**: UK National Crime Agency CEOP Command, 2024. [https://www.nationalcrimeagency.gov.uk/](https://www.nationalcrimeagency.gov.uk/)
 - **65% of children aged 8-12 were contacted by a stranger during online gaming**: CyberSafeKids Ireland, 2023-24. [https://www.cybersafekids.ie/](https://www.cybersafekids.ie/)
 
----
-
-## Safety Note
-
-ChatCompanion is designed to help young people recognize risky patterns and encourage seeking help. If you see a **RED** indicator, the "Need Immediate Help?" section will appear with resources for immediate support.
-
-**Important:** ChatCompanion is a supportive tool, not a replacement for trusted adults or professional help. Always trust your instincts and seek help when something feels wrong. Talk to a trusted adult, counselor, or professional support service if you need help.
-
-For immediate help resources, see the "Need Immediate Help?" section that appears for RED risk levels, or contact:
-- A trusted adult (parent, teacher, counselor)
-- A professional support service (see resources in-app for RED)
-- Emergency services if you are in immediate danger
+</details>
 
 ---
 
