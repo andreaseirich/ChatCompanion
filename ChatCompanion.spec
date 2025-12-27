@@ -11,8 +11,13 @@ import sys
 from pathlib import Path
 
 # Get project root (where this spec file is located)
-# When running PyInstaller, SPECPATH is automatically set to this file's path
-project_root = Path(SPECPATH).parent
+# When running PyInstaller, SPECPATH is automatically set to the directory containing the spec file
+# Note: SPECPATH is the directory, not the file path
+if 'SPECPATH' in globals() and SPECPATH:
+    project_root = Path(SPECPATH)
+else:
+    # Fallback: assume spec file is in project root
+    project_root = Path(__file__).parent if '__file__' in globals() else Path.cwd()
 
 block_cipher = None
 

@@ -149,13 +149,13 @@ def main():
     # Text area for chat input
     # Don't set value parameter - Streamlit will automatically use session_state[key] if it exists
     # This avoids the warning about default value + Session State API conflict
-    chat_text = st.text_area(
-        "Paste a chat conversation here:",
-        height=200,
+        chat_text = st.text_area(
+            "Paste a chat conversation here:",
+            height=200,
         key="chat_input",
-        help="You can paste a conversation from any messaging app. "
-        "The text is processed locally and never saved.",
-    )
+            help="You can paste a conversation from any messaging app. "
+            "The text is processed locally and never saved.",
+        )
 
     # Clear button - set flag instead of modifying session_state directly
     col_clear, col_analyze = st.columns([1, 3])

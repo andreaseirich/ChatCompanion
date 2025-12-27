@@ -280,21 +280,21 @@ Run `python3 scripts/compute_fixture_metrics.py` to regenerate metrics from test
 
 ### Installation & Run
 
-```bash
+   ```bash
 # Clone the repository
-git clone https://github.com/andreaseirich/ChatCompanion.git
-cd ChatCompanion
+   git clone https://github.com/andreaseirich/ChatCompanion.git
+   cd ChatCompanion
 
 # Create virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
-pip install -r requirements.txt
+   pip install -r requirements.txt
 
 # Run the application
-streamlit run app/main.py
-```
+   streamlit run app/main.py
+   ```
 
 The application will open in your default web browser at `http://localhost:8501`.
 
