@@ -217,7 +217,7 @@ def main():
             st.rerun()
     
     with col_analyze:
-    analyze_button = st.button("🔍 Analyze Chat", type="primary", use_container_width=True)
+        analyze_button = st.button("🔍 Analyze Chat", type="primary", use_container_width=True)
 
     # Process analysis
     if analyze_button and chat_text.strip():
