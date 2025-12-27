@@ -78,11 +78,11 @@ def main():
 
     # Initialize detection engine
     engine = get_detection_engine()
-    
+
     # Load demo chats
-    demo_dir = Path(__file__).parent.parent / "demo_data"
-    demo_chats = load_demo_chats(demo_dir)
-    
+        demo_dir = Path(__file__).parent.parent / "demo_data"
+        demo_chats = load_demo_chats(demo_dir)
+
     # Load specific example chats for buttons
     chats_dir = demo_dir / "chats"
     example_green = ""
@@ -105,7 +105,7 @@ def main():
     # ZONE 2: Input Area
     # ============================================================
     st.header("Chat Input")
-    
+
     # Example buttons
     col1, col2, col3 = st.columns(3)
     example_selected = None
@@ -149,14 +149,14 @@ def main():
     # Text area for chat input
     # Don't set value parameter - Streamlit will automatically use session_state[key] if it exists
     # This avoids the warning about default value + Session State API conflict
-    chat_text = st.text_area(
-        "Paste a chat conversation here:",
-        height=200,
+        chat_text = st.text_area(
+            "Paste a chat conversation here:",
+            height=200,
         key="chat_input",
-        help="You can paste a conversation from any messaging app. "
-        "The text is processed locally and never saved.",
-    )
-    
+            help="You can paste a conversation from any messaging app. "
+            "The text is processed locally and never saved.",
+        )
+
     # Clear button - set flag instead of modifying session_state directly
     col_clear, col_analyze = st.columns([1, 3])
     with col_clear:
@@ -170,7 +170,7 @@ def main():
             st.rerun()
     
     with col_analyze:
-        analyze_button = st.button("🔍 Analyze Chat", type="primary", use_container_width=True)
+    analyze_button = st.button("🔍 Analyze Chat", type="primary", use_container_width=True)
 
     # Process analysis
     if analyze_button and chat_text.strip():
@@ -181,7 +181,7 @@ def main():
                     time.sleep(1.5)
                 
                 result = engine.analyze(chat_text)
-                
+
                 # Store result in session state (convert to dict for serialization)
                 st.session_state.last_result = {
                     "risk_level": result.risk_level.value,

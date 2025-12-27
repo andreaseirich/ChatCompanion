@@ -23,13 +23,13 @@ def render_traffic_light(risk_level: RiskLevel) -> None:
         label_color = "#4CAF50" if is_active else "#999999"
         label_weight = "bold" if is_active else "normal"
         
-        st.markdown(
+            st.markdown(
             f'<div class="status-dot-container">'
             f'<div class="{dot_class}" style="background-color: {dot_color};"></div>'
             f'<div class="status-dot-label" style="color: {label_color}; font-weight: {label_weight};">GREEN</div>'
             f'</div>',
-            unsafe_allow_html=True,
-        )
+                unsafe_allow_html=True,
+            )
 
     # YELLOW dot
     with col2:
@@ -39,13 +39,13 @@ def render_traffic_light(risk_level: RiskLevel) -> None:
         label_color = "#FFC107" if is_active else "#999999"
         label_weight = "bold" if is_active else "normal"
         
-        st.markdown(
+            st.markdown(
             f'<div class="status-dot-container">'
             f'<div class="{dot_class}" style="background-color: {dot_color};"></div>'
             f'<div class="status-dot-label" style="color: {label_color}; font-weight: {label_weight};">YELLOW</div>'
             f'</div>',
-            unsafe_allow_html=True,
-        )
+                unsafe_allow_html=True,
+            )
 
     # RED dot
     with col3:
@@ -55,13 +55,13 @@ def render_traffic_light(risk_level: RiskLevel) -> None:
         label_color = "#F44336" if is_active else "#999999"
         label_weight = "bold" if is_active else "normal"
         
-        st.markdown(
+            st.markdown(
             f'<div class="status-dot-container">'
             f'<div class="{dot_class}" style="background-color: {dot_color};"></div>'
             f'<div class="status-dot-label" style="color: {label_color}; font-weight: {label_weight};">RED</div>'
             f'</div>',
-            unsafe_allow_html=True,
-        )
+                unsafe_allow_html=True,
+            )
 
 
 def render_explanation(explanation: str, risk_level: RiskLevel) -> None:
