@@ -99,8 +99,8 @@ def main():
     engine = get_detection_engine()
 
     # Load demo chats
-        demo_dir = Path(__file__).parent.parent / "demo_data"
-        demo_chats = load_demo_chats(demo_dir)
+    demo_dir = Path(__file__).parent.parent / "demo_data"
+    demo_chats = load_demo_chats(demo_dir)
 
     # Load specific example chats for buttons
     chats_dir = demo_dir / "chats"
