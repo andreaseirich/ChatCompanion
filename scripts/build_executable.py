@@ -55,6 +55,8 @@ a = Analysis(
         (str(project_root / 'app' / 'rules' / 'rules_config.yaml'), 'app/rules'),
         # Include demo data (optional, for testing)
         (str(project_root / 'demo_data'), 'demo_data'),
+        # Include assets (logo, icons)
+        (str(project_root / 'assets'), 'assets'),
         # Include models if they exist (optional)
         # Note: Models are large (~80MB), so they may be excluded for smaller executables
         # (str(project_root / 'models'), 'models'),
@@ -111,7 +113,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # Add icon path here if you have one
+    icon=str(project_root / 'assets' / 'logo.svg') if (project_root / 'assets' / 'logo.svg').exists() else None,  # Use SVG logo if available (PyInstaller supports SVG on some platforms)
 )
 """
     

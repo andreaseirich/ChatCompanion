@@ -23,6 +23,7 @@ from app.ui.components import (
     render_behavior_badges,
     render_explanation,
     render_help_section,
+    render_logo,
     render_next_steps,
     render_traffic_light,
     render_what_this_tool_can_do,
@@ -61,7 +62,10 @@ def main():
     # ============================================================
     # ZONE 1: Header
     # ============================================================
-    st.title("🛡️ ChatCompanion")
+    # Display logo
+    render_logo(width=100)
+    
+    st.title("ChatCompanion")
     st.markdown("**Privacy-first assistant to help recognize risky chat patterns**")
     # Static badge - safe: constant string only, no user content
     st.markdown(

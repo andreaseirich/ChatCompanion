@@ -1,9 +1,44 @@
 """UI components for ChatCompanion."""
 
+import base64
+from pathlib import Path
+
 import streamlit as st
 
 from app.ui.text_presets import TextPresets
 from app.utils.constants import RiskLevel
+
+
+def render_logo(width: int = 100) -> None:
+    """
+    Render ChatCompanion logo in the header.
+    
+    Args:
+        width: Width of the logo in pixels (default: 100)
+    """
+    project_root = Path(__file__).parent.parent.parent
+    logo_path = project_root / "assets" / "logo.svg"
+    
+    if logo_path.exists():
+        # Read SVG content and embed as base64
+        with open(logo_path, "r", encoding="utf-8") as f:
+            svg_content = f.read()
+        
+        # Display logo with centered alignment
+        svg_base64 = base64.b64encode(svg_content.encode()).decode()
+        st.markdown(
+            f'<div style="text-align: center; margin-bottom: 20px;">'
+            f'<img src="data:image/svg+xml;base64,{svg_base64}" '
+            f'width="{width}" alt="ChatCompanion Logo" style="display: inline-block;" />'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        # Fallback to emoji if logo file not found
+        st.markdown(
+            f'<div style="text-align: center; margin-bottom: 20px; font-size: {width}px;">🛡️</div>',
+            unsafe_allow_html=True,
+        )
 
 
 def render_traffic_light(risk_level: RiskLevel) -> None:
