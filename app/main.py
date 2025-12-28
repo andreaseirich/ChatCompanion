@@ -63,7 +63,7 @@ def main():
     # ZONE 1: Header
     # ============================================================
     # Display logo
-    render_logo(width=100)
+    render_logo(width=300)
     
     st.title("ChatCompanion")
     st.markdown("**Privacy-first assistant to help recognize risky chat patterns**")

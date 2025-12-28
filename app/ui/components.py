@@ -9,15 +9,24 @@ from app.ui.text_presets import TextPresets
 from app.utils.constants import RiskLevel
 
 
-def render_logo(width: int = 100) -> None:
+def render_logo(width: int = 300, icon_only: bool = False) -> None:
     """
     Render ChatCompanion logo in the header.
     
     Args:
-        width: Width of the logo in pixels (default: 100)
+        width: Width of the logo in pixels (default: 300 for full logo, 80 for icon)
+        icon_only: If True, use icon-only version (default: False)
     """
     project_root = Path(__file__).parent.parent.parent
-    logo_path = project_root / "assets" / "logo.svg"
+    
+    # Choose logo file based on icon_only parameter
+    if icon_only:
+        logo_path = project_root / "assets" / "logo-icon.svg"
+        # Adjust default width for icon
+        if width == 300:
+            width = 80
+    else:
+        logo_path = project_root / "assets" / "logo.svg"
     
     if logo_path.exists():
         # Read SVG content and embed as base64
@@ -36,7 +45,7 @@ def render_logo(width: int = 100) -> None:
     else:
         # Fallback to emoji if logo file not found
         st.markdown(
-            f'<div style="text-align: center; margin-bottom: 20px; font-size: {width}px;">🛡️</div>',
+            f'<div style="text-align: center; margin-bottom: 20px; font-size: {min(width, 100)}px;">🛡️</div>',
             unsafe_allow_html=True,
         )
 
