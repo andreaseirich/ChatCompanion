@@ -1,6 +1,5 @@
 """UI components for ChatCompanion."""
 
-import base64
 from pathlib import Path
 
 import streamlit as st
@@ -19,29 +18,20 @@ def render_logo(width: int = 300, icon_only: bool = False) -> None:
     """
     project_root = Path(__file__).parent.parent.parent
     
-    # Choose logo file based on icon_only parameter
+    # Choose logo file based on icon_only parameter - use PNG instead of SVG
     if icon_only:
-        logo_path = project_root / "assets" / "logo-icon.svg"
+        logo_path = project_root / "assets" / "logo-icon.png"
         # Adjust default width for icon
         if width == 300:
             width = 80
     else:
-        logo_path = project_root / "assets" / "logo.svg"
+        logo_path = project_root / "assets" / "logo.png"
     
     if logo_path.exists():
-        # Read SVG content and embed as base64
-        with open(logo_path, "r", encoding="utf-8") as f:
-            svg_content = f.read()
-        
-        # Display logo with centered alignment
-        svg_base64 = base64.b64encode(svg_content.encode()).decode()
-        st.markdown(
-            f'<div style="text-align: center; margin-bottom: 20px;">'
-            f'<img src="data:image/svg+xml;base64,{svg_base64}" '
-            f'width="{width}" alt="ChatCompanion Logo" style="display: inline-block;" />'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+        # Display PNG logo with centered alignment
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.image(str(logo_path), width=width, use_container_width=False)
     else:
         # Fallback to emoji if logo file not found
         st.markdown(
