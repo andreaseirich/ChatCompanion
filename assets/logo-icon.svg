@@ -1,17 +1,30 @@
-<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+<svg width="150" height="150" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Professional gradient for shield -->
-    <linearGradient id="shieldGradientIcon" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#1e7ae8;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#1557b0;stop-opacity:1" />
+    <!-- Shield gradient - light blue to dark blue/violet -->
+    <linearGradient id="shieldGradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#357ABD;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2C3E50;stop-opacity:1" />
     </linearGradient>
     
-    <!-- Subtle shadow for depth -->
-    <filter id="shieldShadowIcon" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
+    <!-- Pink/red curved line gradient -->
+    <linearGradient id="pinkLineGradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B9D;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#FF8CAB;stop-opacity:0.6" />
+    </linearGradient>
+    
+    <!-- Light blue curved line gradient -->
+    <linearGradient id="blueLineGradientIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#B0E0E6;stop-opacity:0.6" />
+    </linearGradient>
+    
+    <!-- Shadow filter -->
+    <filter id="shadowIcon" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
       <feComponentTransfer>
-        <feFuncA type="linear" slope="0.25"/>
+        <feFuncA type="linear" slope="0.3"/>
       </feComponentTransfer>
       <feMerge>
         <feMergeNode/>
@@ -20,30 +33,66 @@
     </filter>
   </defs>
   
-  <!-- Shield Icon - centered and optimized for icon-only use -->
-  <g transform="translate(60, 60)">
-    <!-- Main shield shape - professional and refined -->
-    <path d="M 0 -40 L -28 -28 L -28 12 Q -28 36 -16 48 Q -4 60 0 60 Q 4 60 16 48 Q 28 36 28 12 L 28 -28 Z" 
+  <!-- Background group for curved lines (behind shield) -->
+  <g opacity="0.7">
+    <!-- Pink/red curved line -->
+    <path d="M 20 20 Q 50 50 60 70 Q 70 90 90 110" 
+          stroke="url(#pinkLineGradientIcon)" 
+          stroke-width="2.5" 
+          fill="none" 
+          stroke-linecap="round"/>
+    
+    <!-- Light blue curved line -->
+    <path d="M 130 20 Q 100 50 90 70 Q 80 90 60 110" 
+          stroke="url(#blueLineGradientIcon)" 
+          stroke-width="2.5" 
+          fill="none" 
+          stroke-linecap="round"/>
+  </g>
+  
+  <!-- Shield Icon Group - centered -->
+  <g transform="translate(75, 75)">
+    <!-- Hexagonal shield shape (pointing down) -->
+    <path d="M 0 -50 L -35 -30 L -35 10 Q -35 30 -25 40 Q -15 50 0 50 Q 15 50 25 40 Q 35 30 35 10 L 35 -30 Z" 
           fill="url(#shieldGradientIcon)" 
-          stroke="#0d47a1" 
+          stroke="#1a1a1a" 
           stroke-width="2"
-          filter="url(#shieldShadowIcon)"/>
+          filter="url(#shadowIcon)"/>
     
     <!-- Inner highlight for depth -->
-    <path d="M 0 -36 L -24 -26 L -24 12 Q -24 32 -14 42 Q -4 52 0 54 Q 4 52 14 42 Q 24 32 24 12 L 24 -26 Z" 
+    <path d="M 0 -45 L -30 -28 L -30 10 Q -30 27 -22 35 Q -14 43 0 45 Q 14 43 22 35 Q 30 27 30 10 L 30 -28 Z" 
           fill="none" 
-          stroke="rgba(255,255,255,0.25)" 
+          stroke="rgba(255,255,255,0.2)" 
           stroke-width="1.5"/>
     
-    <!-- Professional chat symbol inside shield -->
-    <g transform="translate(0, 2)">
-      <!-- Chat bubble - clean and modern -->
-      <ellipse cx="0" cy="-18" rx="16" ry="13" fill="white" opacity="0.95"/>
-      <path d="M -12 -8 L -4 0 L 4 0 L 12 -8" fill="white" opacity="0.95"/>
-      <!-- Chat lines - professional styling -->
-      <line x1="-12" y1="-8" x2="12" y2="-8" stroke="#1e7ae8" stroke-width="2" stroke-linecap="round"/>
-      <line x1="-8" y1="-15" x2="8" y2="-15" stroke="#1e7ae8" stroke-width="1.6" stroke-linecap="round"/>
+    <!-- Circuit board traces around chat symbol -->
+    <g transform="translate(0, 5)">
+      <!-- Horizontal traces -->
+      <line x1="-25" y1="-20" x2="25" y2="-20" stroke="white" stroke-width="2" opacity="0.6"/>
+      <line x1="-20" y1="-15" x2="20" y2="-15" stroke="white" stroke-width="1.5" opacity="0.5"/>
+      <line x1="-25" y1="20" x2="25" y2="20" stroke="white" stroke-width="2" opacity="0.6"/>
+      <line x1="-20" y1="15" x2="20" y2="15" stroke="white" stroke-width="1.5" opacity="0.5"/>
+      
+      <!-- Vertical traces -->
+      <line x1="-25" y1="-20" x2="-25" y2="20" stroke="white" stroke-width="2" opacity="0.6"/>
+      <line x1="-20" y1="-15" x2="-20" y2="15" stroke="white" stroke-width="1.5" opacity="0.5"/>
+      <line x1="25" y1="-20" x2="25" y2="20" stroke="white" stroke-width="2" opacity="0.6"/>
+      <line x1="20" y1="-15" x2="20" y2="15" stroke="white" stroke-width="1.5" opacity="0.5"/>
+      
+      <!-- Diagonal traces -->
+      <line x1="-25" y1="-20" x2="-15" y2="-10" stroke="white" stroke-width="1.2" opacity="0.4"/>
+      <line x1="25" y1="-20" x2="15" y2="-10" stroke="white" stroke-width="1.2" opacity="0.4"/>
+      <line x1="-25" y1="20" x2="-15" y2="10" stroke="white" stroke-width="1.2" opacity="0.4"/>
+      <line x1="25" y1="20" x2="15" y2="10" stroke="white" stroke-width="1.2" opacity="0.4"/>
+    </g>
+    
+    <!-- Chat symbol (keyhole shape) inside shield -->
+    <g transform="translate(0, 5)">
+      <!-- Keyhole shape -->
+      <circle cx="0" cy="-10" r="10" fill="white" opacity="0.95"/>
+      <rect x="-5" y="0" width="10" height="15" fill="white" opacity="0.95" rx="2"/>
+      <!-- Inner detail -->
+      <circle cx="0" cy="-10" r="5" fill="none" stroke="#357ABD" stroke-width="2"/>
     </g>
   </g>
 </svg>
-
