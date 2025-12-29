@@ -62,10 +62,9 @@ def main():
     # ============================================================
     # ZONE 1: Header
     # ============================================================
-    # Display logo
+    # Display logo (right-aligned)
     render_logo(width=300)
     
-    st.title("ChatCompanion")
     st.markdown("**Privacy-first assistant to help recognize risky chat patterns**")
     # Static badge - safe: constant string only, no user content
     st.markdown(

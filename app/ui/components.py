@@ -28,8 +28,10 @@ def render_logo(width: int = 300, icon_only: bool = False) -> None:
         logo_path = project_root / "assets" / "logo.png"
     
     if logo_path.exists():
-        # Display PNG logo with centered alignment
-        col1, col2, col3 = st.columns([1, 2, 1])
+        # Display PNG logo aligned to the right
+        col1, col2 = st.columns([1, 0.2])
+        with col1:
+            st.write("")  # Empty space on the left
         with col2:
             st.image(str(logo_path), width=width, use_container_width=False)
     else:
